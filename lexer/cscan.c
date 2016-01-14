@@ -25,5 +25,3 @@ int main() {
 
   return 0;
 }
-
-  /* Some tokens just to check: == 3.14 "quote\"x" -6.02e23 */
