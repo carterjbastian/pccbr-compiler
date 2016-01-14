@@ -10,21 +10,18 @@ digit [0-9]
 id ({letter}|_)({letter}|{digit}|_)*
 integer {digit}+
 signedint [-+]?{integer}
-fixedfloat {signedint}"."{integer}?|[-+]?"."{integer}
-expfloat {fixedfloat}[Ee]{signedint}|{signedint}[Ee]{signedint}
 
 %x string
 %x block_comment
 %x inline_comment
 
+%option yylineno
 %%
 
 {white}      /* skip whitespace */
 
 {id}         return lexLookup(yytext);
 {signedint}  return INTCONST_T;
-{fixedfloat} |
-{expfloat}   return FLOATCONST_T;
 
 \"           { BEGIN(string); }
 <string>\n   return OTHER_T;
@@ -42,15 +39,14 @@ expfloat {fixedfloat}[Ee]{signedint}|{signedint}[Ee]{signedint}
 "//"         { BEGIN(inline_comment); }
 <inline_comment>\n { BEGIN(INITIAL); }
 
-","          return COMMA_T;
-";"          return SEMICOLON_T;
-"="          return ASSIGN_T;
-"+"          return PLUS_T;
-"-"          return MINUS_T;
-"*"          return ASTERISK_T;
-"#"          return SHARP_T;
-"<"          return LESS_T;
-">"          return GREATER_T;
+","          return ',';
+";"          return ';';
+"="          return '=';
+"+"          return '+';
+"-"          return '-';
+"*"          return '*';
+"<"          return '<';
+">"          return '>';
 "=="         return ISEQUAL_T;
 "!="         return NOTEQUAL_T;
 ">="         return GT_EQUAL_T;
@@ -59,11 +55,8 @@ expfloat {fixedfloat}[Ee]{signedint}|{signedint}[Ee]{signedint}
 "||"         return OR_T;
 "++"         return INCREMENT_T;
 "--"         return DECREMENT_T;
-"<<"         return SHL_T;
-"\."         return DOT_T;
-"->"         return ARROW_T;
-"["          return '[';   /* a valid but odd alternate: */
-"]"          return ']';   /* [][(){}]     return yytext[0]; */
+"["          return '[';   
+"]"          return ']'; 
 "("          return '(';
 ")"          return ')';
 "{"          return '{';
@@ -77,19 +70,15 @@ expfloat {fixedfloat}[Ee]{signedint}|{signedint}[Ee]{signedint}
 %%
 
 int lexLookup(char *s) {
-  struct combo {
+  typedef struct combo {
     char *keyword;
     int token;
-  };
-  typedef struct combo combo;
+  } combo;
 
-  const int KWCOUNT = 13;
+  const int KWCOUNT = 10;
 
   static combo keywords[] =
-    { { "include", INCLUDE_T },
-      { "extern", EXTERN_T },
-      { "int", INT_T },
-      { "char", CHAR_T },
+    { { "int", INT_T },
       { "while", WHILE_T },
       { "for", FOR_T },
       { "if", IF_T },
