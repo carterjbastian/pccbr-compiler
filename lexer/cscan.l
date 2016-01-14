@@ -23,6 +23,7 @@ signedint [-+]?{integer}
 {id}         return lexLookup(yytext);
 {signedint}  return INTCONST_T;
 
+  /* start condition for strings */
 \"           { BEGIN(string); }
 <string>\n   return OTHER_T;
 <string>\\\" { yymore(); }
@@ -33,10 +34,17 @@ signedint [-+]?{integer}
  }
 <string>.    { yymore(); }
 
+  /* Start Condition for block comments */
 "/*"         { BEGIN(block_comment); }
-<block_comment>"*/"  { BEGIN(INITIAL); }
+<block_comment>[^*]*   /* Skip everything that's not a * */
+<block_comment>"*"+[^*/]*      /* Skip *s not followed by a / */
+<block_comment>"*/"  { BEGIN(INITIAL); } /* End the comment */
 
+
+
+  /* Start condition for inline comments */
 "//"         { BEGIN(inline_comment); }
+<inline_comment>[^\n]   /* Skip everything to the new line */
 <inline_comment>\n { BEGIN(INITIAL); }
 
 ","          return ',';
