@@ -1,3 +1,14 @@
+/*
+ * File: toktype.h
+ *  A file with the definitions of tokens use in the pccbr compiler.
+ *
+ * Authors: Carter J. Bastian, Quinn Stearns
+ *    COSC57, 15W
+ *
+ * Special Considerations:
+ *  - Based heavily on a similar file written by Thomas H. Cormen and Sean Smith
+ *
+ */
 #ifndef TOKTYPE_H_
 #define TOKTYPE_H_
 

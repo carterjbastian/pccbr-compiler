@@ -1,7 +1,23 @@
+/*
+ * File: cscan.c
+ *  A file containing the main function for scanning c-code via flex
+ *
+ * Authors: Carter J. Bastian, Quinn Stearns
+ *    CSOC57, 15W
+ *
+ * Special Considerations:
+ *  - Based heavily on a similar file written by Thomas H. Cormen and Sean Smith
+ *
+ */
+
+/* System Includes */
 #include <stdio.h>
 #include <string.h>
+
+/* Local Includes */
 #include "toktype.h"
 
+/* Public Variable Declarations */
 extern char *yytext;
 extern int yyleng;
 extern int yylex (void);
@@ -18,6 +34,7 @@ char *token_name(int token) {
   return strdup(tiny_buf);
 }
 
+/* The main function to do the scanning via flex */
 int main() {
   int token;
 
