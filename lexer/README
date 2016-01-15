@@ -37,5 +37,19 @@ Build the program with the following command:
   make
 Run the program with some input file (input.txt) with the following command:
   cat input.txt | ./cscan
-Test the program with the provided test files with the following command:
+
+TESTS:
+Test the program with the general test files with the following command:
   ./run_tests.sh
+
+To test for specific symbols invoke the program with:
+  ./cscan < testfiles/[FILENAME]
+You can use the following files:
+- tokens.c (for ids)
+- integers.c
+- strings.c
+- keywords.c
+- symbols.c
+- comments.c
+
+
