@@ -38,4 +38,4 @@ Build the program with the following command:
 Run the program with some input file (input.txt) with the following command:
   cat input.txt | ./cscan
 Test the program with the provided test files with the following command:
-
+  ./run_tests.sh
