@@ -20,6 +20,7 @@ cscan: lex.yy.o cscan.o
 lex.yy.c: cscan.l
 	flex $<
 
+%.c : %.l
 
 clean:
 	rm -f lex.yy.* *.o  cscan *~

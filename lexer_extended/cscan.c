@@ -5,6 +5,7 @@
 extern char *yytext;
 extern int yyleng;
 extern int yylex (void);
+extern int yylineno;
 
 char *token_name(int token) {
   char tiny_buf[2];
@@ -21,9 +22,7 @@ int main() {
   int token;
 
   while ((token = yylex()) != EOF_T)
-    printf("%s: %d \"%s\"\n", token_name(token), yyleng, yytext);
+    printf("[%d]: %s \"%s\"\n", yylineno, token_name(token), yytext);
 
   return 0;
 }
-
-  /* Some tokens just to check: == 3.14 "quote\"x" -6.02e23 */
