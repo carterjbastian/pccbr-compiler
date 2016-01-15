@@ -1,0 +1,9 @@
+if
+else
+while
+return
+for
+void
+read
+print
+int
