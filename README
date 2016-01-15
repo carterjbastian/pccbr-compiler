@@ -1,0 +1,41 @@
+Project:  pccbr-compiler project Lexer
+Authors:  Carter J. Bastian, Quinn Stearns
+          CS57, 15W
+
+Files:
+  - toktype.h
+    A header with definitions of all tokens. Token Types were named according
+    to the standard presented in class with an all-caps name describing the
+    symbolic meaning as well as the _T post-fix to denote that it is a token.
+    This also includes string equivalent's of the Toke Type names.
+
+  - cscan.l
+    A flex file that consists of the regular expressions used to recognize the
+    various types of tokens. Note that single-character tokens are returned 
+    as characters. This includes start conditions for strings, block comments,
+    and inline comments. It also has a lexLookup function for tabular lookup
+    distinguishing between identifiers (ID_T) and keywords.
+ 
+  - cscan.c
+    A file to actually do the processing of tokens for a given file using the
+    flex utility. The main method here runs the while loop which scans the
+    text of a file and outputs information on the token scanned in the
+    following format:
+      [LINE_NUMBER]: TOKEN_NAME TOKEN_TEXT
+
+NOTES:
+- A significant amount of our efforts were based on the sample code given to us
+  in class (originally written by Thomas H. Cormen and modified by Sean Smith).
+
+- All testing files are included in the testfiles/ directory. Each sample
+  input was tested and the results verrified by hand. In order to run the tests
+  and verify the output for yourself, you may use the shell script provided in
+  the source directory. 
+
+USAGE:
+Build the program with the following command:
+  make
+Run the program with some input file (input.txt) with the following command:
+  cat input.txt | ./cscan
+Test the program with the provided test files with the following command:
+
