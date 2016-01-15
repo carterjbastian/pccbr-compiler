@@ -53,6 +53,7 @@ signedint [-+]?{integer}
 "+"          return '+';
 "-"          return '-';
 "*"          return '*';
+"/"          return '/';
 "<"          return '<';
 ">"          return '>';
 "=="         return ISEQUAL_T;
