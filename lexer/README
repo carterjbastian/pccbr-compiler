@@ -38,10 +38,18 @@ Build the program with the following command:
 Run the program with some input file (input.txt) with the following command:
   cat input.txt | ./cscan
 
-TESTS:
-Test the program with the general test files with the following command:
+TESTS (AUTOMATED):
+Test the program with the following command:
   ./run_tests.sh
 
+This will build the program with the _TEST_MODE_ macro defined, and will
+cause the program to loop through each test file in the tests/ directory. It
+will then compare the resulting scanned tokens with the known results and
+will print information about any discrepancies that occur. Files to help with
+this process are lex_tests.c and lex_tests.h in the tests/ directory.
+
+
+TESTS (FILES):
 To test for specific symbols invoke the program with:
   ./cscan < testfiles/[FILENAME]
 You can use the following files:
