@@ -11,7 +11,6 @@ extern int yylex();
 int yyerror(char *s);
 extern char *yytext;
 
-extern int lineNumber;
 extern ast_node root;
 extern int parseError;
 
@@ -24,6 +23,27 @@ extern char savedLiteralText[];
 %token GT_EQUAL_T INCREMENT_T DECREMENT_T AND_T OR_T INT_T VOID_T
 %token WHILE_T FOR_T IF_T ELSE_T RETURN_T READ_T PRINT_T EOF_T OTHER_T DO_T
 
+/* This is how we fix the if-else associativity problem, as-per in class eg */
+%nonassoc LOWER_THAN_ELSE
+%nonassoc ELSE_T
+
+%nonassoc NON_FUNC_DEC
+%nonassoc FUNC_DEC
+
+%nonassoc VAR_P
+%right '(' ')'
+%right '[' ']'
+
+/* Set the precedences for rValue operations */
+/* Are all of the unary operations left-associative too? ... */
+%left OR_T
+%left AND_T
+%left ISEQUAL_T NOTEQUAL_T
+%left '<' LT_EQUAL_T '>' GT_EQUAL_T
+%left '+' '-'
+%left '*' '/' '%'
+%left '!' INCREMENT_T DECREMENT_T UNARYM
+
 %%
 
 program : declarationList { }
@@ -33,14 +53,11 @@ declarationList : declarationList declaration { }
 | declaration { }
 ;
 
-declaration : varDeclacation { }
+declaration : varDeclaration { }
 | funcDeclaration { }
 ;
 
-varDeclaration : varTypeSpecifier varDeclationList ';' { }
-;
-
-varTypeSpecifier : INT_T {}
+varDeclaration : INT_T varDeclarationList ';' %prec NON_FUNC_DEC { }
 ;
 
 varDeclarationList : varDeclarationList ',' varDeclaration { }
@@ -52,12 +69,10 @@ varDeclaration : ID_T { }
 | ID_T '[' INTCONST_T ']' { }
 ;
 
-funcDeclaration : funcTypeSpecifier ID_T '(' fomalParams ')' compoundStatement
+funcDeclaration : INT_T ID_T '(' formalParams ')' compoundStatement %prec FUNC_DEC {}
+| VOID_T ID_T '(' formalParams ')' compoundStatement {}
 ;
 
-funcTypeSpecifier : INT_T { }
-| VOID_T { }
-;
 
 formalParams : formalList { }
 | VOID_T { }
@@ -68,8 +83,8 @@ formalList : formalList ',' formalParam { }
 | formalParam { }
 ;
 
-formalParam : varTypeSpecifier ID_T { }
-| varTypeSpecifier ID_T '[' ']' { }
+formalParam : INT_T ID_T { }
+| INT_T ID_T '[' ']' { }
 ;
 
 compoundStatement : '{' localDeclarations statementList '}' { }
@@ -98,7 +113,7 @@ expressionStatement : expression ';'
 | ';'
 ;
 
-ifStatement : IF_T '(' expression ')' statement { }
+ifStatement : IF_T '(' expression ')' statement   %prec LOWER_THAN_ELSE { }
 | IF_T '(' expression ')' statement ELSE_T statement { 
   /* NOTE: resolve ambiguity */ }
 ;
@@ -131,7 +146,7 @@ expression : var '=' expression { }
 | rValue { }
 ;
 
-var : ID_T { }
+var : ID_T %prec VAR_P { }
 | ID_T '[' expression ']' { }
 ;
 
@@ -149,7 +164,7 @@ rValue : expression '+' expression { /*NOTE: Add associativity & precedence */ }
 | expression AND_T expression { }
 | expression OR_T expression { }
 | '!' expression { }
-| '-' expression { }
+| '-' expression  %prec UNARYM  { }
 | var { }
 | INCREMENT_T var { }
 | DECREMENT_T var { }
@@ -159,6 +174,7 @@ rValue : expression '+' expression { /*NOTE: Add associativity & precedence */ }
 ;
 
 call : ID_T '(' args ')' { }
+
 ;
 
 args : argList { }

@@ -1,7 +1,16 @@
 %{
+
 #include <string.h>
 #include "parser.tab.h"
+
 int lexLookup(char *);
+
+/* I want to be like Cormen when I grow up */
+#define MAX_TOKEN_LEN 201
+
+char savedIDText[MAX_TOKEN_LEN];
+char savedLiteralText[MAX_TOKEN_LEN];
+
 %}
 
 white [ \t\n]+
@@ -15,7 +24,7 @@ signedint [-]?{integer}
 %x block_comment
 %x inline_comment
 
-%option yylineno
+%option yylineno noyywrap
 %%
 
 {white}      /* skip whitespace */
