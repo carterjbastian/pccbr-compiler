@@ -1,6 +1,6 @@
 %{
 #include <string.h>
-#include "toktype.h"
+#include "parser.tab.h"
 int lexLookup(char *);
 %}
 
@@ -84,7 +84,7 @@ int lexLookup(char *s) {
     int token;
   } combo;
 
-  const int KWCOUNT = 10;
+  const int KWCOUNT = 11;
 
   static combo keywords[] =
     { { "int", INT_T },
@@ -96,6 +96,7 @@ int lexLookup(char *s) {
       { "void", VOID_T },
       { "read", READ_T },
       { "print", PRINT_T },
+      { "do", DO_T },
       { NULL, ID_T }
     };
 
