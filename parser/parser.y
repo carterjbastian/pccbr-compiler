@@ -30,7 +30,9 @@ extern char savedLiteralText[];
 %nonassoc NON_FUNC_DEC
 %nonassoc FUNC_DEC
 
+%nonassoc EXPR_P
 %nonassoc VAR_P
+
 %right '(' ')'
 %right '[' ']'
 
@@ -60,11 +62,11 @@ declaration : varDeclaration { }
 varDeclaration : INT_T varDeclarationList ';' %prec NON_FUNC_DEC { }
 ;
 
-varDeclarationList : varDeclarationList ',' varDeclaration { }
-| varDeclaration { }
+varDeclarationList : varDeclarationList ',' varDec { }
+| varDec { }
 ;
 
-varDeclaration : ID_T { }
+varDec : ID_T { }
 | ID_T '=' expression { }
 | ID_T '[' INTCONST_T ']' { }
 ;
@@ -142,7 +144,7 @@ printStatement : PRINT_T expression ';' { }
 | PRINT_T STRINGCONST_T ';' { }
 ;
 
-expression : var '=' expression { }
+expression : var '=' expression %prec EXPR_P { }
 | rValue { }
 ;
 
