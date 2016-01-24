@@ -130,8 +130,8 @@ funcDeclaration : INT_T ID_T '(' formalParams ')' compoundStatement %prec FUNC_D
 
 
 formalParams : formalList { $$ = $1; }
-| VOID_T { $$ = create_ast_node(NULL_N); }
-| /* Nothing */ { $$ = create_ast_node(NULL_N); }
+| VOID_T { $$ = create_ast_node(NULL_N); $$->value_string = "void_formal_params"; }
+| /* Nothing */ { $$ = create_ast_node(NULL_N); $$->value_string = "no_formal_params"; }
 ;
 
 formalList : formalList ',' formalParam { 
@@ -159,13 +159,18 @@ formalParam : INT_T ID_T {
 
 compoundStatement : '{' localDeclarations statementList '}' { 
         ast_node t = create_ast_node(COMPOUND_STMT_N);
-        ast_node i = $2;
+        
+        if ($2 != NULL) {
+          ast_node i = $2;
 
-        while(i->right_sibling != NULL)
-          i = i->right_sibling;
+          while(i->right_sibling != NULL)
+            i = i->right_sibling;
 
-        i->right_sibling = $3;
-        t->left_child = $2;
+          i->right_sibling = $3;
+          t->left_child = $2;
+        } else {
+          t->left_child = $3;
+        } 
         $$ = t; }
 ;
 
@@ -179,7 +184,7 @@ localDeclarations : localDeclarations varDeclaration {
         } else {
           $$ = $2;
         } }
-| /* Nothing */ { $$ = create_ast_node(NULL_N); }
+| /* Nothing */ { $$ = NULL; }
 ;
 
 statementList : statementList statement {
@@ -192,7 +197,7 @@ statementList : statementList statement {
         } else {
           $$ = $2;
         } }
-| /* Nothing */ { $$ = create_ast_node(NULL_N); }
+| /* Nothing */ { $$ = NULL; }
 ;
 
 statement : expressionStatement { $$ = $1; }
@@ -207,7 +212,7 @@ statement : expressionStatement { $$ = $1; }
 ;
 
 expressionStatement : expression ';' { $$ = $1; }
-| ';' { $$ = create_ast_node(NULL_N); }
+| ';' { $$ = create_ast_node(NULL_N); $$->value_string = "empty expressionStatement"; }
 ;
 
 ifStatement : IF_T '(' expression ')' statement   %prec LOWER_THAN_ELSE { 
@@ -249,7 +254,7 @@ forStatement : FOR_T '(' forHeaderExpr ';' forHeaderExpr ';' forHeaderExpr ')' s
 
 forHeaderExpr : expression { $$ = $1; }
 | /* Nothing */ { 
-        $$ = create_ast_node(NULL_N); }
+        $$ = create_ast_node(NULL_N); $$->value_string = "empty forHeaderExpr"; }
 ;
 
 returnStatement : RETURN_T ';' { 
@@ -396,7 +401,7 @@ call : ID_T '(' args ')' {
 ;
 
 args : argList { $$ = $1; }
-| /* Nothing */ { $$ = create_ast_node(NULL_N); }
+| /* Nothing */ { $$ = create_ast_node(NULL_N); $$->value_string = "empty arguments"; }
 ;
 
 argList : argList ',' expression { 
