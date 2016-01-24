@@ -13,6 +13,7 @@ extern char *yytext;
 
 extern ast_node root;
 extern int parseError;
+extern int yylineno;
 
 extern char savedIdText[];
 extern char savedLiteralText[];
@@ -48,22 +49,29 @@ extern char savedLiteralText[];
 
 %%
 
-program : declarationList { }
+program : declarationList {
+        ast_node t = create_ast_node(ROOT_N);
+        t->left_child = $1;
+        root = $$ = t; }
 ;
 
-declarationList : declarationList declaration { }
-| declaration { }
+declarationList : declarationList declaration { 
+        $1->right_sibling = $2;
+        $$ = $1; }
+| declaration { $$ = $1; }
 ;
 
-declaration : varDeclaration { }
-| funcDeclaration { }
+declaration : varDeclaration { $$ = $1; }
+| funcDeclaration { $$ = $1; }
 ;
 
-varDeclaration : INT_T varDeclarationList ';' %prec NON_FUNC_DEC { }
+varDeclaration : INT_T varDeclarationList ';' %prec NON_FUNC_DEC { $$ = $2; }
 ;
 
-varDeclarationList : varDeclarationList ',' varDec { }
-| varDec { }
+varDeclarationList : varDeclarationList ',' varDec { 
+        $1->right_sibling = $3;
+        $$ = $1; }
+| varDec { $$ = $1; }
 ;
 
 varDec : ID_T { 
@@ -82,7 +90,7 @@ varDec : ID_T {
         ast_node t = create_ast_node(ID_N);
         t->value_string = strdup(yytext);
         t->left_child = create_ast_node(INT_LITERAL_N);
-        t->left_child->value_int = strdup(yytext);
+        t->left_child->value_int = atoi(strdup(yytext));
         $$ = t;
 }
 ;
@@ -109,8 +117,8 @@ funcDeclaration : INT_T ID_T '(' formalParams ')' compoundStatement %prec FUNC_D
 
 
 formalParams : formalList { $$ = $1; }
-| VOID_T { $$ = NULL; }
-| /* Nothing */ { $$ = NULL; }
+| VOID_T { $$ = create_ast_node(NULL_N); }
+| /* Nothing */ { $$ = create_ast_node(NULL_N); }
 ;
 
 formalList : formalList ',' formalParam { 
@@ -144,13 +152,13 @@ compoundStatement : '{' localDeclarations statementList '}' {
 localDeclarations : localDeclarations varDeclaration { 
               $1->right_sibling = $2;
               $$ = $1; }
-| /* Nothing */ { $$ = NULL; }
+| /* Nothing */ { $$ = create_ast_node(NULL_N); }
 ;
 
 statementList : statementList statement {
               $1->right_sibling = $2;
               $$ = $1; }
-| /* Nothing */ { $$ = NULL; }
+| /* Nothing */ { $$ = create_ast_node(NULL_N); }
 ;
 
 statement : expressionStatement { $$ = $1; }
@@ -165,7 +173,7 @@ statement : expressionStatement { $$ = $1; }
 ;
 
 expressionStatement : expression ';' { $$ = $1; }
-| ';' { $$ = NULL; }
+| ';' { $$ = create_ast_node(NULL_N); }
 ;
 
 ifStatement : IF_T '(' expression ')' statement   %prec LOWER_THAN_ELSE { 
@@ -206,8 +214,8 @@ forStatement : FOR_T '(' forHeaderExpr ';' forHeaderExpr ';' forHeaderExpr ')' s
 ;
 
 forHeaderExpr : expression { $$ = $1; }
-| /* Nothing */ { /* DON'T HAVE NULL HEADER EXPRESSION YET */ 
-          $$ = NULL; }
+| /* Nothing */ { 
+        $$ = create_ast_node(NULL_N); }
 ;
 
 returnStatement : RETURN_T ';' { 
@@ -354,7 +362,7 @@ call : ID_T '(' args ')' {
 ;
 
 args : argList { $$ = $1; }
-| /* Nothing */ { $$ = NULL; }
+| /* Nothing */ { $$ = create_ast_node(NULL_N); }
 ;
 
 argList : argList ',' expression { 
@@ -368,6 +376,6 @@ argList : argList ',' expression {
 
 int yyerror(char *s) {
   parseError = 1;
-  fprintf(stderr, "%s at line %d\n", s, lineNumber);
+  fprintf(stderr, "%s at line %d\n", s, yylineno);
   return 0;
 }

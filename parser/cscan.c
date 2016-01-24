@@ -17,10 +17,6 @@
 /* Local Includes */
 #include "toktype.h"
 
-#ifdef _TEST_MODE_
-#include "tests/lex_tests.h"
-#endif 
-
 /* Public Variable Declarations */
 extern FILE *yyin;
 extern char *yytext;
@@ -42,47 +38,9 @@ char *token_name(int token) {
 /* The main function to do the scanning via flex */
 int main() {
 
-#ifdef _TEST_MODE_
-  int token;
-  FILE *input;
-  int errors = 0;
-  
-  printf("Testing the lexer\n");
-  for (int i = 0; i < TEST_COUNT; i++) {
-      // Loop through each test file 
-      printf("LEXER TESTING FILE: %s\n", test_files[i]);
-      input = fopen(test_files[i], "r");
-      yyin = input;
-      int count = 0;
-
-      // Scan each token in the test files
-      while ((token = yylex()) != EOF_T) {
-        // Check for errors (against the known correct results)
-        if (token != test_comparison[i][count]) {
-          // Report the discrepency
-          fprintf(stderr, 
-              "An error occured on token %d. \"%s\" is not of token type [%s].\n", 
-              count, 
-              yytext, 
-              token_name(test_comparison[i][count]));
-          fprintf(stderr, 
-              "Text %s returned token type %s\n",
-              yytext,
-              token_name(token));
-          errors++;
-        }
-          
-        count += 1;
-      }
-  } 
-  printf("Lexer testing completed: %d tests failed\n", errors);
-
-#else // Not in testing mode – do normal scanning
   int token;
   while ((token = yylex()) != EOF_T)
     printf("[%d]: %s \"%s\"\n", yylineno, token_name(token), yytext);
   
-#endif // _TEST_MODE_
-
   return 0;
 }

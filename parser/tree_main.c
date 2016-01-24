@@ -22,11 +22,12 @@ int main() {
   /*   yydebug = 1; */
   noRoot = yyparse();
 
+  printf("noroot: %d\n", noRoot);
+
   if (parseError)
     fprintf(stderr, "WARNING: There were parse errors.\nParse tree may be ill-formed.\n");
 
-  if (!noRoot)
-    print_ast(root, 0);
+  print_ast(root, 0);
 
   return 0;
 }
