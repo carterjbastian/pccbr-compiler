@@ -49,15 +49,22 @@ extern char savedLiteralText[];
 
 %%
 
-program : declarationList EOF_T {
+program : declarationList {
         ast_node t = create_ast_node(ROOT_N);
         t->left_child = $1;
         root = $$ = t; }
 ;
 
 declarationList : declarationList declaration { 
-        $1->right_sibling = $2;
-        $$ = $1; }
+        ast_node t = $1;
+        if (t != NULL) {
+          while(t->right_sibling != NULL)
+            t = t->right_sibling;
+          t->right_sibling = $2; 
+          $$ = $1; 
+        } else {
+          $$ = $2;
+        } }
 | declaration { $$ = $1; }
 ;
 
@@ -69,8 +76,15 @@ varDeclaration : INT_T varDeclarationList ';' %prec NON_FUNC_DEC { $$ = $2; }
 ;
 
 varDeclarationList : varDeclarationList ',' varDec { 
-        $1->right_sibling = $3;
-        $$ = $1; }
+        ast_node t = $3;
+        if (t != NULL) {
+          while(t->right_sibling != NULL)
+            t = t->right_sibling;
+          t->right_sibling = $2; 
+          $$ = $1; 
+        } else {
+          $$ = $3;
+        } }
 | varDec { $$ = $1; }
 ;
 
@@ -91,8 +105,7 @@ varDec : ID_T {
         t->value_string = strdup(yytext);
         t->left_child = create_ast_node(INT_LITERAL_N);
         t->left_child->value_int = atoi(strdup(yytext));
-        $$ = t;
-}
+        $$ = t; }
 ;
 
 funcDeclaration : INT_T ID_T '(' formalParams ')' compoundStatement %prec FUNC_DEC {
@@ -122,8 +135,15 @@ formalParams : formalList { $$ = $1; }
 ;
 
 formalList : formalList ',' formalParam { 
-        $1->right_sibling = $3;
-        $$ = $1; }
+        ast_node t = $1;
+        if (t != NULL) {
+          while(t->right_sibling != NULL)
+            t = t->right_sibling;
+          t->right_sibling = $3; 
+          $$ = $1; 
+        } else {
+          $$ = $3;
+        } }
 | formalParam { $$ = $1; }
 ;
 
@@ -150,16 +170,28 @@ compoundStatement : '{' localDeclarations statementList '}' {
 ;
 
 localDeclarations : localDeclarations varDeclaration { 
-              ast_node t = $1;
-              t->right_sibling = $2;
-              $$ = t; }
+        ast_node t = $1;
+        if (t != NULL) {
+          while(t->right_sibling != NULL)
+            t = t->right_sibling;
+          t->right_sibling = $2; 
+          $$ = $1; 
+        } else {
+          $$ = $2;
+        } }
 | /* Nothing */ { $$ = create_ast_node(NULL_N); }
 ;
 
 statementList : statementList statement {
-              ast_node t = $1;
-              t->right_sibling = $2;
-              $$ = t; }
+        ast_node t = $1;
+        if (t != NULL) {
+          while(t->right_sibling != NULL)
+            t = t->right_sibling;
+          t->right_sibling = $2; 
+          $$ = $1; 
+        } else {
+          $$ = $2;
+        } }
 | /* Nothing */ { $$ = create_ast_node(NULL_N); }
 ;
 
@@ -368,8 +400,15 @@ args : argList { $$ = $1; }
 ;
 
 argList : argList ',' expression { 
-        $1->right_sibling = $3; 
-        $$ = $1; }
+        ast_node t = $1;
+        if (t != NULL) {
+          while(t->right_sibling != NULL)
+            t = t->right_sibling;
+          t->right_sibling = $3; 
+          $$ = $1; 
+        } else {
+          $$ = $3;
+        } }
 | expression { $$ = $1; }
 ;
 

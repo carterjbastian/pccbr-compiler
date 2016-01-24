@@ -82,7 +82,6 @@ signedint [-]?{integer}
 "%"          return '%';
 "!"          return '!';
 
-<<EOF>>      return EOF_T;
 .            return OTHER_T;
 
 %%
