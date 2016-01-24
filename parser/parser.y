@@ -6,6 +6,7 @@
 
 #define YYSTYPE ast_node
 #define YYDEBUG 1
+#define MAXTOKENLENGTH 201
 
 extern int yylex();
 int yyerror(char *s);
@@ -15,7 +16,7 @@ extern ast_node root;
 extern int parseError;
 extern int yylineno;
 
-extern char savedIdText[];
+extern char savedIDText[];
 extern char savedLiteralText[];
 
 %}
@@ -76,11 +77,11 @@ varDeclarationList : varDeclarationList ',' varDec {
 
 varDec : ID_T { 
         ast_node t = create_ast_node(ID_N);
-        t->value_string = strdup(yytext); 
+        t->value_string = strdup(savedIDText); 
         $$ = t; }
 | ID_T '=' expression {
         ast_node t = create_ast_node(ID_N);
-        t->value_string = strdup(yytext);
+        t->value_string = strdup(savedIDText);
 
         ast_node a = create_ast_node(OP_ASSIGN_N);
         a->left_child = t;
@@ -88,9 +89,9 @@ varDec : ID_T {
         $$ = a; }
 | ID_T '[' INTCONST_T ']' {
         ast_node t = create_ast_node(ID_N);
-        t->value_string = strdup(yytext);
+        t->value_string = savedIDText;
         t->left_child = create_ast_node(INT_LITERAL_N);
-        t->left_child->value_int = atoi(strdup(yytext));
+        t->left_child->value_int = atoi(savedLiteralText);
         $$ = t;
 }
 ;
@@ -98,7 +99,7 @@ varDec : ID_T {
 funcDeclaration : INT_T ID_T '(' formalParams ')' compoundStatement %prec FUNC_DEC {
         ast_node t = create_ast_node(FUNC_N);
         t->value_int = 1; // For int
-        t->value_string = strdup(yytext);
+        t->value_string = strdup(savedIDText);
         
         t->left_child = $6;
         t->left_child->right_sibling = $4;
@@ -107,7 +108,7 @@ funcDeclaration : INT_T ID_T '(' formalParams ')' compoundStatement %prec FUNC_D
 | VOID_T ID_T '(' formalParams ')' compoundStatement {
         ast_node t = create_ast_node(FUNC_N);
         t->value_int = 0; // For void
-        t->value_string = strdup(yytext);
+        t->value_string = strdup(savedIDText);
         
         t->left_child = $6;
         t->left_child->right_sibling = $4;
@@ -129,11 +130,11 @@ formalList : formalList ',' formalParam {
 
 formalParam : INT_T ID_T {
         ast_node t = create_ast_node(PARAM_N);
-        t->value_string = strdup(yytext);
+        t->value_string = strdup(savedIDText);
         $$ = t; }
 | INT_T ID_T '[' ']' { 
         ast_node t = create_ast_node(ARRAY_PARAM_N);
-        t->value_string = strdup(yytext);
+        t->value_string = strdup(savedIDText);
         $$ = t; }
 ;
 
@@ -242,7 +243,7 @@ printStatement : PRINT_T expression ';' {
 | PRINT_T STRINGCONST_T ';' { 
         ast_node t = create_ast_node(PRINT_N);
         t->left_child = create_ast_node(STRING_LITERAL_N);
-        t->left_child->value_string = strdup(yytext);
+        t->left_child->value_string = strdup(savedLiteralText);
         $$ = t; }
 ;
 
@@ -256,11 +257,11 @@ expression : var '=' expression %prec EXPR_P {
 
 var : ID_T %prec VAR_P { 
         ast_node t = create_ast_node(ID_N);
-        t->value_string = strdup(yytext);
+        t->value_string = strdup(savedIDText);
         $$ = t; }
 | ID_T '[' expression ']' { 
         ast_node t = create_ast_node(ID_N);
-        t->value_string = strdup(yytext);
+        t->value_string = strdup(savedIDText);
         t->left_child = $3;
         $$ = t; }
 ;
@@ -351,13 +352,13 @@ rValue : expression '+' expression {
 | call { $$ = $1; }
 | INTCONST_T {
         ast_node t = create_ast_node(INT_LITERAL_N);
-        t->value_int = atoi(yytext);
+        t->value_int = atoi(savedLiteralText);
         $$ = t; }
 ;
 
 call : ID_T '(' args ')' {
         ast_node t = create_ast_node(FUNC_CALL_N);
-        t->value_string = strdup(yytext);
+        t->value_string = strdup(savedIDText);
         t->left_child = $3;
         $$ = t;
      }

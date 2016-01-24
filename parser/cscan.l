@@ -6,10 +6,10 @@
 int lexLookup(char *);
 
 /* I want to be like Cormen when I grow up */
-#define MAX_TOKEN_LEN 201
+#define MAXTOKENLENGTH 201
 
-char savedIDText[MAX_TOKEN_LEN];
-char savedLiteralText[MAX_TOKEN_LEN];
+char savedIDText[MAXTOKENLENGTH];
+char savedLiteralText[MAXTOKENLENGTH];
 
 %}
 
@@ -29,8 +29,12 @@ signedint [-]?{integer}
 
 {white}      /* skip whitespace */
 
-{id}         return lexLookup(yytext);
-{signedint}  return INTCONST_T;
+{id}         { 
+             strncpy(savedIDText, yytext, MAXTOKENLENGTH-1);
+             return lexLookup(yytext); }
+{signedint}  { 
+             strncpy(savedLiteralText, yytext, MAXTOKENLENGTH-1);
+             return INTCONST_T; }
 
   /* start condition for strings */
 \"           { BEGIN(string); }
@@ -39,6 +43,7 @@ signedint [-]?{integer}
 <string>\"   {
   BEGIN(INITIAL);		/* go back to normal state */
   yytext[--yyleng] = '\0';	/* remove the trailing double-quote */
+  strncpy(savedLiteralText, yytext, MAXTOKENLENGTH-1);
   return STRINGCONST_T;
  }
 <string>.    { yymore(); }
