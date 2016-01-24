@@ -17,10 +17,15 @@
    to you to start with.  You may add or remove node types as you
    wish. */
 typedef enum { ROOT_N,
-	       SEQ_N,
+	       SEQ_N, COMPOUND_N,
 	       OP_ASSIGN_N, OP_PLUS_N, OP_MINUS_N, OP_NEG_N, OP_TIMES_N, OP_DIVIDE_N,
-	       OP_EQUALS_N,
-	       IF_STMT_N, IF_ELSE_STMT_N,
+               OP_MOD_N, OP_LT_N, OP_LTE_N, OP_GT_N, OP_GTE_N, OP_EQUALS_N, 
+               OP_NOTEQUALS_N, OP_AND_N, OP_OR_N,
+               OP_COMPLEMENT_N, OP_UNARYM_N, OP_INCREMENT_N, OP_DECREMENT_N,
+               FUNC_CALL_N,
+               IF_N, IF_ELSE_N, PRINT_N, READ_N, RETURN_N, FOR_N, 
+               WHILE_N, DOWHILE_N, COMPOUND_STMT_N,  
+               DECLARATION_LIST_N, PARAM_N, ARRAY_PARAM_N, FUNC_N,
 	       ID_N, INT_LITERAL_N} ast_node_type;
 
 

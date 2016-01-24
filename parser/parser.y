@@ -66,125 +66,301 @@ varDeclarationList : varDeclarationList ',' varDec { }
 | varDec { }
 ;
 
-varDec : ID_T { }
-| ID_T '=' expression { }
-| ID_T '[' INTCONST_T ']' { }
+varDec : ID_T { 
+        ast_node t = create_ast_node(ID_N);
+        t->value_string = strdup(yytext); 
+        $$ = t; }
+| ID_T '=' expression {
+        ast_node t = create_ast_node(ID_N);
+        t->value_string = strdup(yytext);
+
+        ast_node a = create_ast_node(OP_ASSIGN_N);
+        a->left_child = t;
+        a->left_child->right_sibling = $3;
+        $$ = a; }
+| ID_T '[' INTCONST_T ']' {
+        ast_node t = create_ast_node(ID_N);
+        t->value_string = strdup(yytext);
+        t->left_child = create_ast_node(INT_LITERAL_N);
+        t->left_child->value_int = strdup(yytext);
+        $$ = t;
+}
 ;
 
-funcDeclaration : INT_T ID_T '(' formalParams ')' compoundStatement %prec FUNC_DEC {}
-| VOID_T ID_T '(' formalParams ')' compoundStatement {}
+funcDeclaration : INT_T ID_T '(' formalParams ')' compoundStatement %prec FUNC_DEC {
+        ast_node t = create_ast_node(FUNC_N);
+        t->value_int = 1; // For int
+        t->value_string = strdup(yytext);
+        
+        t->left_child = $6;
+        t->left_child->right_sibling = $4;
+
+        $$ = t; }
+| VOID_T ID_T '(' formalParams ')' compoundStatement {
+        ast_node t = create_ast_node(FUNC_N);
+        t->value_int = 0; // For void
+        t->value_string = strdup(yytext);
+        
+        t->left_child = $6;
+        t->left_child->right_sibling = $4;
+
+        $$ = t; }
 ;
 
 
-formalParams : formalList { }
-| VOID_T { }
-| /* Nothing */ { }
+formalParams : formalList { $$ = $1; }
+| VOID_T { $$ = NULL; }
+| /* Nothing */ { $$ = NULL; }
 ;
 
-formalList : formalList ',' formalParam { }
-| formalParam { }
+formalList : formalList ',' formalParam { 
+        $1->right_sibling = $3;
+        $$ = $1; }
+| formalParam { $$ = $1; }
 ;
 
-formalParam : INT_T ID_T { }
-| INT_T ID_T '[' ']' { }
+formalParam : INT_T ID_T {
+        ast_node t = create_ast_node(PARAM_N);
+        t->value_string = strdup(yytext);
+        $$ = t; }
+| INT_T ID_T '[' ']' { 
+        ast_node t = create_ast_node(ARRAY_PARAM_N);
+        t->value_string = strdup(yytext);
+        $$ = t; }
 ;
 
-compoundStatement : '{' localDeclarations statementList '}' { }
+compoundStatement : '{' localDeclarations statementList '}' { 
+        ast_node t = create_ast_node(COMPOUND_STMT_N);
+        ast_node i = $2;
+
+        while(i->right_sibling != NULL)
+          i = i->right_sibling;
+
+        i->right_sibling = $3;
+        t->left_child = $2;
+        $$ = t; }
 ;
 
-localDeclarations : localDeclarations varDeclaration { }
-| /* Nothing */ { }
+localDeclarations : localDeclarations varDeclaration { 
+              $1->right_sibling = $2;
+              $$ = $1; }
+| /* Nothing */ { $$ = NULL; }
 ;
 
-statementList : statementList statement { }
-| /* Nothing */ { }
+statementList : statementList statement {
+              $1->right_sibling = $2;
+              $$ = $1; }
+| /* Nothing */ { $$ = NULL; }
 ;
 
-statement : expressionStatement { }
-| compoundStatement { }
-| ifStatement { }
-| whileStatement { }
-| doWhileStatement { }
-| forStatement { }
-| returnStatement { }
-| readStatement { }
-| printStatement { }
+statement : expressionStatement { $$ = $1; }
+| compoundStatement { $$ = $1; }
+| ifStatement { $$ = $1; }
+| whileStatement { $$ = $1; }
+| doWhileStatement { $$ = $1; }
+| forStatement { $$ = $1; }
+| returnStatement { $$ = $1; }
+| readStatement { $$ = $1; }
+| printStatement { $$ = $1; }
 ;
 
-expressionStatement : expression ';'
-| ';'
+expressionStatement : expression ';' { $$ = $1; }
+| ';' { $$ = NULL; }
 ;
 
-ifStatement : IF_T '(' expression ')' statement   %prec LOWER_THAN_ELSE { }
+ifStatement : IF_T '(' expression ')' statement   %prec LOWER_THAN_ELSE { 
+        ast_node t = create_ast_node(IF_N);
+        t->left_child = $3;
+        t->left_child->right_sibling = $5;
+        $$ = t; }
 | IF_T '(' expression ')' statement ELSE_T statement { 
-  /* NOTE: resolve ambiguity */ }
+        ast_node t = create_ast_node(IF_ELSE_N);
+        t->left_child = $3;
+        t->left_child->right_sibling = $5;
+        t->left_child->right_sibling->right_sibling = $7;
+        $$ = t; }
 ;
 
-whileStatement : WHILE_T '(' expression ')' statement { }
+whileStatement : WHILE_T '(' expression ')' statement {
+        ast_node t = create_ast_node(WHILE_N);
+        t->left_child = $3;
+        t->left_child->right_sibling = $5;
+        $$ = t; }
 ;
 
-doWhileStatement : DO_T statement WHILE_T '(' expression ')' ';' { }
+doWhileStatement : DO_T statement WHILE_T '(' expression ')' ';' { 
+        ast_node t = create_ast_node(DOWHILE_N);
+        t->left_child = $5;
+        t->left_child->right_sibling = $2;
+        $$ = t; }
 ;
 
-forStatement : FOR_T '(' forHeaderExpr ';' forHeaderExpr ';' forHeaderExpr ')' statement { }
+forStatement : FOR_T '(' forHeaderExpr ';' forHeaderExpr ';' forHeaderExpr ')' statement { 
+        ast_node t = create_ast_node(FOR_N);
+        t->left_child = $3;
+        /* Refactor: */
+        t->left_child->right_sibling = $5;
+        t->left_child->right_sibling->right_sibling = $7;
+        t->left_child->right_sibling->right_sibling->right_sibling = $9;
+        $$ = t; }
 ;
 
-forHeaderExpr : expression { }
-| /* Nothing */ { }
+forHeaderExpr : expression { $$ = $1; }
+| /* Nothing */ { /* DON'T HAVE NULL HEADER EXPRESSION YET */ 
+          $$ = NULL; }
 ;
 
-returnStatement : RETURN_T ';' { }
-| RETURN_T expression ';' { }
+returnStatement : RETURN_T ';' { 
+        ast_node t = create_ast_node(RETURN_N);
+        $$ = t; }
+| RETURN_T expression ';' {
+        ast_node t = create_ast_node(RETURN_N);
+        t->left_child = $2;
+        $$ = t; }
 ;
 
-readStatement : READ_T var ';' { }
+readStatement : READ_T var ';' { 
+        ast_node t = create_ast_node(READ_N);
+        t->left_child = $2;
+        $$ = t; }
 ;
 
-printStatement : PRINT_T expression ';' { }
-| PRINT_T STRINGCONST_T ';' { }
+printStatement : PRINT_T expression ';' { 
+        ast_node t = create_ast_node(PRINT_N);
+        t->left_child = $2;
+        $$ = t; }
+| PRINT_T STRINGCONST_T ';' { 
+        ast_node t = create_ast_node(PRINT_N);
+        t->left_child = create_ast_node(STRING_LITERAL_N);
+        t->left_child->value_string = strdup(yytext);
+        $$ = t; }
 ;
 
-expression : var '=' expression %prec EXPR_P { }
-| rValue { }
+expression : var '=' expression %prec EXPR_P { 
+        ast_node t = create_ast_node(OP_ASSIGN_N);
+        t->left_child = $1; 
+        t->left_child->right_sibling = $3;
+        $$ = t; }
+| rValue { $$ = $1; }
 ;
 
-var : ID_T %prec VAR_P { }
-| ID_T '[' expression ']' { }
+var : ID_T %prec VAR_P { 
+        ast_node t = create_ast_node(ID_N);
+        t->value_string = strdup(yytext);
+        $$ = t; }
+| ID_T '[' expression ']' { 
+        ast_node t = create_ast_node(ID_N);
+        t->value_string = strdup(yytext);
+        t->left_child = $3;
+        $$ = t; }
 ;
 
-rValue : expression '+' expression { /*NOTE: Add associativity & precedence */ }
-| expression '-' expression { }
-| expression '*' expression { }
-| expression '/' expression { }
-| expression '%' expression { }
-| expression '<' expression { }
-| expression LT_EQUAL_T expression { }
-| expression '>' expression { }
-| expression GT_EQUAL_T expression { }
-| expression ISEQUAL_T expression { }
-| expression NOTEQUAL_T expression { }
-| expression AND_T expression { }
-| expression OR_T expression { }
-| '!' expression { }
-| '-' expression  %prec UNARYM  { }
-| var { }
-| INCREMENT_T var { }
-| DECREMENT_T var { }
-| '(' expression ')' { }
-| call { }
-| INTCONST_T
+rValue : expression '+' expression { 
+        ast_node t = create_ast_node(OP_PLUS_N);
+        t->left_child = $1;
+        t->left_child->right_sibling = $3;
+        $$ = t; }
+| expression '-' expression { 
+        ast_node t = create_ast_node(OP_MINUS_N);
+        t->left_child = $1;
+        t->left_child->right_sibling = $3;
+        $$ = t; }
+| expression '*' expression { 
+        ast_node t = create_ast_node(OP_TIMES_N);
+        t->left_child = $1;
+        t->left_child->right_sibling = $3;
+        $$ = t; }
+| expression '/' expression { 
+        ast_node t = create_ast_node(OP_DIVIDE_N);
+        t->left_child = $1;
+        t->left_child->right_sibling = $3;
+        $$ = t; }
+| expression '%' expression { 
+        ast_node t = create_ast_node(OP_MOD_N);
+        t->left_child = $1;
+        t->left_child->right_sibling = $3;
+        $$ = t; }
+| expression '<' expression { 
+        ast_node t = create_ast_node(OP_LT_N);
+        t->left_child = $1;
+        t->left_child->right_sibling = $3;
+        $$ = t; }
+| expression LT_EQUAL_T expression { 
+        ast_node t = create_ast_node(OP_LTE_N);
+        t->left_child = $1;
+        t->left_child->right_sibling = $3;
+        $$ = t; }
+| expression '>' expression { 
+        ast_node t = create_ast_node(OP_GT_N);
+        t->left_child = $1;
+        t->left_child->right_sibling = $3;
+        $$ = t; }
+| expression GT_EQUAL_T expression { 
+        ast_node t = create_ast_node(OP_GTE_N);
+        t->left_child = $1;
+        t->left_child->right_sibling = $3;
+        $$ = t; }
+| expression ISEQUAL_T expression { 
+        ast_node t = create_ast_node(OP_EQUALS_N);
+        t->left_child = $1;
+        t->left_child->right_sibling = $3;
+        $$ = t; }
+| expression NOTEQUAL_T expression { 
+        ast_node t = create_ast_node(OP_NOTEQUALS_N);
+        t->left_child = $1;
+        t->left_child->right_sibling = $3;
+        $$ = t; }
+| expression AND_T expression { 
+        ast_node t = create_ast_node(OP_AND_N);
+        t->left_child = $1;
+        t->left_child->right_sibling = $3;
+        $$ = t; }
+| expression OR_T expression { 
+        ast_node t = create_ast_node(OP_OR_N);
+        t->left_child = $1;
+        t->left_child->right_sibling = $3;
+        $$ = t; }
+| '!' expression { 
+        ast_node t = create_ast_node(OP_COMPLEMENT_N);
+        t->left_child = $2;
+        $$ = t; }
+| '-' expression  %prec UNARYM  { 
+        ast_node t = create_ast_node(OP_UNARYM_N);
+        t->left_child = $2;
+        $$ = t; }
+| var { $$ = $1; }
+| INCREMENT_T var { 
+        ast_node t = create_ast_node(OP_INCREMENT_N);
+        t->left_child = $2;
+        $$ = t; }
+| DECREMENT_T var { 
+        ast_node t = create_ast_node(OP_DECREMENT_N);
+        t->left_child = $2;
+        $$ = t; }
+| '(' expression ')' { $$ = $2; }
+| call { $$ = $1; }
+| INTCONST_T {
+        ast_node t = create_ast_node(INT_LITERAL_N);
+        t->value_int = atoi(yytext);
+        $$ = t; }
 ;
 
-call : ID_T '(' args ')' { }
-
+call : ID_T '(' args ')' {
+        ast_node t = create_ast_node(FUNC_CALL_N);
+        t->value_string = strdup(yytext);
+        t->left_child = $3;
+        $$ = t;
+     }
 ;
 
-args : argList { }
-| /* Nothing */ { }
+args : argList { $$ = $1; }
+| /* Nothing */ { $$ = NULL; }
 ;
 
-argList : argList ',' expression { }
-| expression { }
+argList : argList ',' expression { 
+        $1->right_sibling = $3; 
+        $$ = $1; }
+| expression { $$ = $1; }
 ;
 
 
