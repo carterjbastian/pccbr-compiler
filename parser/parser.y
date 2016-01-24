@@ -50,15 +50,22 @@ extern char savedLiteralText[];
 
 %%
 
-program : declarationList EOF_T {
+program : declarationList {
         ast_node t = create_ast_node(ROOT_N);
         t->left_child = $1;
         root = $$ = t; }
 ;
 
 declarationList : declarationList declaration { 
-        $1->right_sibling = $2;
-        $$ = $1; }
+        ast_node t = $1;
+        if (t != NULL) {
+          while(t->right_sibling != NULL)
+            t = t->right_sibling;
+          t->right_sibling = $2; 
+          $$ = $1; 
+        } else {
+          $$ = $2;
+        } }
 | declaration { $$ = $1; }
 ;
 
@@ -70,8 +77,15 @@ varDeclaration : INT_T varDeclarationList ';' %prec NON_FUNC_DEC { $$ = $2; }
 ;
 
 varDeclarationList : varDeclarationList ',' varDec { 
-        $1->right_sibling = $3;
-        $$ = $1; }
+        ast_node t = $3;
+        if (t != NULL) {
+          while(t->right_sibling != NULL)
+            t = t->right_sibling;
+          t->right_sibling = $2; 
+          $$ = $1; 
+        } else {
+          $$ = $3;
+        } }
 | varDec { $$ = $1; }
 ;
 
@@ -92,8 +106,7 @@ varDec : ID_T {
         t->value_string = savedIDText;
         t->left_child = create_ast_node(INT_LITERAL_N);
         t->left_child->value_int = atoi(savedLiteralText);
-        $$ = t;
-}
+        $$ = t; }
 ;
 
 funcDeclaration : INT_T ID_T '(' formalParams ')' compoundStatement %prec FUNC_DEC {
@@ -118,13 +131,20 @@ funcDeclaration : INT_T ID_T '(' formalParams ')' compoundStatement %prec FUNC_D
 
 
 formalParams : formalList { $$ = $1; }
-| VOID_T { $$ = create_ast_node(NULL_N); }
-| /* Nothing */ { $$ = create_ast_node(NULL_N); }
+| VOID_T { $$ = create_ast_node(NULL_N); $$->value_string = "void_formal_params"; }
+| /* Nothing */ { $$ = create_ast_node(NULL_N); $$->value_string = "no_formal_params"; }
 ;
 
 formalList : formalList ',' formalParam { 
-        $1->right_sibling = $3;
-        $$ = $1; }
+        ast_node t = $1;
+        if (t != NULL) {
+          while(t->right_sibling != NULL)
+            t = t->right_sibling;
+          t->right_sibling = $3; 
+          $$ = $1; 
+        } else {
+          $$ = $3;
+        } }
 | formalParam { $$ = $1; }
 ;
 
@@ -140,28 +160,45 @@ formalParam : INT_T ID_T {
 
 compoundStatement : '{' localDeclarations statementList '}' { 
         ast_node t = create_ast_node(COMPOUND_STMT_N);
-        ast_node i = $2;
+        
+        if ($2 != NULL) {
+          ast_node i = $2;
 
-        while(i->right_sibling != NULL)
-          i = i->right_sibling;
+          while(i->right_sibling != NULL)
+            i = i->right_sibling;
 
-        i->right_sibling = $3;
-        t->left_child = $2;
+          i->right_sibling = $3;
+          t->left_child = $2;
+        } else {
+          t->left_child = $3;
+        } 
         $$ = t; }
 ;
 
 localDeclarations : localDeclarations varDeclaration { 
-              ast_node t = $1;
-              t->right_sibling = $2;
-              $$ = t; }
-| /* Nothing */ { $$ = create_ast_node(NULL_N); }
+        ast_node t = $1;
+        if (t != NULL) {
+          while(t->right_sibling != NULL)
+            t = t->right_sibling;
+          t->right_sibling = $2; 
+          $$ = $1; 
+        } else {
+          $$ = $2;
+        } }
+| /* Nothing */ { $$ = NULL; }
 ;
 
 statementList : statementList statement {
-              ast_node t = $1;
-              t->right_sibling = $2;
-              $$ = t; }
-| /* Nothing */ { $$ = create_ast_node(NULL_N); }
+        ast_node t = $1;
+        if (t != NULL) {
+          while(t->right_sibling != NULL)
+            t = t->right_sibling;
+          t->right_sibling = $2; 
+          $$ = $1; 
+        } else {
+          $$ = $2;
+        } }
+| /* Nothing */ { $$ = NULL; }
 ;
 
 statement : expressionStatement { $$ = $1; }
@@ -176,7 +213,7 @@ statement : expressionStatement { $$ = $1; }
 ;
 
 expressionStatement : expression ';' { $$ = $1; }
-| ';' { $$ = create_ast_node(NULL_N); }
+| ';' { $$ = create_ast_node(NULL_N); $$->value_string = "empty expressionStatement"; }
 ;
 
 ifStatement : IF_T '(' expression ')' statement   %prec LOWER_THAN_ELSE { 
@@ -218,7 +255,7 @@ forStatement : FOR_T '(' forHeaderExpr ';' forHeaderExpr ';' forHeaderExpr ')' s
 
 forHeaderExpr : expression { $$ = $1; }
 | /* Nothing */ { 
-        $$ = create_ast_node(NULL_N); }
+        $$ = create_ast_node(NULL_N); $$->value_string = "empty forHeaderExpr"; }
 ;
 
 returnStatement : RETURN_T ';' { 
@@ -365,12 +402,19 @@ call : ID_T '(' args ')' {
 ;
 
 args : argList { $$ = $1; }
-| /* Nothing */ { $$ = create_ast_node(NULL_N); }
+| /* Nothing */ { $$ = create_ast_node(NULL_N); $$->value_string = "empty arguments"; }
 ;
 
 argList : argList ',' expression { 
-        $1->right_sibling = $3; 
-        $$ = $1; }
+        ast_node t = $1;
+        if (t != NULL) {
+          while(t->right_sibling != NULL)
+            t = t->right_sibling;
+          t->right_sibling = $3; 
+          $$ = $1; 
+        } else {
+          $$ = $3;
+        } }
 | expression { $$ = $1; }
 ;
 
