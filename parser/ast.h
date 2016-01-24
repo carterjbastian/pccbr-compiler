@@ -17,7 +17,6 @@
    to you to start with.  You may add or remove node types as you
    wish. */
 typedef enum { ROOT_N,
-	       SEQ_N, COMPOUND_N,
 	       OP_ASSIGN_N, OP_PLUS_N, OP_MINUS_N, OP_NEG_N, OP_TIMES_N, OP_DIVIDE_N,
                OP_MOD_N, OP_LT_N, OP_LTE_N, OP_GT_N, OP_GTE_N, OP_EQUALS_N, 
                OP_NOTEQUALS_N, OP_AND_N, OP_OR_N,
@@ -25,8 +24,8 @@ typedef enum { ROOT_N,
                FUNC_CALL_N,
                IF_N, IF_ELSE_N, PRINT_N, READ_N, RETURN_N, FOR_N, 
                WHILE_N, DOWHILE_N, COMPOUND_STMT_N,  
-               DECLARATION_LIST_N, PARAM_N, ARRAY_PARAM_N, FUNC_N,
-	       ID_N, INT_LITERAL_N, STRING_LITERAL_N } ast_node_type;
+               DECLARATION_LIST_N, PARAM_N, ARRAY_PARAM_N, FUNC_N, NULL_N,
+	       ID_N, STRING_LITERAL_N, INT_LITERAL_N} ast_node_type;
 
 
 
@@ -43,17 +42,42 @@ typedef struct {
 
 static val_name_pair token_table[] = {
   { ROOT_N, "ROOT" },
-  { SEQ_N, "SEQ" },
+  { COMPOUND_STMT_N, "COMPOUND"},
   { OP_ASSIGN_N, "=" },
   { OP_PLUS_N, "+" },
   { OP_MINUS_N, "-" },
   { OP_NEG_N, "-" },
   { OP_TIMES_N, "*" },
   { OP_DIVIDE_N, "/" },
+  { OP_MOD_N, "%" },
+  { OP_LT_N, "<" },
+  { OP_LTE_N, "<=" },
+  { OP_GT_N, ">" },
+  { OP_GTE_N, ">=" },
   { OP_EQUALS_N, "==" },
+  { OP_NOTEQUALS_N, "!=" },
+  { OP_AND_N, "&&" },
+  { OP_OR_N, "||" },
+  { OP_COMPLEMENT_N, "!" },
+  { OP_UNARYM_N, "U-" },
+  { OP_INCREMENT_N, "++" },
+  { OP_DECREMENT_N, "--" },
+  { FUNC_CALL_N, "FUNC_CALL" },
   { IF_N, "IF_STMT" },
   { IF_ELSE_N, "IF_ELSE_STMT" },
+  { PRINT_N, "PRINT_STMT" },
+  { READ_N, "READ_STMT" },
+  { RETURN_N, "RETURN_STMT" },
+  { FOR_N, "FOR_STMT" },
+  { WHILE_N, "WHILE_STMT" },
+  { DOWHILE_N, "DOWHILE_STMT" },
+  { DECLARATION_LIST_N, "DECLARATION_LIST" },
+  { PARAM_N, "PARAMETER" },
+  { ARRAY_PARAM_N, "ARRAY_PARAMETER" },
+  { FUNC_N, "FUNCTION" },
+  { NULL_N, "EMPTY_NODE" },
   { ID_N, "ID" },
+  { STRING_LITERAL_N, "STRING_LITERAL" },
   { INT_LITERAL_N, "INT_LITERAL"} ,
   { STRING_LITERAL_N, "STRING_LITERAL"} ,
   { 0, NULL }
