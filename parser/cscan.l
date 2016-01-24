@@ -17,7 +17,8 @@ white [ \t\n]+
 letter [A-Za-z]
 digit [0-9]
 id ({letter}|_)({letter}|{digit}|_)*
-integer {digit}+
+bad_id {digit}({letter}|{digit}|_)*
+integer {digit}
 signedint [-]?{integer}
 
 %x string
@@ -87,6 +88,9 @@ signedint [-]?{integer}
 "%"          return '%';
 "!"          return '!';
 
+{bad_id}     {
+             strncpy(savedIDText, yytext, MAXTOKENLENGTH-1);
+             return BAD_ID_T; }
 .            return OTHER_T;
 
 %%
