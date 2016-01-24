@@ -49,7 +49,7 @@ extern char savedLiteralText[];
 
 %%
 
-program : declarationList {
+program : declarationList EOF_T {
         ast_node t = create_ast_node(ROOT_N);
         t->left_child = $1;
         root = $$ = t; }
@@ -150,14 +150,16 @@ compoundStatement : '{' localDeclarations statementList '}' {
 ;
 
 localDeclarations : localDeclarations varDeclaration { 
-              $1->right_sibling = $2;
-              $$ = $1; }
+              ast_node t = $1;
+              t->right_sibling = $2;
+              $$ = t; }
 | /* Nothing */ { $$ = create_ast_node(NULL_N); }
 ;
 
 statementList : statementList statement {
-              $1->right_sibling = $2;
-              $$ = $1; }
+              ast_node t = $1;
+              t->right_sibling = $2;
+              $$ = t; }
 | /* Nothing */ { $$ = create_ast_node(NULL_N); }
 ;
 
