@@ -42,7 +42,6 @@ typedef struct {
 
 static val_name_pair token_table[] = {
   { ROOT_N, "ROOT" },
-  { COMPOUND_STMT_N, "COMPOUND"},
   { OP_ASSIGN_N, "=" },
   { OP_PLUS_N, "+" },
   { OP_MINUS_N, "-" },
@@ -71,6 +70,7 @@ static val_name_pair token_table[] = {
   { FOR_N, "FOR_STMT" },
   { WHILE_N, "WHILE_STMT" },
   { DOWHILE_N, "DOWHILE_STMT" },
+  { COMPOUND_STMT_N, "COMPOUND"},
   { DECLARATION_LIST_N, "DECLARATION_LIST" },
   { PARAM_N, "PARAMETER" },
   { ARRAY_PARAM_N, "ARRAY_PARAMETER" },
