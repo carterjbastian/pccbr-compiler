@@ -54,6 +54,10 @@ void print_ast(ast_node root, int depth) {
     printf("%s", root->value_string);
     break;
 
+  case ERROR_N:
+    printf("\t%s", root->value_string);
+    break;
+
   default:
     break;
   }

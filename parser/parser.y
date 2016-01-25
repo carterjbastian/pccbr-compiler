@@ -26,6 +26,12 @@ extern char savedLiteralText[];
 %token WHILE_T FOR_T IF_T ELSE_T RETURN_T READ_T PRINT_T EOF_T OTHER_T DO_T
 
 /* This is how we fix the if-else associativity problem, as-per in class eg */
+%nonassoc ERR_EXPR
+%nonassoc ERR_PRINT ERR_READ ERR_RETURN
+%nonassoc ERR_LOOP
+%nonassoc ERR_IF
+%nonassoc ERR_ELSE
+
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE_T
 
@@ -74,6 +80,11 @@ declaration : varDeclaration { $$ = $1; }
 ;
 
 varDeclaration : INT_T varDeclarationList ';' %prec NON_FUNC_DEC { $$ = $2; }
+| INT_T error ';' {
+        ast_node t = create_ast_node(ERROR_N);
+        t->value_string = "Invalid Variable Declaration";
+        fprintf(stderr, "Invalid variable declaration discarded on line %d\n", yylineno); 
+        $$ = t; }
 ;
 
 varDeclarationList : varDeclarationList ',' varDec { 
@@ -213,6 +224,11 @@ statement : expressionStatement { $$ = $1; }
 ;
 
 expressionStatement : expression ';' { $$ = $1; }
+| error ';' %prec ERR_EXPR {
+        ast_node t = create_ast_node(ERROR_N);
+        t->value_string = "Invalid Expression";
+        fprintf(stderr, "Statement on line %d Discarded due to an invalid expression\n", yylineno);
+        $$ = t; }
 | ';' { $$ = create_ast_node(NULL_N); $$->value_string = "empty expressionStatement"; }
 ;
 
@@ -221,12 +237,23 @@ ifStatement : IF_T '(' expression ')' statement   %prec LOWER_THAN_ELSE {
         t->left_child = $3;
         t->left_child->right_sibling = $5;
         $$ = t; }
+| IF_T '(' error ')' statement %prec ERR_IF {
+        ast_node t = create_ast_node(ERROR_N);
+        t->value_string = "Invalid If-Statement Condition";
+        fprintf(stderr, "If-Statement discarded due to invalid condition on line %d\n", yylineno); 
+        $$ = t; }
 | IF_T '(' expression ')' statement ELSE_T statement { 
         ast_node t = create_ast_node(IF_ELSE_N);
         t->left_child = $3;
         t->left_child->right_sibling = $5;
         t->left_child->right_sibling->right_sibling = $7;
         $$ = t; }
+| IF_T '(' error ')' statement ELSE_T statement %prec ERR_ELSE {
+        ast_node t = create_ast_node(ERROR_N);
+        t->value_string = "Invalid IF-Else Condition";
+        fprintf(stderr, "If-Else statement discarded due to invalid condition on line %d\n", yylineno); 
+        $$ = t; }
+
 ;
 
 whileStatement : WHILE_T '(' expression ')' statement {
@@ -234,12 +261,22 @@ whileStatement : WHILE_T '(' expression ')' statement {
         t->left_child = $3;
         t->left_child->right_sibling = $5;
         $$ = t; }
+| WHILE_T '(' error ')' statement %prec ERR_LOOP {
+        ast_node t = create_ast_node(ERROR_N);
+        t->value_string = "Invalid While-Loop Condition";
+        fprintf(stderr, "While-Loop starting on line %d discarded due to invalid condition\n", yylineno); 
+        $$ = t; }
 ;
 
 doWhileStatement : DO_T statement WHILE_T '(' expression ')' ';' { 
         ast_node t = create_ast_node(DOWHILE_N);
         t->left_child = $5;
         t->left_child->right_sibling = $2;
+        $$ = t; }
+| DO_T statement WHILE_T '(' error ')' ';' %prec ERR_LOOP {
+        ast_node t = create_ast_node(ERROR_N);
+        t->value_string = "Invalid Do-While Loop Condition";
+        fprintf(stderr, "Do-While loop discarded due to invalid condition on line %d\n", yylineno); 
         $$ = t; }
 ;
 
@@ -250,6 +287,12 @@ forStatement : FOR_T '(' forHeaderExpr ';' forHeaderExpr ';' forHeaderExpr ')' s
         t->left_child->right_sibling = $5;
         t->left_child->right_sibling->right_sibling = $7;
         t->left_child->right_sibling->right_sibling->right_sibling = $9;
+        $$ = t; }
+| FOR_T '(' error ')' statement %prec ERR_LOOP {
+        ast_node t = create_ast_node(ERROR_N);
+        t->value_string = "Malformed For-Loop Header";
+        fprintf(stderr, "For Loop Header discarded on line %d\n", yylineno); 
+        fprintf(stderr, "\tNote: All statements inside loop are discarded as well\n");
         $$ = t; }
 ;
 
@@ -265,12 +308,23 @@ returnStatement : RETURN_T ';' {
         ast_node t = create_ast_node(RETURN_N);
         t->left_child = $2;
         $$ = t; }
+| RETURN_T error ';' %prec ERR_RETURN {
+        ast_node t = create_ast_node(ERROR_N);
+        t->value_string = "Invalid Return Statement";
+        fprintf(stderr, "Invalid Return Statement discarded on line %d\n", yylineno); 
+        $$ = t; }
 ;
 
 readStatement : READ_T var ';' { 
         ast_node t = create_ast_node(READ_N);
         t->left_child = $2;
         $$ = t; }
+| READ_T error %prec ERR_READ ';' {
+        ast_node t = create_ast_node(ERROR_N);
+        t->value_string = "Malformed Read Statement";
+        fprintf(stderr, "Malformed Reform Statement discarded on line %d\n", yylineno); 
+        $$ = t; }
+
 ;
 
 printStatement : PRINT_T expression ';' { 
@@ -281,6 +335,11 @@ printStatement : PRINT_T expression ';' {
         ast_node t = create_ast_node(PRINT_N);
         t->left_child = create_ast_node(STRING_LITERAL_N);
         t->left_child->value_string = strdup(savedLiteralText);
+        $$ = t; }
+| PRINT_T error %prec ERR_PRINT ';' {
+        ast_node t = create_ast_node(ERROR_N);
+        t->value_string = "Malformed Print Statement";
+        fprintf(stderr, "Malformed Print Statement discarded on line %d\n", yylineno); 
         $$ = t; }
 ;
 
@@ -423,6 +482,6 @@ argList : argList ',' expression {
 
 int yyerror(char *s) {
   parseError = 1;
-  fprintf(stderr, "%s at line %d\n", s, yylineno);
+  // fprintf(stderr, "%s at line %d\n", s, yylineno);
   return 0;
 }

@@ -25,7 +25,7 @@ typedef enum { ROOT_N,
                IF_N, IF_ELSE_N, PRINT_N, READ_N, RETURN_N, FOR_N, 
                WHILE_N, DOWHILE_N, COMPOUND_STMT_N,  
                DECLARATION_LIST_N, PARAM_N, ARRAY_PARAM_N, FUNC_N, NULL_N,
-	       ID_N, STRING_LITERAL_N, INT_LITERAL_N} ast_node_type;
+	       ID_N, STRING_LITERAL_N, INT_LITERAL_N, ERROR_N} ast_node_type;
 
 
 
@@ -78,8 +78,8 @@ static val_name_pair token_table[] = {
   { NULL_N, "EMPTY_NODE" },
   { ID_N, "ID" },
   { STRING_LITERAL_N, "STRING_LITERAL" },
-  { INT_LITERAL_N, "INT_LITERAL"} ,
-  { STRING_LITERAL_N, "STRING_LITERAL"} ,
+  { INT_LITERAL_N, "INT_LITERAL"},
+  { ERROR_N, "ERROR_NODE"},
   { 0, NULL }
 };
 
