@@ -1,4 +1,4 @@
-int main(void) {
+int main(int a, int b[]) {
   int 5_cat;
   int cat;
   cat = 5 & 6;
@@ -38,6 +38,8 @@ int main(void) {
     print "This still works";
     read cat;
   }
+
+  foo();
 
   return 0;
 }

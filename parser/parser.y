@@ -83,7 +83,7 @@ varDeclaration : INT_T varDeclarationList ';' %prec NON_FUNC_DEC { $$ = $2; }
 | INT_T error ';' {
         ast_node t = create_ast_node(ERROR_N);
         t->value_string = "Invalid Variable Declaration";
-        fprintf(stderr, "Invalid variable declaration discarded on line %d\n", yylineno); 
+        fprintf(stderr, "PARSING ERROR:\tInvalid variable declaration discarded on line %d\n", yylineno); 
         $$ = t; }
 ;
 
@@ -123,7 +123,8 @@ varDec : ID_T {
 funcDeclaration : INT_T ID_T '(' formalParams ')' compoundStatement %prec FUNC_DEC {
         ast_node t = create_ast_node(FUNC_N);
         t->value_int = 1; // For int
-        t->value_string = strdup(savedIDText);
+        // POTENTIAL BUG: This saves ID of last id in compoundStatement, not Func name
+        t->value_string = strdup(savedIDText); 
         
         t->left_child = $6;
         t->left_child->right_sibling = $4;
@@ -227,7 +228,7 @@ expressionStatement : expression ';' { $$ = $1; }
 | error ';' %prec ERR_EXPR {
         ast_node t = create_ast_node(ERROR_N);
         t->value_string = "Invalid Expression";
-        fprintf(stderr, "Statement on line %d Discarded due to an invalid expression\n", yylineno);
+        fprintf(stderr, "PARSING ERROR:\tStatement on line %d Discarded due to an invalid expression\n", yylineno);
         $$ = t; }
 | ';' { $$ = create_ast_node(NULL_N); $$->value_string = "empty expressionStatement"; }
 ;
@@ -240,7 +241,7 @@ ifStatement : IF_T '(' expression ')' statement   %prec LOWER_THAN_ELSE {
 | IF_T '(' error ')' statement %prec ERR_IF {
         ast_node t = create_ast_node(ERROR_N);
         t->value_string = "Invalid If-Statement Condition";
-        fprintf(stderr, "If-Statement discarded due to invalid condition on line %d\n", yylineno); 
+        fprintf(stderr, "PARSING ERROR:\tIf-Statement discarded due to invalid condition on line %d\n", yylineno); 
         $$ = t; }
 | IF_T '(' expression ')' statement ELSE_T statement { 
         ast_node t = create_ast_node(IF_ELSE_N);
@@ -251,7 +252,7 @@ ifStatement : IF_T '(' expression ')' statement   %prec LOWER_THAN_ELSE {
 | IF_T '(' error ')' statement ELSE_T statement %prec ERR_ELSE {
         ast_node t = create_ast_node(ERROR_N);
         t->value_string = "Invalid IF-Else Condition";
-        fprintf(stderr, "If-Else statement discarded due to invalid condition on line %d\n", yylineno); 
+        fprintf(stderr, "PARSING ERROR:\tIf-Else statement discarded due to invalid condition on line %d\n", yylineno); 
         $$ = t; }
 
 ;
@@ -264,7 +265,7 @@ whileStatement : WHILE_T '(' expression ')' statement {
 | WHILE_T '(' error ')' statement %prec ERR_LOOP {
         ast_node t = create_ast_node(ERROR_N);
         t->value_string = "Invalid While-Loop Condition";
-        fprintf(stderr, "While-Loop starting on line %d discarded due to invalid condition\n", yylineno); 
+        fprintf(stderr, "PARSING ERROR:\tWhile-Loop starting on line %d discarded due to invalid condition\n", yylineno); 
         $$ = t; }
 ;
 
@@ -276,7 +277,7 @@ doWhileStatement : DO_T statement WHILE_T '(' expression ')' ';' {
 | DO_T statement WHILE_T '(' error ')' ';' %prec ERR_LOOP {
         ast_node t = create_ast_node(ERROR_N);
         t->value_string = "Invalid Do-While Loop Condition";
-        fprintf(stderr, "Do-While loop discarded due to invalid condition on line %d\n", yylineno); 
+        fprintf(stderr, "PARSING ERROR:\tDo-While loop discarded due to invalid condition on line %d\n", yylineno); 
         $$ = t; }
 ;
 
@@ -291,8 +292,8 @@ forStatement : FOR_T '(' forHeaderExpr ';' forHeaderExpr ';' forHeaderExpr ')' s
 | FOR_T '(' error ')' statement %prec ERR_LOOP {
         ast_node t = create_ast_node(ERROR_N);
         t->value_string = "Malformed For-Loop Header";
-        fprintf(stderr, "For Loop Header discarded on line %d\n", yylineno); 
-        fprintf(stderr, "\tNote: All statements inside loop are discarded as well\n");
+        fprintf(stderr, "PARSING ERROR:\tFor Loop Header discarded on line %d\n", yylineno); 
+        fprintf(stderr, "\t\tNote: All statements inside loop are discarded as well\n");
         $$ = t; }
 ;
 
@@ -311,7 +312,7 @@ returnStatement : RETURN_T ';' {
 | RETURN_T error ';' %prec ERR_RETURN {
         ast_node t = create_ast_node(ERROR_N);
         t->value_string = "Invalid Return Statement";
-        fprintf(stderr, "Invalid Return Statement discarded on line %d\n", yylineno); 
+        fprintf(stderr, "PARSING ERROR:\tInvalid Return Statement discarded on line %d\n", yylineno); 
         $$ = t; }
 ;
 
@@ -322,7 +323,7 @@ readStatement : READ_T var ';' {
 | READ_T error %prec ERR_READ ';' {
         ast_node t = create_ast_node(ERROR_N);
         t->value_string = "Malformed Read Statement";
-        fprintf(stderr, "Malformed Reform Statement discarded on line %d\n", yylineno); 
+        fprintf(stderr, "PARSING ERROR:\tMalformed Reform Statement discarded on line %d\n", yylineno); 
         $$ = t; }
 
 ;
@@ -339,7 +340,7 @@ printStatement : PRINT_T expression ';' {
 | PRINT_T error %prec ERR_PRINT ';' {
         ast_node t = create_ast_node(ERROR_N);
         t->value_string = "Malformed Print Statement";
-        fprintf(stderr, "Malformed Print Statement discarded on line %d\n", yylineno); 
+        fprintf(stderr, "PARSING ERROR:\tMalformed Print Statement discarded on line %d\n", yylineno); 
         $$ = t; }
 ;
 
@@ -482,6 +483,5 @@ argList : argList ',' expression {
 
 int yyerror(char *s) {
   parseError = 1;
-  // fprintf(stderr, "%s at line %d\n", s, yylineno);
   return 0;
 }

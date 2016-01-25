@@ -32,9 +32,9 @@ void print_ast(ast_node root, int depth) {
   int i;
 
   assert(root);
-
-  for (i = 0; i < depth; i++)
-    printf("  ");
+  printf("| ");
+  for (i = 1; i < depth; i++)
+    printf("- ");
 
   /* Print the node type. */
   printf("%s ", NODE_NAME(root->node_type));
@@ -50,8 +50,28 @@ void print_ast(ast_node root, int depth) {
     printf("%d", root->value_int);
     break;
 
-  case NULL_N:
+  case STRING_LITERAL_N:        /* print the value of the string literal */
+    assert(root->value_string);
+    printf("\"%s\"", root->value_string);
+    break;
+
+  case PARAM_N:                 /* Print the name of the param */
+    assert(root->value_string);
     printf("%s", root->value_string);
+    break;
+
+  case ARRAY_PARAM_N:           /* Print the name of the array parameter */
+    assert(root->value_string);
+    printf("%s", root->value_string);
+    break;
+
+  case FUNC_CALL_N:             /* Print the name of the function being called */
+    assert(root->value_string);
+    printf("%s", root->value_string);
+    break;
+
+  case NULL_N:
+    printf("\t%s", root->value_string);
     break;
 
   case ERROR_N:
