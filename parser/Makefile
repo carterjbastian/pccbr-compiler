@@ -72,7 +72,7 @@ parser5:
 
 clean :
 	rm -f parser lex.yy.o parser.tab.o tree_main.o ast.o \
-	parser.tab.h parser.tab.c lex.yy.c *~ parser.output
+	parser.tab.h parser.tab.c lex.yy.c *~ parser.output testing
 
 depend :
 	makedepend -- $(CFLAGS) -- tree_main.c
