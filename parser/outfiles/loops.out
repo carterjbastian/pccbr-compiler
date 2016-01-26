@@ -1,0 +1,37 @@
+| ROOT 
+| FUNCTION 
+| - COMPOUND 
+| - - ID i
+| - - FOR_STMT 
+| - - - = 
+| - - - - ID i
+| - - - - INT_LITERAL 0
+| - - - < 
+| - - - - ID i
+| - - - - INT_LITERAL 100
+| - - - ++ 
+| - - - - ID i
+| - - - COMPOUND 
+| - - - - WHILE_STMT 
+| - - - - - < 
+| - - - - - - ID i
+| - - - - - - INT_LITERAL 50
+| - - - - - COMPOUND 
+| - - - - - - DOWHILE_STMT 
+| - - - - - - - < 
+| - - - - - - - - ID i
+| - - - - - - - - INT_LITERAL 0
+| - - - - - - - COMPOUND 
+| - - - - - - - - = 
+| - - - - - - - - - ID i
+| - - - - - - - - - - 
+| - - - - - - - - - - ID i
+| - - - - - - - - - - INT_LITERAL 1
+| - - - - - - = 
+| - - - - - - - ID i
+| - - - - - - - + 
+| - - - - - - - - ID i
+| - - - - - - - - INT_LITERAL 2
+| - - RETURN_STMT 
+| - - - ID i
+| - EMPTY_NODE 	void_formal_params

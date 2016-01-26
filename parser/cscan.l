@@ -1,7 +1,19 @@
+/*
+ * cscan.l    A flex file defining the 
+ *
+ * Authors:
+ *  - Originally written by Thomas H. Cormen and Sean Smith
+ *  - Extended and modified for use in the pccbr-compiler by Carter J. Bastian
+ *    and Quinn Stearns in 2016
+ *
+ * This File Contains:
+ *  - A set of rules for scanning C programs
+ *  - A few clever tricks for tabular lookup of keywords
+ */
 %{
 
 #include <string.h>
-#include "parser.tab.h"
+#include "parser.tab.h"   // The output of running bison on our parser
 
 int lexLookup(char *);
 
@@ -91,6 +103,13 @@ signedint [-]?{integer}
 
 %%
 
+/* 
+ * Function: lexLookup
+ *  @char *s
+ * 
+ * Uses tabular lookup to distinguish between IDs and keywords when the scanner
+ *  encounters identifiers in the input.
+ */
 int lexLookup(char *s) {
   typedef struct combo {
     char *keyword;
@@ -99,6 +118,7 @@ int lexLookup(char *s) {
 
   const int KWCOUNT = 11;
 
+  // Table of possible keywords in our subset of C
   static combo keywords[] =
     { { "int", INT_T },
       { "while", WHILE_T },
@@ -116,7 +136,7 @@ int lexLookup(char *s) {
   combo *kw;
   
   keywords[KWCOUNT-1].keyword = s;
-
+  
   for (kw = keywords; strcmp(kw->keyword, s) != 0; kw++)
     ;
 

@@ -1,0 +1,40 @@
+| ROOT 
+| FUNCTION 
+| - COMPOUND 
+| - - PRINT_STMT 
+| - - - STRING_LITERAL "Hello world\n"
+| - - PRINT_STMT 
+| - - - STRING_LITERAL "Goodbye world\n"
+| - - PRINT_STMT 
+| - - - STRING_LITERAL "I sure hope this works\n"
+| - EMPTY_NODE 	void_formal_params
+| FUNCTION 
+| - COMPOUND 
+| - - = 
+| - - - ID x
+| - - - INT_LITERAL 5
+| - - = 
+| - - - ID y
+| - - - INT_LITERAL 6
+| - - = 
+| - - - ID z
+| - - - INT_LITERAL 7
+| - - = 
+| - - - ID q
+| - - - INT_LITERAL 8
+| - - FUNC_CALL hello_world
+| - - - EMPTY_NODE 	empty arguments
+| - - PRINT_STMT 
+| - - - STRING_LITERAL "Hello World\n"
+| - - = 
+| - - - ID x
+| - - - + 
+| - - - - ID b
+| - - - - / 
+| - - - - - ID a
+| - - - - - ID c
+| - - RETURN_STMT 
+| - - - INT_LITERAL 0
+| - PARAMETER a
+| - PARAMETER b
+| - PARAMETER c
