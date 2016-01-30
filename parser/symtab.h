@@ -9,11 +9,31 @@
 #ifndef SYMTAB_H_
 #define SYMTAB_H_
 
-#include "ast.h"
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <assert.h>
 
+#include "ast.h"
+
+
+/*
+ * The full enumeration of types of lbles in the C subset
+ */
+typedef enum { INT_LT, 
+               FUNC_INT_LT,
+               FUNC_VOID_LT,
+               ERROR_LT} var_lookup_type;
+
+typedef struct {
+  int val;
+  char *name;
+} type_name_pair;
+
+/*
+ * A Table of var_lookup_type -> string representation pairs.
+ * NOTE: These must be in the same order as the enumerated values in
+ * the var_lookup_type
+ */
 
 typedef struct symnode {
   char *name;	                    /* name in this symnode */

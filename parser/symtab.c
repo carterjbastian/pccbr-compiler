@@ -27,7 +27,6 @@
 symhashtable_t *create_symhashtable(int entries) {
   symhashtable_t *hashtable = malloc(sizeof(symhashtable_t));
   assert(hashtable);
-  hashtable->type = type;
   hashtable->size = entries;
   hashtable->table = calloc(entries, sizeof(symnode_t));
 
@@ -118,7 +117,7 @@ symboltable_t  *create_symboltable() {
   symboltable_t *symtab = malloc(sizeof(symboltable_t));
   assert(symtab);
 
-  symhashtable_t *hashtable=create_symhashtable(HASHSIZE, GLOBALS_S);
+  symhashtable_t *hashtable=create_symhashtable(HASHSIZE);
   hashtable->level = 0;
   hashtable->name = "0";
 
