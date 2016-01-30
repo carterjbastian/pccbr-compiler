@@ -1,21 +1,23 @@
 /* 
- * ast.h
+ * ast.h    A header defining the types of ast_nodes as well as the ast_node itself
  *
- * File defining an enum and a struct for node types in an abstract
- * syntax tree.
- *
- * Written by THC for CS 57; massaged by SWS.  
- *
- * You should modify this file as appropriate.
+ * Authors:
+ *  Originally written by THC for CS 57 and massaged by SWS.
+ *  Extended for use in the pccbr-compiler project by Carter J. Bastian
+ *    and Quinn Stearns in 2016.
+ * 
+ * This File Contains:
+ *  - An enum and a struct for node types in an abstract syntax tree
+ *  - Declarations of ast-related functions (implemented in ast.c)
  *
  */
 
 #ifndef AST_H_
 #define AST_H_
 
-/* You should fill in the various AST node types.  The following are given
-   to you to start with.  You may add or remove node types as you
-   wish. */
+/* 
+ * The full enumeration of types of nodes in an Abstract Syntax Tree.
+ */
 typedef enum { ROOT_N,
 	       OP_ASSIGN_N, OP_PLUS_N, OP_MINUS_N, OP_NEG_N, OP_TIMES_N, OP_DIVIDE_N,
                OP_MOD_N, OP_LT_N, OP_LTE_N, OP_GT_N, OP_GTE_N, OP_EQUALS_N, 
@@ -25,21 +27,20 @@ typedef enum { ROOT_N,
                IF_N, IF_ELSE_N, PRINT_N, READ_N, RETURN_N, FOR_N, 
                WHILE_N, DOWHILE_N, COMPOUND_STMT_N,  
                DECLARATION_LIST_N, PARAM_N, ARRAY_PARAM_N, FUNC_N, NULL_N,
-	       ID_N, STRING_LITERAL_N, INT_LITERAL_N, ERROR_N } ast_node_type;
+	       ID_N, STRING_LITERAL_N, INT_LITERAL_N, ERROR_N} ast_node_type;
 
-
-
+/* A struct used for ast_node_type -> string value conversion table */
 typedef struct {
         int val;
         char *name;
 } val_name_pair;
 
 
-/* Define a table of nd associated strings.  You
-   should modify this table as appropriate.  The order of entries
-   should match the order of enumerated values in ast_node_type. */
-
-
+/*
+ * A table of ast_node_type -> string representation pairs
+ * NOTE: These must be in the same order as the enumerated values in the
+ *  ast_node_type.
+ */
 static val_name_pair token_table[] = {
   { ROOT_N, "ROOT" },
   { OP_ASSIGN_N, "=" },
@@ -78,9 +79,8 @@ static val_name_pair token_table[] = {
   { NULL_N, "EMPTY_NODE" },
   { ID_N, "ID" },
   { STRING_LITERAL_N, "STRING_LITERAL" },
-  { STRING_LITERAL_N, "STRING_LITERAL"} ,
-  { INT_LITERAL_N, "INT_LITERAL"} ,
-  { ERROR_N, "ERROR" } ,
+  { INT_LITERAL_N, "INT_LITERAL"},
+  { ERROR_N, "ERROR_NODE"},
   { 0, NULL }
 };
 
@@ -97,8 +97,7 @@ struct ast_node_struct {
   ast_node_type node_type;
   ast_node left_child, right_sibling;
 
-  // as most one of these would be nonzero
-  char *value_string;		/* for ID */
+  char *value_string;		/* for IDs, errors, null nodes, etc. */
   int value_int;		/* for INT_LITERAL */
   
 };
@@ -109,6 +108,6 @@ ast_node create_ast_node(ast_node_type node_type);
 
 /* Print the contents of a subtree of an abstract syntax tree, given
    the root of the subtree and the depth of the subtree root. */
-void print_ast(ast_node root, int depth);
+void print_ast(FILE *fp, ast_node root, int depth);
 
-#endif
+#endif // AST_H_

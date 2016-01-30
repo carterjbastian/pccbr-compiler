@@ -1,0 +1,78 @@
+Project:  pccbr-compiler project Lexer
+Authors:  Carter J. Bastian, Quinn Stearns
+
+FILES:
+  - ast.c
+    Implementations of the AST-related utility functions declared in ast.h
+
+  - ast.h
+    Definitions of AST datatypes and declarations of AST utility functions
+
+  - cscan.l
+    The lexer for the parser. Slightly modified from it's original state.
+
+  - parser.y
+    The parser defines the grammar, constructs ASTs, and handles/reports errors.
+
+  - ast_main.c
+    A simple driver to build the parse tree. Also contains the testing suite.
+
+NOTES ON AST DESIGN:
+  For the most part, our design was fairly standard. Most binary operation nodes
+  contain children (the operands). Analogously, unary operations contain one 
+  child node. Some specific node types have structures worth commenting on.  
+
+  Any "list" nodes are really only the first item in the list, with each
+  successive node in the list pointed to by its direct left sibling in the tree.
+  Whenever a parent node has a list as a child, an effort was made to ensure
+  that the list-type node would be the right-most child.
+
+  Function nodes (FUNC_N) consist of a compound statement as the left-most
+  child, followed by a list of parameters. Notice that function nodes get a
+  value_int of 1 if they return an int, and a value_int of 0 if they return
+  void.
+
+  Compound statement nodes (COMPOUND_STMT_N) consist of two lists: first, a list
+  of declarations, followed imediately by a list of statements.
+
+  If statement nodes (IF_N), consist of two children: on the left, an expression
+  which is the conditional for the if statement, and on the right, a statement
+  (potentially compound) to execute if the conditional is true.
+
+  If-Else statements (IF_ELSE_N) are identical, except for the addition of a
+  third child – a statement node to be executed in the conditional is false.
+
+  For both While statements and Do-While statements (WHILE_N and DOWHILE_N
+  respectively), the conditional expression is the leftmost-child, followed
+  by the statement to execute while the condition is true.
+
+  For-Loop nodes (FOR_N) have the three header expressions (in order from left-
+  to-right) as their three leftmost children, follwed immediately by a statement
+  node (the body of the loop).
+
+  Empty Nodes (NULL_N) are used throughout wherever a node is optional in code, 
+  but necessary to preserve the expected structure of the AST (for example, with
+  empty for-loop header statements).
+
+
+ERROR REPORTING AND RECOVERY:
+  All error reporting and recovery happens at the statement-level.
+  Fairly specific errors can be reported this way without having to 
+  jeapordize the semantic meaning of the structure of the AST.
+
+  A statement that's a recognized error will simply be ignored. The rest of the
+  tree will be constructed as if the error statement had never occurred.
+  However, an error node (ERROR_N) is created and placed in the tree where
+  the node should have been placed.
+
+  Notice that if there is a problem in the construction of a loop or control
+  construct, the entire node (including it's body and the statements therein)
+  will be ignored. However, if you have an error in the body of a malformed
+  loop or control statement, the error will still be reported even though 
+  the corresponding error node is not included in the tree.
+
+USAGE:
+
+AUTOMATED TESTING:
+
+TESTS (FILES):

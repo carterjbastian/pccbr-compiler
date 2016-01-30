@@ -1,5 +1,7 @@
 void hello_world(void) {
   print "Hello world\n";
+  print "Goodbye world\n";
+  print "I sure hope this works\n";
 }
 
 int main(int a, int b, int c) {

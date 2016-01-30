@@ -1,0 +1,19 @@
+| ROOT 
+| FUNCTION 
+| - COMPOUND 
+| - - ID i
+| - - FOR_STMT 
+| - - - = 
+| - - - - ID i
+| - - - - INT_LITERAL 10
+| - - - < 
+| - - - - ID i
+| - - - - INT_LITERAL 15
+| - - - ++ 
+| - - - - ID i
+| - - - COMPOUND 
+| - - - - PRINT_STMT 
+| - - - - - ID i
+| - - RETURN_STMT 
+| - - - INT_LITERAL 1
+| - PARAMETER argc

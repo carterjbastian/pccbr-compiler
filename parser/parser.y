@@ -1,3 +1,18 @@
+/*
+ * File:    parser.y
+ *
+ * Authors:
+ *  - Based of example files written by Tom Cormen and Sean Smith
+ *  - Heavily extended, modified and mutilated for use in the pccbr compiler
+ *      by Carter J. Bastian and Quinn Stearns in 2016.
+ *
+ * This File Contains:
+ *  - The grammar for our accepted subset of the C programming language
+ *  - The corresponding rules for construction of an abstract syntax tree for
+ *    any input recognized by the grammar.
+ *  - All error reporting and recovery functionality
+ */
+
 %{
 #include <stdlib.h>
 #include <string.h>
@@ -7,6 +22,9 @@
 #define YYSTYPE ast_node
 #define YYDEBUG 1
 #define MAXTOKENLENGTH 201
+
+// Redirected output for testing
+extern FILE* error_out;
 
 extern int yylex();
 int yyerror(char *s);
@@ -20,15 +38,24 @@ extern char savedIDText[];
 extern char savedLiteralText[];
 
 %}
-
-%token ID_T BAD_ID_T INTCONST_T STRINGCONST_T ISEQUAL_T NOTEQUAL_T LT_EQUAL_T
+/* Declarations of all of the used tokens returned from the lexer */
+%token ID_T INTCONST_T STRINGCONST_T ISEQUAL_T NOTEQUAL_T LT_EQUAL_T
 %token GT_EQUAL_T INCREMENT_T DECREMENT_T AND_T OR_T INT_T VOID_T
 %token WHILE_T FOR_T IF_T ELSE_T RETURN_T READ_T PRINT_T EOF_T OTHER_T DO_T
 
-/* This is how we fix the if-else associativity problem, as-per in class eg */
+/* Associativity and Precedence options */
+/* We use this to ensure that errors are as specific as possible */
+%nonassoc ERR_EXPR
+%nonassoc ERR_PRINT ERR_READ ERR_RETURN
+%nonassoc ERR_LOOP
+%nonassoc ERR_IF
+%nonassoc ERR_ELSE
+
+/* This solves the if-else / dangling-else precedence problems */
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE_T
 
+/* Solve other ambiguities from the original grammar */
 %nonassoc NON_FUNC_DEC
 %nonassoc FUNC_DEC
 
@@ -39,7 +66,6 @@ extern char savedLiteralText[];
 %right '[' ']'
 
 /* Set the precedences for rValue operations */
-/* Are all of the unary operations left-associative too? ... */
 %left OR_T
 %left AND_T
 %left ISEQUAL_T NOTEQUAL_T
@@ -74,6 +100,12 @@ declaration : varDeclaration { $$ = $1; }
 ;
 
 varDeclaration : INT_T varDeclarationList ';' %prec NON_FUNC_DEC { $$ = $2; }
+| INT_T error ';' {
+        ast_node t = create_ast_node(ERROR_N);
+        t->value_string = "Invalid Variable Declaration";
+        fprintf(error_out, "PARSING ERROR:\tInvalid variable declaration discarded on line %d\n", yylineno);
+        parseError++;
+        $$ = t; }
 ;
 
 varDeclarationList : varDeclarationList ',' varDec { 
@@ -112,7 +144,8 @@ varDec : ID_T {
 funcDeclaration : INT_T ID_T '(' formalParams ')' compoundStatement %prec FUNC_DEC {
         ast_node t = create_ast_node(FUNC_N);
         t->value_int = 1; // For int
-        t->value_string = strdup(savedIDText);
+        // POTENTIAL BUG: This saves ID of last id in compoundStatement, not Func name
+        t->value_string = strdup(savedIDText); 
         
         t->left_child = $6;
         t->left_child->right_sibling = $4;
@@ -213,6 +246,12 @@ statement : expressionStatement { $$ = $1; }
 ;
 
 expressionStatement : expression ';' { $$ = $1; }
+| error ';' %prec ERR_EXPR {
+        ast_node t = create_ast_node(ERROR_N);
+        t->value_string = "Invalid Expression";
+        fprintf(error_out, "PARSING ERROR:\tStatement on line %d Discarded due to an invalid expression\n", yylineno);
+        parseError++;
+        $$ = t; }
 | ';' { $$ = create_ast_node(NULL_N); $$->value_string = "empty expressionStatement"; }
 ;
 
@@ -221,12 +260,25 @@ ifStatement : IF_T '(' expression ')' statement   %prec LOWER_THAN_ELSE {
         t->left_child = $3;
         t->left_child->right_sibling = $5;
         $$ = t; }
+| IF_T '(' error ')' statement %prec ERR_IF {
+        ast_node t = create_ast_node(ERROR_N);
+        t->value_string = "Invalid If-Statement Condition";
+        fprintf(error_out, "PARSING ERROR:\tIf-Statement discarded due to invalid condition on line %d\n", yylineno); 
+        parseError++;
+       $$ = t; }
 | IF_T '(' expression ')' statement ELSE_T statement { 
         ast_node t = create_ast_node(IF_ELSE_N);
         t->left_child = $3;
         t->left_child->right_sibling = $5;
         t->left_child->right_sibling->right_sibling = $7;
         $$ = t; }
+| IF_T '(' error ')' statement ELSE_T statement %prec ERR_ELSE {
+        ast_node t = create_ast_node(ERROR_N);
+        t->value_string = "Invalid IF-Else Condition";
+        parseError++;
+        fprintf(error_out, "PARSING ERROR:\tIf-Else statement discarded due to invalid condition on line %d\n", yylineno); 
+        $$ = t; }
+
 ;
 
 whileStatement : WHILE_T '(' expression ')' statement {
@@ -234,12 +286,24 @@ whileStatement : WHILE_T '(' expression ')' statement {
         t->left_child = $3;
         t->left_child->right_sibling = $5;
         $$ = t; }
+| WHILE_T '(' error ')' statement %prec ERR_LOOP {
+        ast_node t = create_ast_node(ERROR_N);
+        t->value_string = "Invalid While-Loop Condition";
+        fprintf(error_out, "PARSING ERROR:\tWhile-Loop starting on line %d discarded due to invalid condition\n", yylineno); 
+        parseError++;
+        $$ = t; }
 ;
 
 doWhileStatement : DO_T statement WHILE_T '(' expression ')' ';' { 
         ast_node t = create_ast_node(DOWHILE_N);
         t->left_child = $5;
         t->left_child->right_sibling = $2;
+        $$ = t; }
+| DO_T statement WHILE_T '(' error ')' ';' %prec ERR_LOOP {
+        ast_node t = create_ast_node(ERROR_N);
+        t->value_string = "Invalid Do-While Loop Condition";
+        fprintf(error_out, "PARSING ERROR:\tDo-While loop discarded due to invalid condition on line %d\n", yylineno); 
+        parseError++;
         $$ = t; }
 ;
 
@@ -250,6 +314,13 @@ forStatement : FOR_T '(' forHeaderExpr ';' forHeaderExpr ';' forHeaderExpr ')' s
         t->left_child->right_sibling = $5;
         t->left_child->right_sibling->right_sibling = $7;
         t->left_child->right_sibling->right_sibling->right_sibling = $9;
+        $$ = t; }
+| FOR_T '(' error ')' statement %prec ERR_LOOP {
+        ast_node t = create_ast_node(ERROR_N);
+        t->value_string = "Malformed For-Loop Header";
+        fprintf(error_out, "PARSING ERROR:\tFor Loop Header discarded on line %d\n", yylineno); 
+        fprintf(error_out, "\t\tNote: All statements inside loop are discarded as well\n");
+        parseError++;
         $$ = t; }
 ;
 
@@ -265,12 +336,25 @@ returnStatement : RETURN_T ';' {
         ast_node t = create_ast_node(RETURN_N);
         t->left_child = $2;
         $$ = t; }
+| RETURN_T error ';' %prec ERR_RETURN {
+        ast_node t = create_ast_node(ERROR_N);
+        t->value_string = "Invalid Return Statement";
+        fprintf(error_out, "PARSING ERROR:\tInvalid Return Statement discarded on line %d\n", yylineno); 
+        parseError++;
+        $$ = t; }
 ;
 
 readStatement : READ_T var ';' { 
         ast_node t = create_ast_node(READ_N);
         t->left_child = $2;
         $$ = t; }
+| READ_T error %prec ERR_READ ';' {
+        ast_node t = create_ast_node(ERROR_N);
+        t->value_string = "Malformed Read Statement";
+        fprintf(error_out, "PARSING ERROR:\tMalformed Read Statement discarded on line %d\n", yylineno); 
+        parseError++;
+        $$ = t; }
+
 ;
 
 printStatement : PRINT_T expression ';' { 
@@ -281,6 +365,12 @@ printStatement : PRINT_T expression ';' {
         ast_node t = create_ast_node(PRINT_N);
         t->left_child = create_ast_node(STRING_LITERAL_N);
         t->left_child->value_string = strdup(savedLiteralText);
+        $$ = t; }
+| PRINT_T error %prec ERR_PRINT ';' {
+        ast_node t = create_ast_node(ERROR_N);
+        t->value_string = "Malformed Print Statement";
+        fprintf(error_out, "PARSING ERROR:\tMalformed Print Statement discarded on line %d\n", yylineno); 
+        parseError++;
         $$ = t; }
 ;
 
@@ -421,8 +511,10 @@ argList : argList ',' expression {
 
 %%
 
+/* 
+ * We do not use the function for error handling.
+ * we found it to be somewhat buggy and limited in terms of error handling.
+ */
 int yyerror(char *s) {
-  parseError = 1;
-  fprintf(stderr, "%s at line %d\n", s, yylineno);
   return 0;
 }

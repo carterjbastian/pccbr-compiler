@@ -1,0 +1,51 @@
+PARSING ERROR:	Invalid variable declaration discarded on line 39
+PARSING ERROR:	Statement on line 41 Discarded due to an invalid expression
+PARSING ERROR:	Malformed Print Statement discarded on line 42
+PARSING ERROR:	Malformed Read Statement discarded on line 43
+PARSING ERROR:	Invalid Return Statement discarded on line 45
+PARSING ERROR:	Statement on line 48 Discarded due to an invalid expression
+PARSING ERROR:	For Loop Header discarded on line 50
+		Note: All statements inside loop are discarded as well
+PARSING ERROR:	Do-While loop discarded due to invalid condition on line 58
+PARSING ERROR:	While-Loop starting on line 62 discarded due to invalid condition
+PARSING ERROR:	If-Statement discarded due to invalid condition on line 68
+PARSING ERROR:	If-Else statement discarded due to invalid condition on line 72
+| ROOT 
+| FUNCTION 
+| - COMPOUND 
+| - - ERROR_NODE 	Invalid Variable Declaration
+| - - ID cat
+| - - ERROR_NODE 	Invalid Expression
+| - - ERROR_NODE 	Malformed Print Statement
+| - - ERROR_NODE 	Malformed Read Statement
+| - - ERROR_NODE 	Invalid Return Statement
+| - - ERROR_NODE 	Malformed For-Loop Header
+| - - FOR_STMT 
+| - - - = 
+| - - - - ID cat
+| - - - - INT_LITERAL 0
+| - - - < 
+| - - - - ID cat
+| - - - - INT_LITERAL 5
+| - - - ++ 
+| - - - - ID cat
+| - - - COMPOUND 
+| - - - - PRINT_STMT 
+| - - - - - STRING_LITERAL "In loop\n"
+| - - ERROR_NODE 	Invalid Do-While Loop Condition
+| - - ERROR_NODE 	Invalid While-Loop Condition
+| - - ERROR_NODE 	Invalid If-Statement Condition
+| - - ERROR_NODE 	Invalid IF-Else Condition
+| - - IF_STMT 
+| - - - ID a
+| - - - COMPOUND 
+| - - - - PRINT_STMT 
+| - - - - - STRING_LITERAL "This still works"
+| - - - - READ_STMT 
+| - - - - - ID cat
+| - - FUNC_CALL foo
+| - - - EMPTY_NODE 	empty arguments
+| - - RETURN_STMT 
+| - - - INT_LITERAL 0
+| - PARAMETER a
+| - ARRAY_PARAMETER b
