@@ -1,0 +1,54 @@
+| ROOT 
+| FUNCTION 
+| - COMPOUND 
+| - - RETURN_STMT 
+| - - - ID a
+| - PARAMETER a
+| - PARAMETER b
+| - PARAMETER c
+| - PARAMETER d
+| FUNCTION 
+| - COMPOUND 
+| - - PRINT_STMT 
+| - - - ID scared
+| - PARAMETER scared
+| FUNCTION 
+| - COMPOUND 
+| - - RETURN_STMT 
+| - - - INT_LITERAL 5
+| - EMPTY_NODE 	no_formal_params
+| FUNCTION 
+| - COMPOUND 
+| - - RETURN_STMT 
+| - - - INT_LITERAL 6
+| - EMPTY_NODE 	void_formal_params
+| FUNCTION 
+| - COMPOUND 
+| - - PRINT_STMT 
+| - - - STRING_LITERAL "Also"
+| - EMPTY_NODE 	void_formal_params
+| FUNCTION 
+| - COMPOUND 
+| - - PRINT_STMT 
+| - - - STRING_LITERAL "Lou"
+| - EMPTY_NODE 	no_formal_params
+| FUNCTION 
+| - COMPOUND 
+| - - FUNC_CALL foo
+| - - - INT_LITERAL 1
+| - - - INT_LITERAL 2
+| - - - INT_LITERAL 3
+| - - - INT_LITERAL 4
+| - - FUNC_CALL boo
+| - - - INT_LITERAL 5
+| - - FUNC_CALL zoo
+| - - - EMPTY_NODE 	empty arguments
+| - - FUNC_CALL noo
+| - - - EMPTY_NODE 	empty arguments
+| - - FUNC_CALL too
+| - - - EMPTY_NODE 	empty arguments
+| - - FUNC_CALL loo
+| - - - EMPTY_NODE 	empty arguments
+| - - RETURN_STMT 
+| - - - INT_LITERAL 0
+| - EMPTY_NODE 	void_formal_params

@@ -1,0 +1,36 @@
+| ROOT 
+| FUNCTION 
+| - COMPOUND 
+| - - = 
+| - - - ID x
+| - - - INT_LITERAL 1
+| - - IF_ELSE_STMT 
+| - - - == 
+| - - - - ID x
+| - - - - INT_LITERAL 1
+| - - - COMPOUND 
+| - - - - PRINT_STMT 
+| - - - - - STRING_LITERAL "True"
+| - - - COMPOUND 
+| - - - - PRINT_STMT 
+| - - - - - STRING_LITERAL "False"
+| - - IF_STMT 
+| - - - && 
+| - - - - == 
+| - - - - - ID y
+| - - - - - INT_LITERAL 2
+| - - - - == 
+| - - - - - ID z
+| - - - - - INT_LITERAL 3
+| - - - COMPOUND 
+| - - - - PRINT_STMT 
+| - - - - - STRING_LITERAL "True"
+| - - IF_STMT 
+| - - - != 
+| - - - - ID z
+| - - - - INT_LITERAL 3
+| - - - PRINT_STMT 
+| - - - - ID x
+| - - RETURN_STMT 
+| - - - INT_LITERAL 0
+| - EMPTY_NODE 	void_formal_params
