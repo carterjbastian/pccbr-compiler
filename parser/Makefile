@@ -3,7 +3,7 @@ CFLAGS = -g
 BISONFL = -d -v
 FLEXFLAGS = -ll
 
-.PHONY: clean parser1 parser2a parser2b parser2c parser3 parser4 parser4bad parser5
+.PHONY: clean 
 
 .SUFFIXES: .c
 
@@ -34,46 +34,6 @@ parser.tab.c : parser.y
 
 ast_main.o : ast_main.c
 	$(CC) -c $(CFLAGS) $<
-
-parser1:
-	cp -f parser.1.l parser.l
-	cp -f parser.1.y parser.y
-	make parser
-
-parser2a:
-	cp -f parser.2.l parser.l
-	cp -f parser.2a.y parser.y
-	make parser
-
-parser2b:
-	cp -f parser.2.l parser.l
-	cp -f parser.2b.y parser.y
-	make parser
-
-parser2c:
-	cp -f parser.2.l parser.l
-	cp -f parser.2c.y parser.y
-	make parser
-
-parser3:
-	cp -f parser.2.l parser.l
-	cp -f parser.3.y parser.y
-	make parser
-
-parser4:
-	cp -f parser.2.l parser.l
-	cp -f parser.4.y parser.y
-	make parser
-
-parser4bad:
-	cp -f parser.2.l parser.l
-	cp -f parser.4.bad.y parser.y
-	make parser
-
-parser5:
-	cp -f parser.5.l parser.l
-	cp -f parser.5.y parser.y
-	make parser
 
 clean :
 	rm -f parser lex.yy.o parser.tab.o ast_main.o ast.o \
