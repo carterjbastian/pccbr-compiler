@@ -77,7 +77,7 @@ parser5:
 
 clean :
 	rm -f parser lex.yy.o parser.tab.o ast_main.o ast.o \
-	parser.tab.h parser.tab.c lex.yy.c *~ parser.output testing
+	parser.tab.h parser.tab.c lex.yy.c *~ parser.output test
 
 
 depend :

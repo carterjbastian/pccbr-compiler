@@ -72,7 +72,46 @@ ERROR REPORTING AND RECOVERY:
   the corresponding error node is not included in the tree.
 
 USAGE:
+  To parse a file "example.c", use the following chain of commands from the 
+  source directory:
+    
+    make; ./parser < example.c
 
 AUTOMATED TESTING:
+  Conditional compilation was used to automate the testing process.
+
+  Note that all test files must be in the testfiles/ directory, and the output
+  AST for each respective file will be placed in the output/ directory.
+
+  Also note that, to add additional tests, one must modify the header file
+  testfiles/autoTest.h (while following the notes and instructions in the
+  inline documentation).
+
+  To run the test suite, use the following commands from the source directory:
+
+    make test; ./test
+
+  Notice also that the dangling else construction is tested with the file
+  testfiles/danglingElse.c but that this is not tested by default in the auto
+  testing since it fails to build an AST at all. To test this, run the command:
+  
+    make; ./parser < testfiles/danglingElse.c
+
 
 TESTS (FILES):
+  Below is a list of test files used which comprises those in our test suite:
+
+  forLoop.c     - Displays the capability to parse a simple for loop
+  loops.c       - Displays nested-loop functionality and all types of supported 
+                  loops
+  generalTest.c - Displays most of the functionalities of the C programming
+                  language with general purpose testing
+  expressions.c - Displays the parser's ability to work with complex expressions
+  controlFlow.c - Displays the parser's if-else and if capabilities
+  functions.c   - Displays the parser's ability to handle functions of different
+                  types and numbers of parameters (as well as respective calls)
+  errTest.c     - Displays all error report and recovery functionality
+
+  danglingElse.c is a non-parsing file that shows that dangling else 
+    constructions fail.
+  

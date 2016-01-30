@@ -1,0 +1,63 @@
+| ROOT 
+| FUNCTION 
+| - COMPOUND 
+| - - ID a
+| - - = 
+| - - - ID a
+| - - - - 
+| - - - - + 
+| - - - - - * 
+| - - - - - - % 
+| - - - - - - - INT_LITERAL 5
+| - - - - - - - INT_LITERAL 4
+| - - - - - - INT_LITERAL 3
+| - - - - - INT_LITERAL 7
+| - - - - / 
+| - - - - - INT_LITERAL 2
+| - - - - - INT_LITERAL 1
+| - - = 
+| - - - ID c
+| - - - INT_LITERAL 3
+| - - = 
+| - - - ID b
+| - - - || 
+| - - - - || 
+| - - - - - && 
+| - - - - - - < 
+| - - - - - - - ID a
+| - - - - - - - INT_LITERAL 5
+| - - - - - - == 
+| - - - - - - - ID c
+| - - - - - - - INT_LITERAL 3
+| - - - - - && 
+| - - - - - - > 
+| - - - - - - - ID c
+| - - - - - - - INT_LITERAL 2
+| - - - - - - <= 
+| - - - - - - - ID a
+| - - - - - - - INT_LITERAL 9
+| - - - - && 
+| - - - - - != 
+| - - - - - - ID c
+| - - - - - - INT_LITERAL 3
+| - - - - - ! 
+| - - - - - - >= 
+| - - - - - - - ID a
+| - - - - - - - INT_LITERAL 2
+| - - = 
+| - - - ID d
+| - - - U- 
+| - - - - + 
+| - - - - - ID b
+| - - - - - * 
+| - - - - - - INT_LITERAL 7
+| - - - - - - INT_LITERAL 9
+| - - RETURN_STMT 
+| - - - - 
+| - - - - + 
+| - - - - - ID a
+| - - - - - ID b
+| - - - - * 
+| - - - - - ID c
+| - - - - - ID d
+| - EMPTY_NODE 	void_formal_params

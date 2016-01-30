@@ -10,7 +10,7 @@
 #ifndef _AUTOTEST_H_
 #define _AUTOTEST_H_
 
-#define TEST_COUNT 4
+#define TEST_COUNT 7
 #define FILE_NAME_LEN 50
 
 #define TEST_EXT ".c"
@@ -29,6 +29,9 @@ static char* test_names[] = {
   "forLoop",
   "loops",
   "generalTest",
+  "expressions",
+  "controlFlow",
+  "functions",
   "errTest"
 };
 
