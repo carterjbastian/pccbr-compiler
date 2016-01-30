@@ -10,8 +10,8 @@ FLEXFLAGS = -ll
 .cc.o:
 	$(CC) $(CFLAGS) -c $<
 
-parser : lex.yy.o parser.tab.o ast.o ast_main.o
-	$(CC) -o $@ $(CFLAGS) lex.yy.o parser.tab.o ast.o ast_main.o $(FLEXFLAGS)
+symtab : lex.yy.o parser.tab.o ast.o symtab.o ast_main.o
+	$(CC) -o $@ $(CFLAGS) lex.yy.o parser.tab.o ast.o symtab.o ast_main.o $(FLEXFLAGS)
 
 test : lex.yy.o parser.tab.o ast.o ast_main.o
 	$(CC) -c $(CFLAGS) -D _TESTING_ ast_main.c
@@ -35,45 +35,8 @@ parser.tab.c : parser.y
 ast_main.o : ast_main.c
 	$(CC) -c $(CFLAGS) $<
 
-parser1:
-	cp -f parser.1.l parser.l
-	cp -f parser.1.y parser.y
-	make parser
-
-parser2a:
-	cp -f parser.2.l parser.l
-	cp -f parser.2a.y parser.y
-	make parser
-
-parser2b:
-	cp -f parser.2.l parser.l
-	cp -f parser.2b.y parser.y
-	make parser
-
-parser2c:
-	cp -f parser.2.l parser.l
-	cp -f parser.2c.y parser.y
-	make parser
-
-parser3:
-	cp -f parser.2.l parser.l
-	cp -f parser.3.y parser.y
-	make parser
-
-parser4:
-	cp -f parser.2.l parser.l
-	cp -f parser.4.y parser.y
-	make parser
-
-parser4bad:
-	cp -f parser.2.l parser.l
-	cp -f parser.4.bad.y parser.y
-	make parser
-
-parser5:
-	cp -f parser.5.l parser.l
-	cp -f parser.5.y parser.y
-	make parser
+symtab.o : symtab.c symtab.h
+	$(CC) -c $(CFLAGS) symtab.c
 
 clean :
 	rm -f parser lex.yy.o parser.tab.o ast_main.o ast.o \

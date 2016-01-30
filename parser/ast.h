@@ -15,6 +15,7 @@
 #ifndef AST_H_
 #define AST_H_
 
+#include <stdio.h>
 /* 
  * The full enumeration of types of nodes in an Abstract Syntax Tree.
  */
