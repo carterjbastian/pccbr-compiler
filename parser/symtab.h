@@ -17,8 +17,12 @@
 
 
 /*
- * The full enumeration of types of lbles in the C subset
+ * ================================================= 
+ * Data Structures for Types in Lookup Tables
+ * =================================================
  */
+
+/* The full enumeration of types of lbles in the C subset */
 typedef enum { INT_LT, 
                FUNC_INT_LT,
                FUNC_VOID_LT,
@@ -34,19 +38,35 @@ typedef struct {
  * NOTE: These must be in the same order as the enumerated values in
  * the var_lookup_type
  */
+static type_name_pair lt_table[] = {
+  { INT_LT, "INTEGER" },
+  { FUNC_INT_LT, "FUNCTION_RETURNING_INTEGER" },
+  { FUNC_VOID_LT, "FUNCTION_RETURNING_VOID" },
+  { ERROR_LT, "VARIABLE_WITH_INVALID_DECLARATION" },
+  { 0, NULL }
+};
 
+#define LT_INDEX(X)     ( (X) - INT_LT )
+#define LT_NAME(X)      ( lt_table[ LT_INDEX((X)) ].name )
+
+
+/*
+ * =================================================
+ * Data Types for symnode, symhashtable, and symboltable 
+ * =================================================
+ */
 typedef struct symnode {
   char *name;	                    /* name in this symnode */
   struct symnode  *next;	    /* next symnode in list */
   struct symhashtable *parent;
+  var_lookup_type type;             /* The type of the symbol */
+  /* 
+   * If the node is a function, point to it's generic function
+   * table
+   */
+  symhashtable *generic_func_table; 
   /* Other attributes go here. */
 } symnode_t;
-
-/* Set the name in this node. */
-void set_node_name(symnode_t *node, char *name);
-
-/* Does the identifier in this node equal name? */
-int name_is_equal(symnode_t *node, char *name);
 
 
 /* Hash table for a given scope in a symbol table. */
@@ -69,9 +89,34 @@ typedef struct {
     
 } symboltable_t;
 
+
+
+/* 
+ * =================================================
+ * symnode function prototypes
+ * =================================================
+ */
+
+/* Set the name in this node. */
+void set_node_name(symnode_t *node, char *name);
+
+/* Does the identifier in this node equal name? */
+int name_is_equal(symnode_t *node, char *name);
+
+/*
+ * =================================================
+ * symhashtable function prototypes
+ * =================================================
+ */
+
+/*
+ * =================================================
+ * symboltable function prototypes
+ * =================================================
+ */
+
 /* Create an empty symbol table. */
 symboltable_t *create_symboltable();
-
 
 /* Insert an entry into the innermost scope of symbol table.  First
    make sure it's not already in that scope.  Return a pointer to the
@@ -81,6 +126,7 @@ symnode_t *insert_into_symboltable(symboltable_t *symtab, char *name);
 /* Lookup an entry in a symbol table.  If found return a pointer to it.
    Otherwise, return NULL */
 symnode_t *lookup_in_symboltable(symboltable_t *symtab, char *name);
+
 
 /* Enter a new scope. */
 void enter_scope(symboltable_t *symtab, int type, ast_node node);
