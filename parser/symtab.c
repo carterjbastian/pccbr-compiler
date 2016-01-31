@@ -213,7 +213,7 @@ symnode_t *lookup_in_symboltable(symboltable_t  *symtab, char *name) {
  * Creates a new symhashtable at the next level and appropriate place.
  *
  */
-void enter_scope(symboltable_t *symtab, int type, ast_node node) {
+void enter_scope(symboltable_t *symtab) {
   assert(symtab);
   assert(symtab->leaf);
 
