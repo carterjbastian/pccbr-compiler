@@ -36,8 +36,15 @@ extern int yylineno;
 
 extern char savedIDText[];
 extern char savedLiteralText[];
+char savedFuncText[MAXTOKENLENGTH];
 
 %}
+
+%code requires {
+  #include "ast.h"
+  #define YYSTYPE ast_node
+}
+
 /* Declarations of all of the used tokens returned from the lexer */
 %token ID_T INTCONST_T STRINGCONST_T ISEQUAL_T NOTEQUAL_T LT_EQUAL_T
 %token GT_EQUAL_T INCREMENT_T DECREMENT_T AND_T OR_T INT_T VOID_T
@@ -145,7 +152,7 @@ funcDeclaration : INT_T ID_T '(' formalParams ')' compoundStatement %prec FUNC_D
         ast_node t = create_ast_node(FUNC_N);
         t->value_int = 1; // For int
         // POTENTIAL BUG: This saves ID of last id in compoundStatement, not Func name
-        t->value_string = strdup(savedIDText); 
+        t->value_string = $2->value_string;
         
         t->left_child = $6;
         t->left_child->right_sibling = $4;
