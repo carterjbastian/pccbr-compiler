@@ -116,11 +116,11 @@ varDeclaration : INT_T varDeclarationList ';' %prec NON_FUNC_DEC { $$ = $2; }
 ;
 
 varDeclarationList : varDeclarationList ',' varDec { 
-        ast_node t = $3;
+        ast_node t = $1;
         if (t != NULL) {
           while(t->right_sibling != NULL)
             t = t->right_sibling;
-          t->right_sibling = $2; 
+          t->right_sibling = $3; 
           $$ = $1; 
         } else {
           $$ = $3;

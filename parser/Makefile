@@ -47,7 +47,7 @@ symtab.o : symtab.c symtab.h
 clean :
 	rm -f parser lex.yy.o parser.tab.o tree_main.o ast.o \
 	parser.tab.h parser.tab.c lex.yy.c *~ parser.output test \
-    	symtab.o symtab
+    	symtab.o symtab *.o parse
 
 depend :
 	makedepend -- $(CFLAGS) -- ast_main.c
