@@ -14,6 +14,9 @@
 #include "symtab.h"
 
 #define NOHASHSLOT -1
+#define NAME_DEPTH 85
+
+int levels[NAME_DEPTH] = { 0, 0 };
 
 /*
  * Local function declarations
@@ -208,6 +211,24 @@ symnode_t *lookup_in_symboltable(symboltable_t  *symtab, char *name) {
 }
 
 
+/*
+ * Create the name for a scope based on the current state of the levels aray
+ */
+
+static char *create_name() {
+    char *name = malloc(3 * NAME_DEPTH);
+    char *next_dig = malloc(5);
+
+    sprintf(name, "%d", levels[0]);
+
+    for (int i = 1; levels[i] != 0 && i < NAME_DEPTH ; i++) {
+        sprintf(next_dig, "-%d", levels[i]);
+        strncat(name, next_dig, 5);
+    }
+
+    return name;
+}
+
 /* 
  * Enter a new scope. 
  * Creates a new symhashtable at the next level and appropriate place.
@@ -223,8 +244,10 @@ void enter_scope(symboltable_t *symtab) {
 
   int sibno = 0;
 
+  levels[curr->level]++;
+
   // Set up the symhashtable with the correct basic values
-  next->name = "Fred"; // WRITE THE NAMING PROTOCOL
+  next->name = create_name(); // WRITE THE NAMING PROTOCOL
   next->level = curr->level + 1;
 
   // Create a new symhashtable at the right place
@@ -258,6 +281,7 @@ void enter_scope(symboltable_t *symtab) {
 
 /* Leave a scope. */
 void leave_scope(symboltable_t *symtab) {
+  levels[symtab->leaf->level] = 0;
   symtab->leaf = symtab->leaf->parent;
 }
 
