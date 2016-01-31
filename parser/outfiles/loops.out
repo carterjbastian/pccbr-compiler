@@ -1,5 +1,5 @@
 | ROOT 
-| FUNCTION 
+| FUNCTION main
 | - COMPOUND 
 | - - ID i
 | - - FOR_STMT 

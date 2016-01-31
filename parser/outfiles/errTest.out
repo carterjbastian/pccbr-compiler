@@ -11,7 +11,7 @@ PARSING ERROR:	While-Loop starting on line 133 discarded due to invalid conditio
 PARSING ERROR:	If-Statement discarded due to invalid condition on line 139
 PARSING ERROR:	If-Else statement discarded due to invalid condition on line 143
 | ROOT 
-| FUNCTION 
+| FUNCTION main
 | - COMPOUND 
 | - - ERROR_NODE 	Invalid Variable Declaration
 | - - ID cat
