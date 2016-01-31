@@ -71,6 +71,9 @@ symboltable_t *build_symboltable(symboltable_t *table, ast_node root, ast_node c
           insert_into_symboltable(table, type, child->value_string);
           build_symboltable(table, root, child);
         // Node is other => recurse
+        } else if (child->node_type == ERROR_N && 
+            (strcmp(child->value_string, "Invalid Variable Declaration")) == 0) { 
+          insert_into_symboltable(table, ERROR_LT, child->value_string);
         } else {
           build_symboltable(table, root, child);
         }
@@ -83,23 +86,32 @@ symboltable_t *build_symboltable(symboltable_t *table, ast_node root, ast_node c
       enter_scope(table);
 
       // Loop through declarations, adding them to the current level's table
+      // This is the nastiest for-loop I've ever written. But it has to happen
       for (child = curr->left_child; 
-          child->node_type == OP_ASSIGN_N || child->node_type == ID_N; 
+          // This is the nasty conditional on the for-loop:  
+          child != NULL &&                      // Child is not null
+            (child->node_type == OP_ASSIGN_N || // Child may be a declaration
+            child->node_type == ID_N ||
+            (child->node_type == ERROR_N && 
+              (strcmp(child->value_string, "Invalid Variable Declaration") == 0)));
           child = child->right_sibling) {
+        
         if (child->node_type == OP_ASSIGN_N) {
           insert_into_symboltable(table, INT_LT, child->left_child->value_string);
-        } else { // Child's node type is ID_N
+        } else if (child->node_type == ID_N) { 
           if (child->left_child == NULL) // Not an array
             insert_into_symboltable(table, INT_LT, child->value_string);
           else
             insert_into_symboltable(table, INT_ARRAY_LT, child->value_string);
+        } else {  // Node is an error
+          insert_into_symboltable(table, ERROR_LT, child->value_string);
         }
       }
       // Loop through remaining children, recursing on them
       // Child is already set to the first non-declaration item
       for ( ; child != NULL; child = child->right_sibling)
         build_symboltable(table, root, child);
-
+      
       break;
 
 
