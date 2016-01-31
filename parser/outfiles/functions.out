@@ -7,7 +7,7 @@
 | - PARAMETER b
 | - PARAMETER c
 | - PARAMETER d
-| FUNCTION scared
+| FUNCTION boo
 | - COMPOUND 
 | - - PRINT_STMT 
 | - - - ID scared
@@ -22,12 +22,12 @@
 | - - RETURN_STMT 
 | - - - INT_LITERAL 6
 | - EMPTY_NODE 	void_formal_params
-| FUNCTION print
+| FUNCTION too
 | - COMPOUND 
 | - - PRINT_STMT 
 | - - - STRING_LITERAL "Also"
 | - EMPTY_NODE 	void_formal_params
-| FUNCTION print
+| FUNCTION loo
 | - COMPOUND 
 | - - PRINT_STMT 
 | - - - STRING_LITERAL "Lou"

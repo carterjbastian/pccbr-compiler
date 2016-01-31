@@ -10,7 +10,10 @@ FLEXFLAGS = -ll
 .cc.o:
 	$(CC) $(CFLAGS) -c $<
 
-symtab : lex.yy.o parser.tab.o ast.o symtab.o ast_main.o
+symtab : lex.yy.o parser.tab.o ast.o symtab.o symbols_main.o
+	$(CC) -ggdb -o $@ $(CFLAGS) lex.yy.o parser.tab.o ast.o symtab.o symbols_main.o $(FLEXFLAGS)
+
+parse : lex.yy.o parser.tab.o ast.o symtab.o ast_main.o
 	$(CC) -o $@ $(CFLAGS) lex.yy.o parser.tab.o ast.o symtab.o ast_main.o $(FLEXFLAGS)
 
 test : lex.yy.o parser.tab.o ast.o ast_main.o
@@ -35,13 +38,16 @@ parser.tab.c : parser.y
 ast_main.o : ast_main.c
 	$(CC) -c $(CFLAGS) $<
 
+symbols_main.o : symbols_main.c
+	$(CC) -c $(CFLAGS) symbols_main.c
+
 symtab.o : symtab.c symtab.h
 	$(CC) -c $(CFLAGS) symtab.c
 
 clean :
 	rm -f parser lex.yy.o parser.tab.o tree_main.o ast.o \
 	parser.tab.h parser.tab.c lex.yy.c *~ parser.output test \
-    	symtab.o
+    	symtab.o symtab
 
 depend :
 	makedepend -- $(CFLAGS) -- ast_main.c

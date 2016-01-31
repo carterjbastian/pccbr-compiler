@@ -1,15 +1,15 @@
-PARSING ERROR:	Invalid variable declaration discarded on line 110
-PARSING ERROR:	Statement on line 112 Discarded due to an invalid expression
-PARSING ERROR:	Malformed Print Statement discarded on line 113
-PARSING ERROR:	Malformed Read Statement discarded on line 114
-PARSING ERROR:	Invalid Return Statement discarded on line 116
-PARSING ERROR:	Statement on line 119 Discarded due to an invalid expression
-PARSING ERROR:	For Loop Header discarded on line 121
+PARSING ERROR:	Invalid variable declaration discarded on line 115
+PARSING ERROR:	Statement on line 117 Discarded due to an invalid expression
+PARSING ERROR:	Malformed Print Statement discarded on line 118
+PARSING ERROR:	Malformed Read Statement discarded on line 119
+PARSING ERROR:	Invalid Return Statement discarded on line 121
+PARSING ERROR:	Statement on line 124 Discarded due to an invalid expression
+PARSING ERROR:	For Loop Header discarded on line 126
 		Note: All statements inside loop are discarded as well
-PARSING ERROR:	Do-While loop discarded due to invalid condition on line 129
-PARSING ERROR:	While-Loop starting on line 133 discarded due to invalid condition
-PARSING ERROR:	If-Statement discarded due to invalid condition on line 139
-PARSING ERROR:	If-Else statement discarded due to invalid condition on line 143
+PARSING ERROR:	Do-While loop discarded due to invalid condition on line 134
+PARSING ERROR:	While-Loop starting on line 138 discarded due to invalid condition
+PARSING ERROR:	If-Statement discarded due to invalid condition on line 144
+PARSING ERROR:	If-Else statement discarded due to invalid condition on line 148
 | ROOT 
 | FUNCTION main
 | - COMPOUND 

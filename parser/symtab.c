@@ -54,7 +54,7 @@ int name_is_equal(symnode_t *node, char *name) {
 /* Create an empty symhashtable and return a pointer to it.  The
    parameter entries gives the initial size of the table. */
 symhashtable_t *create_symhashtable(int entries) {
-  symhashtable_t *hashtable = malloc(sizeof(symhashtable_t));
+  symhashtable_t *hashtable = calloc(1, sizeof(symhashtable_t));
   assert(hashtable);
   hashtable->size = entries;
   hashtable->table = calloc(entries, sizeof(symnode_t *));
@@ -145,7 +145,7 @@ static const int HASHSIZE = 211;
 
 /* Create an empty symbol table. */
 symboltable_t  *create_symboltable() {
-  symboltable_t *symtab = malloc(sizeof(symboltable_t));
+  symboltable_t *symtab = calloc(1, sizeof(symboltable_t));
   assert(symtab);
 
   symhashtable_t *hashtable=create_symhashtable(HASHSIZE);
@@ -272,7 +272,6 @@ void print_symtab(symboltable_t *symtab) {
 void recursive_print_symtab(symhashtable_t *symhash, int offset) {
   symhashtable_t *curr;
   print_symhashtable(symhash, offset);
-
   // Are there children to recurse on?
   if (symhash->child) {
     // Then just do it already
@@ -290,10 +289,20 @@ void print_symhashtable(symhashtable_t *symhash, int offset) {
   int max = symhash->size;
   symnode_t *curr;
 
+  printf("| ");
+  for (int i = 0; i < offset; i++)
+    printf("- ");
+  printf("Scope %s\toffset = %d\n", symhash->name, offset);
+
+  printf("| ");
+  for (int i = 0; i < offset; i++)
+    printf("- ");
+  printf("Variables:\n");
   // Loop through each bucket
   for (int i = 0; i < max; i++) {
     // Is the bucket empty?
-    if (symhash->table[i]) {
+    if (symhash->table[i] != NULL) {
+      // printf("Found a non-empty bucket!\n");
       curr = symhash->table[i];
       print_symnode(curr, offset);
 
@@ -304,11 +313,13 @@ void print_symhashtable(symhashtable_t *symhash, int offset) {
       }
     }
   }
+  printf("\n");
 }
 
 void print_symnode(symnode_t *node, int offset) {
+  printf("| ");
   for (int i = 0; i < offset; i++)
     printf("- ");
 
-  printf("%s\tType: %s", node->name, LT_NAME(node->type));
+  printf("%s\tType: %s\n", node->name, LT_NAME(node->type));
 }

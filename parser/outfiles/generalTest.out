@@ -1,6 +1,11 @@
 | ROOT 
-| FUNCTION print
+| = 
+| - ID cat
+| - INT_LITERAL 6
+| ID dog
+| FUNCTION hello_world
 | - COMPOUND 
+| - - ID i
 | - - PRINT_STMT 
 | - - - STRING_LITERAL "Hello world\n"
 | - - PRINT_STMT 
@@ -10,6 +15,8 @@
 | - EMPTY_NODE 	void_formal_params
 | FUNCTION main
 | - COMPOUND 
+| - - ID l
+| - - - INT_LITERAL 5
 | - - = 
 | - - - ID x
 | - - - INT_LITERAL 5

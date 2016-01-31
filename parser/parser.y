@@ -142,7 +142,8 @@ varDec : ID_T {
         $$ = a; }
 | ID_T '[' INTCONST_T ']' {
         ast_node t = create_ast_node(ID_N);
-        t->value_string = savedIDText;
+        //t->value_string = savedIDText;
+        t->value_string = $1->value_string;
         t->left_child = create_ast_node(INT_LITERAL_N);
         t->left_child->value_int = atoi(savedLiteralText);
         $$ = t; }
@@ -161,7 +162,7 @@ funcDeclaration : INT_T ID_T '(' formalParams ')' compoundStatement %prec FUNC_D
 | VOID_T ID_T '(' formalParams ')' compoundStatement {
         ast_node t = create_ast_node(FUNC_N);
         t->value_int = 0; // For void
-        t->value_string = strdup(savedIDText);
+        t->value_string = $2->value_string;
         
         t->left_child = $6;
         t->left_child->right_sibling = $4;
@@ -195,6 +196,7 @@ formalParam : INT_T ID_T {
 | INT_T ID_T '[' ']' { 
         ast_node t = create_ast_node(ARRAY_PARAM_N);
         t->value_string = strdup(savedIDText);
+        //t->value_string = $2->value_string;
         $$ = t; }
 ;
 

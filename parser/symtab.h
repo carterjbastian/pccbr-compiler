@@ -23,7 +23,8 @@
  */
 
 /* The full enumeration of types of lbles in the C subset */
-typedef enum { INT_LT, 
+typedef enum { INT_LT,
+               INT_ARRAY_LT,
                FUNC_INT_LT,
                FUNC_VOID_LT,
                ERROR_LT} var_lookup_type;
@@ -40,6 +41,7 @@ typedef struct {
  */
 static type_name_pair lt_table[] = {
   { INT_LT, "INTEGER" },
+  { INT_ARRAY_LT, "ARRAY_OF_INTEGERS" },
   { FUNC_INT_LT, "FUNCTION_RETURNING_INTEGER" },
   { FUNC_VOID_LT, "FUNCTION_RETURNING_VOID" },
   { ERROR_LT, "VARIABLE_WITH_INVALID_DECLARATION" },
