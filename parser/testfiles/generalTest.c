@@ -5,6 +5,7 @@ void hello_world(void) {
 }
 
 int main(int a, int b, int c) {
+  int cat1, cat2 = 5;
   int x = 5;
   int y = 6;
   int z = 7;

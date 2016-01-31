@@ -10,6 +10,10 @@
 | - EMPTY_NODE 	void_formal_params
 | FUNCTION main
 | - COMPOUND 
+| - - ID cat1
+| - - = 
+| - - - ID cat2
+| - - - INT_LITERAL 5
 | - - = 
 | - - - ID x
 | - - - INT_LITERAL 5
