@@ -16,13 +16,14 @@
 #include "parser.tab.h"   // The output of running bison on our parser
 
 int lexLookup(char *);
-
+int funcTypeRead = 0;
+int funcNameRead = 0;
 /* I want to be like Cormen when I grow up */
 #define MAXTOKENLENGTH 201
 
 char savedIDText[MAXTOKENLENGTH];
 char savedLiteralText[MAXTOKENLENGTH];
-
+char savedFuncText[MAXTOKENLENGTH];
 %}
 
 white [ \t\n]+

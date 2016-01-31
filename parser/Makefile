@@ -10,8 +10,8 @@ FLEXFLAGS = -ll
 .cc.o:
 	$(CC) $(CFLAGS) -c $<
 
-parser : lex.yy.o parser.tab.o ast.o symtab.o tree_main.o
-	$(CC) -o $@ $(CFLAGS) lex.yy.o parser.tab.o ast.o symtab.o tree_main.o $(FLEXFLAGS)
+symtab : lex.yy.o parser.tab.o ast.o symtab.o ast_main.o
+	$(CC) -o $@ $(CFLAGS) lex.yy.o parser.tab.o ast.o symtab.o ast_main.o $(FLEXFLAGS)
 
 test : lex.yy.o parser.tab.o ast.o ast_main.o
 	$(CC) -c $(CFLAGS) -D _TESTING_ ast_main.c
@@ -34,6 +34,9 @@ parser.tab.c : parser.y
 
 ast_main.o : ast_main.c
 	$(CC) -c $(CFLAGS) $<
+
+symtab.o : symtab.c symtab.h
+	$(CC) -c $(CFLAGS) symtab.c
 
 clean :
 	rm -f parser lex.yy.o parser.tab.o tree_main.o ast.o \
