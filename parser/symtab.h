@@ -64,7 +64,7 @@ typedef struct symnode {
    * If the node is a function, point to it's generic function
    * table
    */
-  symhashtable *generic_func_table; 
+  struct symhashtable *generic_func_table; 
   /* Other attributes go here. */
 } symnode_t;
 
@@ -97,8 +97,8 @@ typedef struct {
  * =================================================
  */
 
-/* Set the name in this node. */
-void set_node_name(symnode_t *node, char *name);
+/* Create and return an empty symnode */
+symnode_t *create_symnode(char * name, var_lookup_type type, symhashtable_t *parent);
 
 /* Does the identifier in this node equal name? */
 int name_is_equal(symnode_t *node, char *name);
@@ -121,7 +121,7 @@ symboltable_t *create_symboltable();
 /* Insert an entry into the innermost scope of symbol table.  First
    make sure it's not already in that scope.  Return a pointer to the
    entry. */
-symnode_t *insert_into_symboltable(symboltable_t *symtab, char *name);
+symnode_t *insert_into_symboltable(symboltable_t *symtab, var_lookup_type type, char *name);
 
 /* Lookup an entry in a symbol table.  If found return a pointer to it.
    Otherwise, return NULL */
@@ -129,7 +129,8 @@ symnode_t *lookup_in_symboltable(symboltable_t *symtab, char *name);
 
 
 /* Enter a new scope. */
-void enter_scope(symboltable_t *symtab, int type, ast_node node);
+//void enter_scope(symboltable_t *symtab, int type, ast_node node);
+void enter_scope(symboltable_t *symtab);
 
 /* Leave a scope. */
 void leave_scope(symboltable_t *symtab);

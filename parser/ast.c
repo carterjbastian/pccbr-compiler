@@ -64,6 +64,10 @@ void print_ast(FILE *fp, ast_node root, int depth) {
     fprintf(fp, "%s", root->value_string);
     break;
 
+  case FUNC_N:
+    fprintf(fp, "%s", root->value_string);
+    break;
+
   case INT_LITERAL_N:		/* print the int literal */
     fprintf(fp, "%d", root->value_int);
     break;
