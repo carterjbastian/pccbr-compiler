@@ -8,7 +8,6 @@ white [ \t\n]+
 letter [A-Za-z]
 digit [0-9]
 id ({letter}|_)({letter}|{digit}|_)*
-bad_id {digit}({letter}|{digit}|_)*
 integer {digit}+
 signedint [-]?{integer}
 
@@ -74,7 +73,6 @@ signedint [-]?{integer}
 "%"          return '%';
 "!"          return '!';
 
-{bad_id}     return BAD_ID_T;
 <<EOF>>      return EOF_T;
 .            return OTHER_T;
 

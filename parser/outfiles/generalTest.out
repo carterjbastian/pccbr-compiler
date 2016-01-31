@@ -1,5 +1,5 @@
 | ROOT 
-| FUNCTION 
+| FUNCTION print
 | - COMPOUND 
 | - - PRINT_STMT 
 | - - - STRING_LITERAL "Hello world\n"
@@ -8,7 +8,7 @@
 | - - PRINT_STMT 
 | - - - STRING_LITERAL "I sure hope this works\n"
 | - EMPTY_NODE 	void_formal_params
-| FUNCTION 
+| FUNCTION main
 | - COMPOUND 
 | - - = 
 | - - - ID x

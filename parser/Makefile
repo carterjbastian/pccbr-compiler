@@ -3,7 +3,7 @@ CFLAGS = -g
 BISONFL = -d -v
 FLEXFLAGS = -ll
 
-.PHONY: clean
+.PHONY: clean 
 
 .SUFFIXES: .c
 
@@ -40,7 +40,7 @@ symtab.o : symtab.c symtab.h
 
 clean :
 	rm -f parser lex.yy.o parser.tab.o tree_main.o ast.o \
-	parser.tab.h parser.tab.c lex.yy.c *~ parser.output testing \
+	parser.tab.h parser.tab.c lex.yy.c *~ parser.output test \
     	symtab.o
 
 depend :

@@ -12,7 +12,7 @@
 #ifndef TOKTYPE_H_
 #define TOKTYPE_H_
 
-enum TokenType { ID_T=258, BAD_ID_T, INTCONST_T, STRINGCONST_T,
+enum TokenType { ID_T=258, INTCONST_T, STRINGCONST_T,
 		 ISEQUAL_T, NOTEQUAL_T, LT_EQUAL_T, GT_EQUAL_T, INCREMENT_T, 
                  DECREMENT_T, AND_T, OR_T,
                  INT_T, VOID_T, WHILE_T, FOR_T, IF_T, ELSE_T, RETURN_T,READ_T, 
@@ -20,7 +20,7 @@ enum TokenType { ID_T=258, BAD_ID_T, INTCONST_T, STRINGCONST_T,
 
 
 static char *tokens[] =
-{ "ID", "BAD_ID_T", "INTCONST", "STRINGCONST",
+{ "ID", "INTCONST", "STRINGCONST",
   "ISEQUAL", "NOTEQUAL", "LT_EQUAL", "GT_EQUAL", "INCREMENT", 
   "DECREMENT", "AND", "OR", "INT", "VOID", "WHILE", "FOR", "IF", "ELSE", 
   "RETURN", "READ", "PRINT", "EOF", "DO", "OTHER" };

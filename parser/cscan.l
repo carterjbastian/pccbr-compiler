@@ -14,6 +14,7 @@
 
 #include <string.h>
 #include "parser.tab.h"   // The output of running bison on our parser
+#include "ast.h"
 
 int lexLookup(char *);
 int funcTypeRead = 0;
@@ -30,8 +31,7 @@ white [ \t\n]+
 letter [A-Za-z]
 digit [0-9]
 id ({letter}|_)({letter}|{digit}|_)*
-bad_id {digit}({letter}|{digit}|_)*
-integer {digit}
+integer {digit}+
 signedint [-]?{integer}
 
 %x string
@@ -45,6 +45,9 @@ signedint [-]?{integer}
 
 {id}         { 
              strncpy(savedIDText, yytext, MAXTOKENLENGTH-1);
+             ast_node t = create_ast_node(0);
+             t->value_string = strdup(yytext);
+             yylval = t;
              return lexLookup(yytext); }
 {signedint}  { 
              strncpy(savedLiteralText, yytext, MAXTOKENLENGTH-1);
@@ -101,9 +104,6 @@ signedint [-]?{integer}
 "%"          return '%';
 "!"          return '!';
 
-{bad_id}     {
-             strncpy(savedIDText, yytext, MAXTOKENLENGTH-1);
-             return BAD_ID_T; }
 .            return OTHER_T;
 
 %%

@@ -96,7 +96,12 @@ void print_ast(FILE *fp, ast_node root, int depth) {
     fprintf(fp, "\t%s", root->value_string);
     break;
 
+  case FUNC_N:                  /* Print the name of the function */
+    fprintf(fp, "%s", root->value_string);
+    break;
+
   case ERROR_N:                 /* Print the type of error represented */
+    assert(root->value_string);
     fprintf(fp, "\t%s", root->value_string);
     break;
 
