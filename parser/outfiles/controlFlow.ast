@@ -2,13 +2,13 @@
 | FUNCTION main
 | - COMPOUND 
 | - - = 
-| - - - ID x
+| - - - DECLARED ID x
 | - - - INT_LITERAL 1
 | - - = 
-| - - - ID y
+| - - - DECLARED ID y
 | - - - INT_LITERAL 2
 | - - = 
-| - - - ID z
+| - - - DECLARED ID z
 | - - - INT_LITERAL 3
 | - - IF_ELSE_STMT 
 | - - - == 

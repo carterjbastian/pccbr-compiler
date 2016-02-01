@@ -1,18 +1,27 @@
-/* symtab.h
- * Declarations for the symbol table.
- * Written by THC for CS 57.
- * You should extend the structs and functions as appropriate.
+/* 
+ * symtab.h   A header defining the types of symbol nodes as well as symbol table
+ *            data structures.
+ * Authors:
+ *  Originally written by THC for CS 57 and massaged by SWS
+ *  Extended for use in the pccbr-compiler project by Carter J. Bastian
+ *    and Quinn Stearns in 2016
  *
- * extended and changed muchly by sean
+ * This File Contains:
+ *  - An enum and a struct for types of symbols in a symbol table
+ *  - Definitions of symbol-table related data structures
+ *  - Prototypes of functions needed to implement the symbol table structures
+ *
  */
 
 #ifndef SYMTAB_H_
 #define SYMTAB_H_
 
+// System Includes
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
 
+// Local Includes
 #include "ast.h"
 
 
@@ -62,12 +71,6 @@ typedef struct symnode {
   struct symnode  *next;	    /* next symnode in list */
   struct symhashtable *parent;
   var_lookup_type type;             /* The type of the symbol */
-  /* 
-   * If the node is a function, point to it's generic function
-   * table
-   */
-  struct symhashtable *generic_func_table; 
-  /* Other attributes go here. */
 } symnode_t;
 
 
@@ -88,7 +91,6 @@ typedef struct symhashtable {
 /* Symbol table for all levels of scope. */
 typedef struct {
   symhashtable_t *root, *leaf;
-    
 } symboltable_t;
 
 
@@ -104,12 +106,6 @@ symnode_t *create_symnode(char * name, var_lookup_type type, symhashtable_t *par
 
 /* Does the identifier in this node equal name? */
 int name_is_equal(symnode_t *node, char *name);
-
-/*
- * =================================================
- * symhashtable function prototypes
- * =================================================
- */
 
 /*
  * =================================================

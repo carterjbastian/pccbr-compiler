@@ -1,0 +1,16 @@
+Symtable created...
+| Scope: 0
+| Variables:
+| main	Type: FUNCTION_RETURNING_VOID
+
+| - Scope: 1
+| - Variables:
+| - argc	Type: INTEGER
+
+| - - Scope: 1-1
+| - - Variables:
+| - - i	Type: INTEGER
+
+| - - - Scope: 1-1-1
+| - - - Variables:
+

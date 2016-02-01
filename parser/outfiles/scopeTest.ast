@@ -1,0 +1,124 @@
+| ROOT 
+| = 
+| - DECLARED ID cat
+| - INT_LITERAL 6
+| DECLARED ID dog
+| FUNCTION hello_world
+| - COMPOUND 
+| - - DECLARED ID i
+| - - = 
+| - - - DECLARED ID j
+| - - - INT_LITERAL 2
+| - - PRINT_STMT 
+| - - - STRING_LITERAL "Hello world\n"
+| - - PRINT_STMT 
+| - - - STRING_LITERAL "Goodbye world\n"
+| - - PRINT_STMT 
+| - - - STRING_LITERAL "I sure hope this works\n"
+| - - IF_ELSE_STMT 
+| - - - == 
+| - - - - ID x
+| - - - - INT_LITERAL 5
+| - - - COMPOUND 
+| - - - - PRINT_STMT 
+| - - - - - STRING_LITERAL "Welcome to a new cope"
+| - - - - FOR_STMT 
+| - - - - - = 
+| - - - - - - ID i
+| - - - - - - INT_LITERAL 10
+| - - - - - < 
+| - - - - - - ID i
+| - - - - - - INT_LITERAL 14
+| - - - - - ++ 
+| - - - - - - ID i
+| - - - - - COMPOUND 
+| - - - - - - PRINT_STMT 
+| - - - - - - - STRING_LITERAL "And another one"
+| - - - - FOR_STMT 
+| - - - - - = 
+| - - - - - - ID i
+| - - - - - - INT_LITERAL 0
+| - - - - - < 
+| - - - - - - ID i
+| - - - - - - INT_LITERAL 10
+| - - - - - ++ 
+| - - - - - - ID i
+| - - - - - COMPOUND 
+| - - - - - - = 
+| - - - - - - - DECLARED ID bubble
+| - - - - - - - INT_LITERAL 2
+| - - - - - - PRINT_STMT 
+| - - - - - - - STRING_LITERAL "Inside"
+| - - - - FOR_STMT 
+| - - - - - = 
+| - - - - - - ID i
+| - - - - - - INT_LITERAL 0
+| - - - - - < 
+| - - - - - - ID i
+| - - - - - - INT_LITERAL 4
+| - - - - - ++ 
+| - - - - - - ID i
+| - - - - - COMPOUND 
+| - - - - - - = 
+| - - - - - - - DECLARED ID pop
+| - - - - - - - INT_LITERAL 3
+| - - - - - - PRINT_STMT 
+| - - - - - - - STRING_LITERAL "again"
+| - - - COMPOUND 
+| - - - - = 
+| - - - - - ID r
+| - - - - - INT_LITERAL 3
+| - - - - PRINT_STMT 
+| - - - - - STRING_LITERAL "else"
+| - EMPTY_NODE 	void_formal_params
+| FUNCTION main
+| - COMPOUND 
+| - - DECLARED ID cat1
+| - - = 
+| - - - DECLARED ID cat2
+| - - - INT_LITERAL 5
+| - - = 
+| - - - DECLARED ID x
+| - - - INT_LITERAL 5
+| - - = 
+| - - - DECLARED ID y
+| - - - INT_LITERAL 6
+| - - = 
+| - - - DECLARED ID z
+| - - - INT_LITERAL 7
+| - - = 
+| - - - DECLARED ID q
+| - - - INT_LITERAL 8
+| - - = 
+| - - - DECLARED ID humanitarian_aid
+| - - - INT_LITERAL 9
+| - - = 
+| - - - DECLARED ID ontomontopea
+| - - - INT_LITERAL 10
+| - - IF_STMT 
+| - - - INT_LITERAL 1
+| - - - COMPOUND 
+| - - - - = 
+| - - - - - DECLARED ID n
+| - - - - - INT_LITERAL 0
+| - - - - PRINT_STMT 
+| - - - - - STRING_LITERAL "we have scopes here too"
+| - - FUNC_CALL hello_world
+| - - - EMPTY_NODE 	empty arguments
+| - - PRINT_STMT 
+| - - - STRING_LITERAL "Hello World\n"
+| - - = 
+| - - - ID x
+| - - - + 
+| - - - - ID b
+| - - - - / 
+| - - - - - ID a
+| - - - - - ID c
+| - - = 
+| - - - ID mew
+| - - - ID x
+| - - RETURN_STMT 
+| - - - INT_LITERAL 0
+| - PARAMETER a
+| - PARAMETER b
+| - PARAMETER c

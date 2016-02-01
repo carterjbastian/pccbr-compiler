@@ -16,9 +16,9 @@ symtab : lex.yy.o parser.tab.o ast.o symtab.o symbols_main.o
 parse : lex.yy.o parser.tab.o ast.o symtab.o ast_main.o
 	$(CC) -o $@ $(CFLAGS) lex.yy.o parser.tab.o ast.o symtab.o ast_main.o $(FLEXFLAGS)
 
-test : lex.yy.o parser.tab.o ast.o ast_main.o
-	$(CC) -c $(CFLAGS) -D _TESTING_ ast_main.c
-	$(CC) -o $@ $(CFLAGS) -D _TESTING_ lex.yy.o parser.tab.o ast.o ast_main.o $(FLEXFLAGS)
+test : lex.yy.o parser.tab.o ast.o symtab.o symbols_main.o
+	$(CC) -c $(CFLAGS) -D _TESTING_ symbols_main.c
+	$(CC) -o $@ $(CFLAGS) -D _TESTING_ lex.yy.o parser.tab.o ast.o symtab.o symbols_main.o $(FLEXFLAGS)
 
 lex.yy.o : lex.yy.c
 	$(CC) -c $(CFLAGS) $<

@@ -1,0 +1,45 @@
+Symtable created...
+| Scope: 0
+| Variables:
+| second	Type: FUNCTION_RETURNING_INTEGER
+| i	Type: INTEGER
+| j	Type: ARRAY_OF_INTEGERS
+| k	Type: ARRAY_OF_INTEGERS
+| l	Type: ARRAY_OF_INTEGERS
+| m	Type: INTEGER
+| third	Type: FUNCTION_RETURNING_VOID
+| first	Type: FUNCTION_RETURNING_INTEGER
+
+| - Scope: 1
+| - Variables:
+| - a	Type: ARRAY_OF_INTEGERS
+| - b	Type: INTEGER
+| - c	Type: INTEGER
+
+| - - Scope: 1-1
+| - - Variables:
+
+| - Scope: 2
+| - Variables:
+| - a	Type: ARRAY_OF_INTEGERS
+| - b	Type: ARRAY_OF_INTEGERS
+| - c	Type: INTEGER
+
+| - - Scope: 2-1
+| - - Variables:
+
+| - Scope: 3
+| - Variables:
+| - a	Type: ARRAY_OF_INTEGERS
+| - b	Type: ARRAY_OF_INTEGERS
+| - c	Type: ARRAY_OF_INTEGERS
+
+| - - Scope: 3-1
+| - - Variables:
+| - - q	Type: INTEGER
+| - - r	Type: ARRAY_OF_INTEGERS
+| - - s	Type: INTEGER
+| - - x	Type: ARRAY_OF_INTEGERS
+| - - y	Type: INTEGER
+| - - z	Type: ARRAY_OF_INTEGERS
+

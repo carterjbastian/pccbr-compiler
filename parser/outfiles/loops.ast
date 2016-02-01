@@ -1,7 +1,7 @@
 | ROOT 
 | FUNCTION main
 | - COMPOUND 
-| - - ID i
+| - - DECLARED ID i
 | - - FOR_STMT 
 | - - - = 
 | - - - - ID i

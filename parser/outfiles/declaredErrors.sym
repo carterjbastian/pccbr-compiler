@@ -1,0 +1,57 @@
+PARSING ERROR:	Invalid variable declaration discarded on line 1
+PARSING ERROR:	Invalid variable declaration discarded on line 8
+PARSING ERROR:	Invalid variable declaration discarded on line 15
+PARSING ERROR:	Invalid variable declaration discarded on line 23
+PARSING ERROR:	Statement on line 24 Discarded due to an invalid expression
+PARSING ERROR:	Invalid variable declaration discarded on line 35
+WARNING: There were 6 parse errors.
+Parse tree may be ill-formed.
+Symtable created...
+| Scope: 0
+| Variables:
+| cat	Type: INTEGER
+| dog	Type: INTEGER
+| Invalid Variable Declaration	Type: VARIABLE_WITH_INVALID_DECLARATION
+| goodbye	Type: FUNCTION_RETURNING_VOID
+| hello_cat	Type: FUNCTION_RETURNING_INTEGER
+| cheers	Type: FUNCTION_RETURNING_VOID
+| dothings	Type: FUNCTION_RETURNING_INTEGER
+
+| - Scope: 1
+| - Variables:
+| - a	Type: INTEGER
+| - b	Type: INTEGER
+| - c	Type: INTEGER
+
+| - - Scope: 1-1
+| - - Variables:
+| - - Invalid Variable Declaration	Type: VARIABLE_WITH_INVALID_DECLARATION
+| - - l	Type: INTEGER
+| - - m	Type: INTEGER
+| - - n	Type: INTEGER
+| - - p	Type: INTEGER
+
+| - Scope: 2
+| - Variables:
+
+| - - Scope: 2-1
+| - - Variables:
+| - - Invalid Variable Declaration	Type: VARIABLE_WITH_INVALID_DECLARATION
+| - - x	Type: INTEGER
+| - - y	Type: INTEGER
+
+| - Scope: 3
+| - Variables:
+
+| - - Scope: 3-1
+| - - Variables:
+| - - Invalid Variable Declaration	Type: VARIABLE_WITH_INVALID_DECLARATION
+| - - g	Type: INTEGER
+| - - h	Type: INTEGER
+
+| - Scope: 4
+| - Variables:
+
+| - - Scope: 4-1
+| - - Variables:
+

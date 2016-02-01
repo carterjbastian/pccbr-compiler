@@ -1,5 +1,5 @@
 /*
- * tree_main.c    A driver to print or test the output of the pccbr parser
+ * symbols_main.c    A driver for the pccbr symbol table generator
  *
  * Authors:
  *  Originally written by THC for CS 57 and massaged by SWS.
@@ -35,10 +35,19 @@ int parseError = 0;
 FILE *error_out;  // Global conditionally used in testing mode only
 
 /*
+ * Function: build_symboltable
+ *  @table  - the symbol table to build
+ *  @root   - the root node of the AST
+ *  @curr   - the current AST node to add to the table
+ *
  * A function to recursively build the symbol table.
  *
+ * Disclaimers:
+ *  - By necessity, this is a hairy function. There are lots of complicated
+ *    cases to check for.
+ *
  * PseudoCode:
- *  I.    Catch irrelevant ast_nodes
+ *  I.    Catch the type of the ast_node.
  *  II.   Enter a new scope (for the current ast_node)
  *  II.   Loop through (Based on the type of ast_node):
  *      a. Add the newly-declared variables to the new scope
@@ -61,7 +70,7 @@ symboltable_t *build_symboltable(symboltable_t *table, ast_node root, ast_node c
           insert_into_symboltable(table, INT_LT, child->left_child->value_string);
         // Node is a valueless declaration => add to symtab
         } else if (child->node_type == DEC_ID_N) {
-          if (child->left_child == NULL) // Not an array
+          if (child->value_int == 0) // Not an array
             insert_into_symboltable(table, INT_LT, child->value_string); 
           else
             insert_into_symboltable(table, INT_ARRAY_LT, child->value_string);
@@ -103,7 +112,7 @@ symboltable_t *build_symboltable(symboltable_t *table, ast_node root, ast_node c
             insert_into_symboltable(table, INT_LT, child->left_child->value_string);
           }
         } else if (child->node_type == DEC_ID_N) { 
-          if (child->left_child == NULL) // Not an array
+          if (child->value_int == 0) // Not an array
             insert_into_symboltable(table, INT_LT, child->value_string);
           else
             insert_into_symboltable(table, INT_ARRAY_LT, child->value_string);
@@ -147,6 +156,9 @@ symboltable_t *build_symboltable(symboltable_t *table, ast_node root, ast_node c
   return table;
 }
 
+/*
+ * Build the AST and create a Symbol Table for it
+ */
 int main() {
   int noRoot = 0;		/* 0 means we will have a root */
   symboltable_t *symtab;

@@ -1,0 +1,31 @@
+Symtable created...
+| Scope: 0
+| Variables:
+| example	Type: FUNCTION_RETURNING_VOID
+| w	Type: INTEGER
+| x	Type: INTEGER
+
+| - Scope: 1
+| - Variables:
+| - a	Type: INTEGER
+| - b	Type: INTEGER
+
+| - - Scope: 1-1
+| - - Variables:
+| - - c	Type: INTEGER
+
+| - - - Scope: 1-1-1
+| - - - Variables:
+| - - - b	Type: INTEGER
+| - - - z	Type: INTEGER
+
+| - - - Scope: 1-1-2
+| - - - Variables:
+| - - - a	Type: INTEGER
+| - - - x	Type: INTEGER
+
+| - - - - Scope: 1-1-2-1
+| - - - - Variables:
+| - - - - c	Type: INTEGER
+| - - - - x	Type: INTEGER
+

@@ -62,11 +62,25 @@ void print_ast(FILE *fp, ast_node root, int depth) {
   case ID_N:			/* print the id */
     assert(root->value_string);
     fprintf(fp, "%s", root->value_string);
+
+    if (root->value_int != 0) { 
+      if (root->value_int > 0)
+        fprintf(fp, " (array of length %d)", root->value_int);
+      else
+        fprintf(fp, " (array indexed to left-child expression)");
+    }
     break;
 
   case DEC_ID_N:
     assert(root->value_string);
     fprintf(fp, "%s", root->value_string);
+
+    if (root->value_int != 0) { 
+      if (root->value_int > 0)
+        fprintf(fp, " (array of length %d)", root->value_int);
+      else
+        fprintf(fp, " (array indexed to left-child expression)");
+    }    
     break;
 
   case INT_LITERAL_N:		/* print the int literal */

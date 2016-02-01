@@ -1,13 +1,13 @@
 | ROOT 
 | = 
-| - ID cat
+| - DECLARED ID cat
 | - INT_LITERAL 6
-| ID dog
+| DECLARED ID dog
 | FUNCTION hello_world
 | - COMPOUND 
-| - - ID i
+| - - DECLARED ID i
 | - - = 
-| - - - ID j
+| - - - DECLARED ID j
 | - - - INT_LITERAL 2
 | - - PRINT_STMT 
 | - - - STRING_LITERAL "Hello world\n"
@@ -18,21 +18,21 @@
 | - EMPTY_NODE 	void_formal_params
 | FUNCTION main
 | - COMPOUND 
-| - - ID cat1
+| - - DECLARED ID cat1
 | - - = 
-| - - - ID cat2
+| - - - DECLARED ID cat2
 | - - - INT_LITERAL 5
 | - - = 
-| - - - ID x
+| - - - DECLARED ID x
 | - - - INT_LITERAL 5
 | - - = 
-| - - - ID y
+| - - - DECLARED ID y
 | - - - INT_LITERAL 6
 | - - = 
-| - - - ID z
+| - - - DECLARED ID z
 | - - - INT_LITERAL 7
 | - - = 
-| - - - ID q
+| - - - DECLARED ID q
 | - - - INT_LITERAL 8
 | - - FUNC_CALL hello_world
 | - - - EMPTY_NODE 	empty arguments

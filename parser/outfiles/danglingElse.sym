@@ -1,0 +1,14 @@
+PARSING ERROR:	Statement on line 4 Discarded due to an invalid expression
+Parsing reached fatal error. No AST was constructed
+Symtable created...
+| Scope: 0
+| Variables:
+| main	Type: FUNCTION_RETURNING_INTEGER
+
+| - Scope: 1
+| - Variables:
+
+| - - Scope: 1-1
+| - - Variables:
+| - - a	Type: INTEGER
+

@@ -21,6 +21,7 @@ int dothings() {
   int g;
   int h;
   int 4;
+  5 ^ s;
 
   read g;
   return 4;

@@ -1,21 +1,31 @@
-/* symtab.c
- * Functions for the symbol table.
- * Written by THC for CS 57.
+/* symtab.c   a file implementing functions to work with symbol tables
  *
- * extended and changed by sws
+ * Authors:
+ *  Originally written by THC for CS57 and modified by SWS
+ *  Extended for use in the pccbr compiler by Carter J. Bastian and
+ *    Quinn Stearns in 2016
  *
- * You should extend the functions as appropriate.
+ * This file Contains:
+ *  - functions to implement groups of symbol information (symnode_t)
+ *  - functions to implement scope-specific hash tables of symbol information
+ *    (symhashtable_t)
+ *  - functions to link these symbol hashtables into a single, heirarchical 
+ *    table that can be printed for easy viewing (symboltable_t)
  */
 
+// System includes
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 
+// Local Includes
 #include "symtab.h"
 
+// Macros
 #define NOHASHSLOT -1
 #define NAME_DEPTH 85
 
+// Global Variable for naming functionality
 int levels[NAME_DEPTH] = { 0, 0 };
 
 /*
@@ -165,9 +175,13 @@ symboltable_t  *create_symboltable() {
 
 
 
-/* Insert an entry into the innermost scope of symbol table.  First
-   make sure it's not already in that scope.  Return a pointer to the
-   entry. */
+/* 
+ * instert_into_symboltable
+ *
+ * Insert an entry into the innermost scope of symbol table.  First 
+ * make sure it's not already in that scope.  Return a pointer to the
+ * entry. 
+ */
 symnode_t *insert_into_symboltable(symboltable_t *symtab, var_lookup_type type, char *name) {
 
   assert(symtab);
@@ -190,8 +204,12 @@ symnode_t *insert_into_symboltable(symboltable_t *symtab, var_lookup_type type, 
 
 
 
-/* Lookup an entry in a symbol table.  If found return a pointer to it.
-   Otherwise, return NULL */
+/* 
+ * lookup_in_symboltable
+ *
+ * Lookup an entry in a symbol table.  If found return a pointer to it.
+ * Otherwise, return NULL 
+ */
 symnode_t *lookup_in_symboltable(symboltable_t  *symtab, char *name) {
   symnode_t *node;
   symhashtable_t *hashtable;
@@ -211,6 +229,8 @@ symnode_t *lookup_in_symboltable(symboltable_t  *symtab, char *name) {
 
 /*
  * Create the name for a scope based on the current state of the levels aray
+ *
+ * Implements the naming protocol documented in the README
  */
 
 static char *create_name() {
@@ -291,6 +311,9 @@ void print_symtab(symboltable_t *symtab) {
   recursive_print_symtab(curr, depth);
 }
 
+/*
+ * Recursive function to print a sub-table of a symbol table
+ */
 void recursive_print_symtab(symhashtable_t *symhash, int offset) {
   symhashtable_t *curr;
   print_symhashtable(symhash, offset);
@@ -307,6 +330,9 @@ void recursive_print_symtab(symhashtable_t *symhash, int offset) {
   }
 }
 
+/*
+ * Function to print a single hashtable in a symbol table
+ */
 void print_symhashtable(symhashtable_t *symhash, int offset) {
   int max = symhash->size;
   symnode_t *curr;
@@ -314,7 +340,7 @@ void print_symhashtable(symhashtable_t *symhash, int offset) {
   printf("| ");
   for (int i = 0; i < offset; i++)
     printf("- ");
-  printf("Scope %s\toffset = %d\n", symhash->name, offset);
+  printf("Scope: %s\n", symhash->name);
 
   printf("| ");
   for (int i = 0; i < offset; i++)
@@ -335,6 +361,10 @@ void print_symhashtable(symhashtable_t *symhash, int offset) {
   printf("\n");
 }
 
+/*
+ * Function to print a single node of symbol information in a nice way
+ * with semantically meaningful indenting
+ */
 void print_symnode(symnode_t *node, int offset) {
   printf("| ");
   for (int i = 0; i < offset; i++)

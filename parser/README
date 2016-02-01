@@ -1,7 +1,12 @@
-Project:  pccbr-compiler project Lexer
+Project:  pccbr-compiler Project Symbol Table
 Authors:  Carter J. Bastian, Quinn Stearns
 
 FILES:
+  - symtab.c
+    Implementations of symbol table functions declared in ast.c
+
+  - symtab.h
+    Definitions of symbol table datatypes and related function prototypes
   - ast.c
     Implementations of the AST-related utility functions declared in ast.h
 
@@ -9,109 +14,154 @@ FILES:
     Definitions of AST datatypes and declarations of AST utility functions
 
   - cscan.l
-    The lexer for the parser. Slightly modified from it's original state.
+    The lexer for the parser. Slightly modified from it's original state
 
   - parser.y
-    The parser defines the grammar, constructs ASTs, and handles/reports errors.
+    The parser defines the grammar, constructs ASTs, and handles/reports errors
+
+  - symbol_main.c
+    A simple driver to build and traverse the parse tree to make a symbol table
 
   - ast_main.c
-    A simple driver to build the parse tree. Also contains the testing suite.
+    A simple driver to only build a parse tree using the grammar in parser.y
 
-NOTES ON AST DESIGN:
-  For the most part, our design was fairly standard. Most binary operation nodes
-  contain children (the operands). Analogously, unary operations contain one 
-  child node. Some specific node types have structures worth commenting on.  
 
-  Any "list" nodes are really only the first item in the list, with each
-  successive node in the list pointed to by its direct left sibling in the tree.
-  Whenever a parent node has a list as a child, an effort was made to ensure
-  that the list-type node would be the right-most child.
+DEPENDENCIES:
+- Our build requires Bison 3.0.0 or later. Notice that Mac's generally have an
+  older version of this software, while the Sudikof Lab machines have version
+  3.0.2
 
-  Function nodes (FUNC_N) consist of a compound statement as the left-most
-  child, followed by a list of parameters. Notice that function nodes get a
-  value_int of 1 if they return an int, and a value_int of 0 if they return
-  void.
 
-  Compound statement nodes (COMPOUND_STMT_N) consist of two lists: first, a list
-  of declarations, followed imediately by a list of statements.
+NOTES ON SYMBOL TABLE DESIGN:
+- Our naming protocol is as follows:
+  i. The first level is 0 (and this level "0-" is ommitted from all other names)
+  ii. Any subsequent depth is denoted with a '-'
+  iii. Siblings in the parse tree are those named with the same prefix
 
-  If statement nodes (IF_N), consist of two children: on the left, an expression
-  which is the conditional for the if statement, and on the right, a statement
-  (potentially compound) to execute if the conditional is true.
+  EXAMPLE: 1-0-1-2-3 and 1-0-1-2-5 are siblings, while 1-0-1-1-4 is not.
 
-  If-Else statements (IF_ELSE_N) are identical, except for the addition of a
-  third child – a statement node to be executed in the conditional is false.
+- Because of the minimalist structure of our parse tree, some fancy looping is
+  necessary in the build_symboltable function of symbols_main.c
+  
+  Specifically, we really only need to concern ourselves with declarations in 
+  the cases of ROOT_N (where functions and globals can be declared),
+  COMPOUND_STMT_N (where new local variables can be declared and a new scope
+  is entered), and FUNC_N (where we can get parameters).
 
-  For both While statements and Do-While statements (WHILE_N and DOWHILE_N
-  respectively), the conditional expression is the leftmost-child, followed
-  by the statement to execute while the condition is true.
+  In other cases, we simply recurse on the children nodes of the AST and return
+  without modifying scope or adding to the symbol table.
 
-  For-Loop nodes (FOR_N) have the three header expressions (in order from left-
-  to-right) as their three leftmost children, follwed immediately by a statement
-  node (the body of the loop).
+  However, for each of these three cases, there are unique edge cases which must
+  be tested for such as
+    - Compound statements consisting solely of declarations
+    - Compound statements with no declarations
+    - Errors nodes in the declarations
+    - A non-declaration error node immediately following valid declarations
+    - Functions with no or void parameters
+    - Functions with array parameters
+    - A root with multiple functions 
+    - ETC.
 
-  Empty Nodes (NULL_N) are used throughout wherever a node is optional in code, 
-  but necessary to preserve the expected structure of the AST (for example, with
-  empty for-loop header statements).
 
+IMPORTANT NOTE ON AST REPRESENTATION OF ARRAY VARIABLES:
+  On the last checkpoint, we were docked points becuase our array and non-array
+  identifiers are all collected under the ID_N ast_node type. However, this is
+  an intentional design decision on our part.
+  
+  For any non-array identifier, the value_int field of it's ast_node is set to
+  zero.
+
+  For a declared array, the number of items it's declared as having is stored in
+  the value_int field of its ast_node.
+
+  For an ID representing access into an array, it's ast_node's value_int
+  field is set to -1 and it's leftmost (and only) child is the expression
+  used as the index.
+
+  This design allows us to differentiate between array declaration and access 
+  with the AST alone and is being used with extensibility to other data types
+  (extra credit) down the road. If there is a fundamental issue with this,
+  please let us know asap. 
+
+  To see this in action, see arrayTest.ast and arrayTest.sym in the outfiles/
+  directory.
+
+
+UPDATES TO LEXER AND PARSER:
+- Fixed a bug in which the parser failed to copy the correct name of the 
+  function into the ast_node->value_string field.
+- Fixed a bug in which multiple-declarations (eg int a,b, c = 5;) were parsed
+  as only a single declaration.
+- Added semantic differentiation between ID of normal parameters and IDs of 
+  array parameters.
+- Added semantic differentiation between variables used in an expression
+  (ID_N) and variables used in a declaration (DEC_ID_N).
+- Changed the way we handle arrays (the note on symbol table design above)
 
 ERROR REPORTING AND RECOVERY:
-  All error reporting and recovery happens at the statement-level.
-  Fairly specific errors can be reported this way without having to 
-  jeapordize the semantic meaning of the structure of the AST.
+  Note that we concern ourselves in the symbol table only with those error 
+  nodes which are due to Invalid Variable Declarations. All others are ignored
+  while traversing the AST.
 
-  A statement that's a recognized error will simply be ignored. The rest of the
-  tree will be constructed as if the error statement had never occurred.
-  However, an error node (ERROR_N) is created and placed in the tree where
-  the node should have been placed.
+  Further, we mark that there was a variable in that scope which was declared,
+  but which was done so invalidly. In this way, we will still be able to check
+  for valid variable use w/ respect to scope in future projects even in the
+  event of code with parse errors.
 
-  Notice that if there is a problem in the construction of a loop or control
-  construct, the entire node (including it's body and the statements therein)
-  will be ignored. However, if you have an error in the body of a malformed
-  loop or control statement, the error will still be reported even though 
-  the corresponding error node is not included in the tree.
+  Edge cases related to error reporting and recovery are tested in the file
+  testfiles/declaredErrors.c
+
 
 USAGE:
-  To parse a file "example.c", use the following chain of commands from the 
-  source directory:
-    
-    make; ./parser < example.c
+To build and print the symbol table for any given file:
+  make clean; make; ./symtab < FILE_NAME
+
+To build and print ONLY the AST for any given file:
+  make clean; make parse; ./parse < FILE_NAME
+
+To run our test suite (see below):
+  ./autoTest.sh
+
 
 AUTOMATED TESTING:
-  Conditional compilation was used to automate the testing process.
+  By running the autoTest.sh script as described above, you will run a series of
+  all the test inputs we have written (all of which are in the testfiles/ 
+  directory). All of the output will be placed in the outfiles/ directory.
 
-  Note that all test files must be in the testfiles/ directory, and the output
-  AST for each respective file will be placed in the output/ directory.
+  Notice that both the AST and the Symbol Table are output by this shell script
+  for easy comparison. We recommend comparing both of these output files
+  next to the input .c file.
 
-  Also note that, to add additional tests, one must modify the header file
-  testfiles/autoTest.h (while following the notes and instructions in the
-  inline documentation).
+  Output AST's have the extension ".ast" and output symbol tables have the
+  extension ".sym".
 
-  To run the test suite, use the following commands from the source directory:
-
-    make test; ./test
-
-  Notice also that the dangling else construction is tested with the file
-  testfiles/danglingElse.c but that this is not tested by default in the auto
-  testing since it fails to build an AST at all. To test this, run the command:
-  
-    make; ./parser < testfiles/danglingElse.c
+  All .ast and .sym files were checked by hand to ensure they were accurate 
+  representations of their respective c-files.
 
 
-TESTS (FILES):
-  Below is a list of test files used which comprises those in our test suite:
+SUMMARY OF TESTS (FILES):
+Those Special to the 
+  - arrayTest
+    Testing and demonstration of how the Symbol Table generator handles arrays
+    as declared variables and parameters at differing scopes.
 
-  forLoop.c     - Displays the capability to parse a simple for loop
-  loops.c       - Displays nested-loop functionality and all types of supported 
-                  loops
-  generalTest.c - Displays most of the functionalities of the C programming
-                  language with general purpose testing
-  expressions.c - Displays the parser's ability to work with complex expressions
-  controlFlow.c - Displays the parser's if-else and if capabilities
-  functions.c   - Displays the parser's ability to handle functions of different
-                  types and numbers of parameters (as well as respective calls)
-  errTest.c     - Displays all error report and recovery functionality
+  - declaredErrors
+    Edge cases with scope/declaration-relevant error report and recovery.
 
-  danglingElse.c is a non-parsing file that shows that dangling else 
-    constructions fail.
-  
+  - scopeTest
+    Testing with deep scopes, many siblings, and edge cases, etc.
+    (This is where we discovered most of our bugs).
+
+  - textbook
+    The example from C&T Engineering a Compiler (2nd Edition) Figure 5.10-5.12
+
+Those continued from parser testing (Described in the parser README):
+  - contolFlow
+  - danglingElse
+  - errTest
+  - expressions
+  - forLoop
+  - functions
+  - generalTest
+  - loops
+

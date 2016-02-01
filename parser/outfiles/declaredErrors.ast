@@ -1,0 +1,46 @@
+PARSING ERROR:	Invalid variable declaration discarded on line 1
+PARSING ERROR:	Invalid variable declaration discarded on line 8
+PARSING ERROR:	Invalid variable declaration discarded on line 15
+PARSING ERROR:	Invalid variable declaration discarded on line 23
+PARSING ERROR:	Statement on line 24 Discarded due to an invalid expression
+PARSING ERROR:	Invalid variable declaration discarded on line 35
+WARNING: There were 6 parse errors.
+Parse tree may be ill-formed.
+| ROOT 
+| ERROR_NODE 	Invalid Variable Declaration
+| DECLARED ID cat
+| FUNCTION hello_cat
+| - COMPOUND 
+| - - DECLARED ID l
+| - - DECLARED ID m
+| - - DECLARED ID n
+| - - ERROR_NODE 	Invalid Variable Declaration
+| - - DECLARED ID p
+| - - RETURN_STMT 
+| - PARAMETER a
+| - PARAMETER b
+| - PARAMETER c
+| FUNCTION goodbye
+| - COMPOUND 
+| - - ERROR_NODE 	Invalid Variable Declaration
+| - - DECLARED ID x
+| - - DECLARED ID y
+| - EMPTY_NODE 	void_formal_params
+| FUNCTION dothings
+| - COMPOUND 
+| - - DECLARED ID g
+| - - DECLARED ID h
+| - - ERROR_NODE 	Invalid Variable Declaration
+| - - ERROR_NODE 	Invalid Expression
+| - - READ_STMT 
+| - - - ID g
+| - - RETURN_STMT 
+| - - - INT_LITERAL 4
+| - EMPTY_NODE 	no_formal_params
+| FUNCTION cheers
+| - COMPOUND 
+| - - PRINT_STMT 
+| - - - STRING_LITERAL "Cheers, mate"
+| - EMPTY_NODE 	no_formal_params
+| DECLARED ID dog
+| ERROR_NODE 	Invalid Variable Declaration

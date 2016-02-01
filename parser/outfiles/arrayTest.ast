@@ -1,0 +1,44 @@
+| ROOT 
+| DECLARED ID i
+| DECLARED ID j (array of length 10)
+| DECLARED ID k (array of length 3)
+| DECLARED ID l (array of length 3)
+| DECLARED ID m
+| FUNCTION first
+| - COMPOUND 
+| - - RETURN_STMT 
+| - - - ID a (array indexed to left-child expression)
+| - - - - INT_LITERAL 1
+| - ARRAY_PARAMETER a
+| - PARAMETER b
+| - PARAMETER c
+| FUNCTION second
+| - COMPOUND 
+| - - RETURN_STMT 
+| - - - ID b (array indexed to left-child expression)
+| - - - - INT_LITERAL 1
+| - ARRAY_PARAMETER a
+| - ARRAY_PARAMETER b
+| - PARAMETER c
+| FUNCTION third
+| - COMPOUND 
+| - - DECLARED ID x (array of length 5)
+| - - DECLARED ID y
+| - - DECLARED ID z (array of length 3)
+| - - DECLARED ID q
+| - - DECLARED ID r (array of length 2)
+| - - DECLARED ID s
+| - - = 
+| - - - ID x (array indexed to left-child expression)
+| - - - - INT_LITERAL 1
+| - - - * 
+| - - - - INT_LITERAL 6
+| - - - - ID r (array indexed to left-child expression)
+| - - - - - - 
+| - - - - - - INT_LITERAL 5
+| - - - - - - + 
+| - - - - - - - INT_LITERAL 4
+| - - - - - - - INT_LITERAL 1
+| - ARRAY_PARAMETER a
+| - ARRAY_PARAMETER b
+| - ARRAY_PARAMETER c

@@ -1,0 +1,26 @@
+| ROOT 
+| DECLARED ID w
+| DECLARED ID x
+| FUNCTION example
+| - COMPOUND 
+| - - DECLARED ID c
+| - - COMPOUND 
+| - - - DECLARED ID b
+| - - - DECLARED ID z
+| - - COMPOUND 
+| - - - DECLARED ID a
+| - - - DECLARED ID x
+| - - - COMPOUND 
+| - - - - DECLARED ID c
+| - - - - DECLARED ID x
+| - - - - + 
+| - - - - - + 
+| - - - - - - + 
+| - - - - - - - - 
+| - - - - - - - - ID b
+| - - - - - - - - ID a
+| - - - - - - - ID b
+| - - - - - - ID c
+| - - - - - ID w
+| - PARAMETER a
+| - PARAMETER b

@@ -1,0 +1,31 @@
+Symtable created...
+| Scope: 0
+| Variables:
+| cat	Type: INTEGER
+| main	Type: FUNCTION_RETURNING_INTEGER
+| dog	Type: INTEGER
+| hello_world	Type: FUNCTION_RETURNING_VOID
+
+| - Scope: 1
+| - Variables:
+
+| - - Scope: 1-1
+| - - Variables:
+| - - i	Type: INTEGER
+| - - j	Type: INTEGER
+
+| - Scope: 2
+| - Variables:
+| - a	Type: INTEGER
+| - b	Type: INTEGER
+| - c	Type: INTEGER
+
+| - - Scope: 2-1
+| - - Variables:
+| - - q	Type: INTEGER
+| - - cat1	Type: INTEGER
+| - - cat2	Type: INTEGER
+| - - x	Type: INTEGER
+| - - y	Type: INTEGER
+| - - z	Type: INTEGER
+

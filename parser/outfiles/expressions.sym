@@ -1,0 +1,15 @@
+Symtable created...
+| Scope: 0
+| Variables:
+| main	Type: FUNCTION_RETURNING_INTEGER
+
+| - Scope: 1
+| - Variables:
+
+| - - Scope: 1-1
+| - - Variables:
+| - - a	Type: INTEGER
+| - - b	Type: INTEGER
+| - - c	Type: INTEGER
+| - - d	Type: INTEGER
+

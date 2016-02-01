@@ -130,11 +130,13 @@ varDeclarationList : varDeclarationList ',' varDec {
 
 varDec : ID_T { 
         ast_node t = create_ast_node(DEC_ID_N);
-        t->value_string = strdup(savedIDText); 
+        t->value_string = strdup(savedIDText);
+        t->value_int = 0;
         $$ = t; }
 | ID_T '=' expression {
         ast_node t = create_ast_node(DEC_ID_N);
         t->value_string = strdup(savedIDText);
+        t->value_int = 0;
 
         ast_node a = create_ast_node(OP_ASSIGN_N);
         a->left_child = t;
@@ -144,8 +146,9 @@ varDec : ID_T {
         ast_node t = create_ast_node(DEC_ID_N);
         //t->value_string = savedIDText;
         t->value_string = $1->value_string;
-        t->left_child = create_ast_node(INT_LITERAL_N);
-        t->left_child->value_int = atoi(savedLiteralText);
+        t->value_int = atoi(savedLiteralText);
+/*        t->left_child = create_ast_node(INT_LITERAL_N);
+        t->left_child->value_int = atoi(savedLiteralText); */
         $$ = t; }
 ;
 
@@ -394,10 +397,12 @@ expression : var '=' expression %prec EXPR_P {
 var : ID_T %prec VAR_P { 
         ast_node t = create_ast_node(ID_N);
         t->value_string = strdup(savedIDText);
+        t->value_int = 0;
         $$ = t; }
 | ID_T '[' expression ']' { 
         ast_node t = create_ast_node(ID_N);
         t->value_string = strdup(savedIDText);
+        t->value_int = -1; // Denotes a complex array index
         t->left_child = $3;
         $$ = t; }
 ;
