@@ -1,3 +1,4 @@
 *.o
 cscan
 lex.yy.c
+.DS_Store 
