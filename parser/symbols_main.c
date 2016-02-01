@@ -60,7 +60,7 @@ symboltable_t *build_symboltable(symboltable_t *table, ast_node root, ast_node c
         if (child->node_type == OP_ASSIGN_N) {
           insert_into_symboltable(table, INT_LT, child->left_child->value_string);
         // Node is a valueless declaration => add to symtab
-        } else if (child->node_type == ID_N) {
+        } else if (child->node_type == DEC_ID_N) {
           if (child->left_child == NULL) // Not an array
             insert_into_symboltable(table, INT_LT, child->value_string); 
           else
@@ -88,17 +88,23 @@ symboltable_t *build_symboltable(symboltable_t *table, ast_node root, ast_node c
       // Loop through declarations, adding them to the current level's table
       // This is the nastiest for-loop I've ever written. But it has to happen
       for (child = curr->left_child; 
+          
           // This is the nasty conditional on the for-loop:  
           child != NULL &&                      // Child is not null
             (child->node_type == OP_ASSIGN_N || // Child may be a declaration
-            child->node_type == ID_N ||
+            child->node_type == DEC_ID_N ||
             (child->node_type == ERROR_N && 
               (strcmp(child->value_string, "Invalid Variable Declaration") == 0)));
+
           child = child->right_sibling) {
         
         if (child->node_type == OP_ASSIGN_N) {
-          insert_into_symboltable(table, INT_LT, child->left_child->value_string);
-        } else if (child->node_type == ID_N) { 
+          if (child->left_child->node_type == DEC_ID_N) {
+            printf("Hash Value for %s is %d\n", child->left_child->value_string, public_hashPJW(child->left_child->value_string, 211));
+            insert_into_symboltable(table, INT_LT, child->left_child->value_string);
+          }
+        } else if (child->node_type == DEC_ID_N) { 
+          printf("Hash Value for %s is %d\n", child->value_string, public_hashPJW(child->value_string, 211));
           if (child->left_child == NULL) // Not an array
             insert_into_symboltable(table, INT_LT, child->value_string);
           else
@@ -134,6 +140,8 @@ symboltable_t *build_symboltable(symboltable_t *table, ast_node root, ast_node c
       break;
 
     default :
+      for (child = curr->left_child; child != NULL; child = child->right_sibling)
+        build_symboltable(table, root, child);
       return table;
   }
 

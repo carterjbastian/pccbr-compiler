@@ -46,7 +46,7 @@ symnode_t *create_symnode(char *name, var_lookup_type type, symhashtable_t *pare
  * Assumes both strings involved are null-terminated!!
  */
 int name_is_equal(symnode_t *node, char *name) {
-  return strcmp(node->name, name);
+  return (strcmp(node->name, name) == 0);
 }
 /*
  * =================================================
@@ -87,6 +87,9 @@ static int hashPJW(char *s, int size) {
   return h % size;
 }
 
+int public_hashPJW(char *s, int size) {
+  return hashPJW(s, size);
+}
 
 
 
@@ -95,7 +98,7 @@ static int hashPJW(char *s, int size) {
    == NOHASHSLOT, then apply the hash function to figure it out. */
 symnode_t *lookup_symhashtable(symhashtable_t *hashtable, char *name,
 				   int slot) {
-  symnode_t *node;
+  symnode_t *node = NULL;
 
   assert(hashtable);
 
@@ -322,17 +325,14 @@ void print_symhashtable(symhashtable_t *symhash, int offset) {
   for (int i = 0; i < offset; i++)
     printf("- ");
   printf("Variables:\n");
+
   // Loop through each bucket
   for (int i = 0; i < max; i++) {
+
     // Is the bucket empty?
     if (symhash->table[i] != NULL) {
-      // printf("Found a non-empty bucket!\n");
-      curr = symhash->table[i];
-      print_symnode(curr, offset);
-
       // Ensure you hit all the nodes in this bucket
-      while (curr->next) {
-        curr = curr->next;
+      for (curr = symhash->table[i]; curr != NULL; curr = curr->next) {
         print_symnode(curr, offset);
       }
     }

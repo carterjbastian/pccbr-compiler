@@ -129,11 +129,11 @@ varDeclarationList : varDeclarationList ',' varDec {
 ;
 
 varDec : ID_T { 
-        ast_node t = create_ast_node(ID_N);
+        ast_node t = create_ast_node(DEC_ID_N);
         t->value_string = strdup(savedIDText); 
         $$ = t; }
 | ID_T '=' expression {
-        ast_node t = create_ast_node(ID_N);
+        ast_node t = create_ast_node(DEC_ID_N);
         t->value_string = strdup(savedIDText);
 
         ast_node a = create_ast_node(OP_ASSIGN_N);
@@ -141,7 +141,7 @@ varDec : ID_T {
         a->left_child->right_sibling = $3;
         $$ = a; }
 | ID_T '[' INTCONST_T ']' {
-        ast_node t = create_ast_node(ID_N);
+        ast_node t = create_ast_node(DEC_ID_N);
         //t->value_string = savedIDText;
         t->value_string = $1->value_string;
         t->left_child = create_ast_node(INT_LITERAL_N);
