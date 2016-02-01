@@ -87,11 +87,6 @@ static int hashPJW(char *s, int size) {
   return h % size;
 }
 
-int public_hashPJW(char *s, int size) {
-  return hashPJW(s, size);
-}
-
-
 
 /* Look up an entry in a symhashtable, returning either a pointer to
    the symnode for the entry or NULL.  slot is where to look; if slot

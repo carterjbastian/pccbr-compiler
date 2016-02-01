@@ -139,6 +139,4 @@ void leave_scope(symboltable_t *symtab);
 
 /* print the table in a nice way */
 void print_symtab(symboltable_t *symtab);
-
-int public_hashPJW(char *s, int size);
 #endif

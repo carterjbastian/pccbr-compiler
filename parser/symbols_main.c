@@ -100,11 +100,9 @@ symboltable_t *build_symboltable(symboltable_t *table, ast_node root, ast_node c
         
         if (child->node_type == OP_ASSIGN_N) {
           if (child->left_child->node_type == DEC_ID_N) {
-            printf("Hash Value for %s is %d\n", child->left_child->value_string, public_hashPJW(child->left_child->value_string, 211));
             insert_into_symboltable(table, INT_LT, child->left_child->value_string);
           }
         } else if (child->node_type == DEC_ID_N) { 
-          printf("Hash Value for %s is %d\n", child->value_string, public_hashPJW(child->value_string, 211));
           if (child->left_child == NULL) // Not an array
             insert_into_symboltable(table, INT_LT, child->value_string);
           else
