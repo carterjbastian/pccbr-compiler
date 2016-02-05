@@ -11,14 +11,31 @@
  *  - Declarations of ast-related functions (implemented in ast.c)
  *
  */
+//#include "symtab.h"
 
 #ifndef AST_H_
 #define AST_H_
 
 #include <stdio.h>
+
 /* 
  * The full enumeration of types of nodes in an Abstract Syntax Tree.
  */
+
+
+/* The full enumeration of types of lbles in the C subset */
+typedef enum { INT_LT,
+               INT_ARRAY_LT,
+               FUNC_INT_LT,
+               FUNC_VOID_LT,
+               ERROR_LT} var_lookup_type;
+
+typedef struct {
+  int val;
+  char *name;
+} type_name_pair;
+
+
 typedef enum { ROOT_N,
 	       OP_ASSIGN_N, OP_PLUS_N, OP_MINUS_N, OP_NEG_N, OP_TIMES_N, OP_DIVIDE_N,
                OP_MOD_N, OP_LT_N, OP_LTE_N, OP_GT_N, OP_GTE_N, OP_EQUALS_N, 
@@ -101,7 +118,9 @@ struct ast_node_struct {
 
   char *value_string;		/* for IDs, errors, null nodes, etc. */
   int value_int;		/* for INT_LITERAL */
-  
+
+  var_lookup_type dtype;                    /* Data type for expressions and vars */
+  int lineno;                   /* Line number for var declarations */  
 };
 
 /* Create a node with a given token type and return a pointer to the

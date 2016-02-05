@@ -42,6 +42,7 @@ char savedFuncText[MAXTOKENLENGTH];
 
 %code requires {
   #include "ast.h"
+  #include "symtab.h"
   #define YYSTYPE ast_node
 }
 
@@ -110,6 +111,7 @@ varDeclaration : INT_T varDeclarationList ';' %prec NON_FUNC_DEC { $$ = $2; }
 | INT_T error ';' {
         ast_node t = create_ast_node(ERROR_N);
         t->value_string = "Invalid Variable Declaration";
+        t->lineno = yylineno;
         fprintf(error_out, "PARSING ERROR:\tInvalid variable declaration discarded on line %d\n", yylineno);
         parseError++;
         $$ = t; }
@@ -132,11 +134,13 @@ varDec : ID_T {
         ast_node t = create_ast_node(DEC_ID_N);
         t->value_string = strdup(savedIDText);
         t->value_int = 0;
+        t->lineno = yylineno;
         $$ = t; }
 | ID_T '=' expression {
         ast_node t = create_ast_node(DEC_ID_N);
         t->value_string = strdup(savedIDText);
         t->value_int = 0;
+        t->lineno = yylineno;
 
         ast_node a = create_ast_node(OP_ASSIGN_N);
         a->left_child = t;
@@ -147,8 +151,7 @@ varDec : ID_T {
         //t->value_string = savedIDText;
         t->value_string = $1->value_string;
         t->value_int = atoi(savedLiteralText);
-/*        t->left_child = create_ast_node(INT_LITERAL_N);
-        t->left_child->value_int = atoi(savedLiteralText); */
+        t->lineno = yylineno;
         $$ = t; }
 ;
 
@@ -160,7 +163,7 @@ funcDeclaration : INT_T ID_T '(' formalParams ')' compoundStatement %prec FUNC_D
         
         t->left_child = $6;
         t->left_child->right_sibling = $4;
-
+        t->lineno = yylineno;
         $$ = t; }
 | VOID_T ID_T '(' formalParams ')' compoundStatement {
         ast_node t = create_ast_node(FUNC_N);
@@ -169,7 +172,7 @@ funcDeclaration : INT_T ID_T '(' formalParams ')' compoundStatement %prec FUNC_D
         
         t->left_child = $6;
         t->left_child->right_sibling = $4;
-
+        t->lineno = yylineno;
         $$ = t; }
 ;
 
@@ -195,10 +198,12 @@ formalList : formalList ',' formalParam {
 formalParam : INT_T ID_T {
         ast_node t = create_ast_node(PARAM_N);
         t->value_string = strdup(savedIDText);
-        $$ = t; }
+        $$ = t; 
+        t->lineno = yylineno; }
 | INT_T ID_T '[' ']' { 
         ast_node t = create_ast_node(ARRAY_PARAM_N);
         t->value_string = strdup(savedIDText);
+        t->lineno = yylineno;
         //t->value_string = $2->value_string;
         $$ = t; }
 ;
@@ -398,12 +403,14 @@ var : ID_T %prec VAR_P {
         ast_node t = create_ast_node(ID_N);
         t->value_string = strdup(savedIDText);
         t->value_int = 0;
+        t->lineno = yylineno;
         $$ = t; }
 | ID_T '[' expression ']' { 
         ast_node t = create_ast_node(ID_N);
         t->value_string = strdup(savedIDText);
         t->value_int = -1; // Denotes a complex array index
         t->left_child = $3;
+        t->lineno = yylineno;
         $$ = t; }
 ;
 

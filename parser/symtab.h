@@ -14,7 +14,7 @@
  */
 
 #ifndef SYMTAB_H_
-#define SYMTAB_H_
+#define SYMTAB_H_ 
 
 // System Includes
 #include <stdio.h>
@@ -31,17 +31,7 @@
  * =================================================
  */
 
-/* The full enumeration of types of lbles in the C subset */
-typedef enum { INT_LT,
-               INT_ARRAY_LT,
-               FUNC_INT_LT,
-               FUNC_VOID_LT,
-               ERROR_LT} var_lookup_type;
-
-typedef struct {
-  int val;
-  char *name;
-} type_name_pair;
+/* NOTE: var_lookup_type and type_name_pair defined in ast.h */
 
 /*
  * A Table of var_lookup_type -> string representation pairs.
@@ -71,6 +61,7 @@ typedef struct symnode {
   struct symnode  *next;	    /* next symnode in list */
   struct symhashtable *parent;
   var_lookup_type type;             /* The type of the symbol */
+  int lineno;                       /* Where in the file the symbol was declared */
 } symnode_t;
 
 
@@ -102,7 +93,7 @@ typedef struct {
  */
 
 /* Create and return an empty symnode */
-symnode_t *create_symnode(char * name, var_lookup_type type, symhashtable_t *parent);
+symnode_t *create_symnode(char * name, var_lookup_type type, symhashtable_t *parent, int lineno);
 
 /* Does the identifier in this node equal name? */
 int name_is_equal(symnode_t *node, char *name);
@@ -119,7 +110,7 @@ symboltable_t *create_symboltable();
 /* Insert an entry into the innermost scope of symbol table.  First
    make sure it's not already in that scope.  Return a pointer to the
    entry. */
-symnode_t *insert_into_symboltable(symboltable_t *symtab, var_lookup_type type, char *name);
+symnode_t *insert_into_symboltable(symboltable_t *symtab, var_lookup_type type, char *name, int lineno);
 
 /* Lookup an entry in a symbol table.  If found return a pointer to it.
    Otherwise, return NULL */

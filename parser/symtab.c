@@ -40,12 +40,13 @@ void print_symnode(symnode_t *node, int offset);
  * Functions for symnodes.
  * =================================================
  */
-symnode_t *create_symnode(char *name, var_lookup_type type, symhashtable_t *parent) {
+symnode_t *create_symnode(char *name, var_lookup_type type, symhashtable_t *parent, int lineno) {
   symnode_t *node = (symnode_t *) calloc(1, sizeof(symnode_t));
   assert(node);
   node->name = name;
   node->type = type;
   node->parent = parent;
+  node->lineno = lineno;
 
   return node;
 }
@@ -125,7 +126,7 @@ symnode_t *lookup_symhashtable(symhashtable_t *hashtable, char *name,
 
 /* Insert a new entry into a symhashtable, but only if it is not
    already present. */
-symnode_t *insert_into_symhashtable(symhashtable_t *hashtable, var_lookup_type type, char *name) {
+symnode_t *insert_into_symhashtable(symhashtable_t *hashtable, var_lookup_type type, char *name, int lineno) {
 
   assert(hashtable);
 
@@ -135,7 +136,7 @@ symnode_t *insert_into_symhashtable(symhashtable_t *hashtable, var_lookup_type t
   /* error check if node already existed! */
 
   if (node == NULL) {
-    node = create_symnode(name, type, hashtable);
+    node = create_symnode(name, type, hashtable, lineno);
     node->next = hashtable->table[slot];
     hashtable->table[slot] = node;
   }
@@ -182,7 +183,7 @@ symboltable_t  *create_symboltable() {
  * make sure it's not already in that scope.  Return a pointer to the
  * entry. 
  */
-symnode_t *insert_into_symboltable(symboltable_t *symtab, var_lookup_type type, char *name) {
+symnode_t *insert_into_symboltable(symboltable_t *symtab, var_lookup_type type, char *name, int lineno) {
 
   assert(symtab);
   assert(symtab->leaf);
@@ -192,7 +193,7 @@ symnode_t *insert_into_symboltable(symboltable_t *symtab, var_lookup_type type, 
   /* error check!! */
   
   if (node == NULL) {
-    node = insert_into_symhashtable(symtab->leaf, type, name);
+    node = insert_into_symhashtable(symtab->leaf, type, name, lineno);
     return node;
   } else {
     return NULL;
@@ -370,5 +371,5 @@ void print_symnode(symnode_t *node, int offset) {
   for (int i = 0; i < offset; i++)
     printf("- ");
 
-  printf("%s\tType: %s\n", node->name, LT_NAME(node->type));
+  printf("%s\tType: %s\tLine: %d\n", node->name, LT_NAME(node->type), node->lineno);
 }

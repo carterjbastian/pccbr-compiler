@@ -19,7 +19,7 @@
 
 // Local Includes:
 #include "ast.h"
-
+#include "symtab.h"
 // Public Function Definitions:
 /* 
  * Function: create_ast_node
@@ -131,4 +131,5 @@ void print_ast(FILE *fp, ast_node root, int depth) {
   ast_node child;
   for (child = root->left_child; child != NULL; child = child->right_sibling)
     print_ast(fp, child, depth + 1);
+
 }  
