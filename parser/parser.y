@@ -418,89 +418,108 @@ rValue : expression '+' expression {
         ast_node t = create_ast_node(OP_PLUS_N);
         t->left_child = $1;
         t->left_child->right_sibling = $3;
+        t->lineno = yylineno;
         $$ = t; }
 | expression '-' expression { 
         ast_node t = create_ast_node(OP_MINUS_N);
         t->left_child = $1;
         t->left_child->right_sibling = $3;
+        t->lineno = yylineno;
         $$ = t; }
 | expression '*' expression { 
         ast_node t = create_ast_node(OP_TIMES_N);
         t->left_child = $1;
         t->left_child->right_sibling = $3;
+        t->lineno = yylineno;
         $$ = t; }
 | expression '/' expression { 
         ast_node t = create_ast_node(OP_DIVIDE_N);
         t->left_child = $1;
         t->left_child->right_sibling = $3;
+        t->lineno = yylineno;
         $$ = t; }
 | expression '%' expression { 
         ast_node t = create_ast_node(OP_MOD_N);
         t->left_child = $1;
         t->left_child->right_sibling = $3;
+        t->lineno = yylineno;
         $$ = t; }
 | expression '<' expression { 
         ast_node t = create_ast_node(OP_LT_N);
         t->left_child = $1;
         t->left_child->right_sibling = $3;
+        t->lineno = yylineno;
         $$ = t; }
 | expression LT_EQUAL_T expression { 
         ast_node t = create_ast_node(OP_LTE_N);
         t->left_child = $1;
         t->left_child->right_sibling = $3;
+        t->lineno = yylineno;
         $$ = t; }
 | expression '>' expression { 
         ast_node t = create_ast_node(OP_GT_N);
         t->left_child = $1;
         t->left_child->right_sibling = $3;
+        t->lineno = yylineno;
         $$ = t; }
 | expression GT_EQUAL_T expression { 
         ast_node t = create_ast_node(OP_GTE_N);
         t->left_child = $1;
         t->left_child->right_sibling = $3;
+        t->lineno = yylineno;
         $$ = t; }
 | expression ISEQUAL_T expression { 
         ast_node t = create_ast_node(OP_EQUALS_N);
         t->left_child = $1;
         t->left_child->right_sibling = $3;
+        t->lineno = yylineno;
         $$ = t; }
 | expression NOTEQUAL_T expression { 
         ast_node t = create_ast_node(OP_NOTEQUALS_N);
         t->left_child = $1;
         t->left_child->right_sibling = $3;
+        t->lineno = yylineno;
         $$ = t; }
 | expression AND_T expression { 
         ast_node t = create_ast_node(OP_AND_N);
         t->left_child = $1;
         t->left_child->right_sibling = $3;
+        t->lineno = yylineno;
         $$ = t; }
 | expression OR_T expression { 
         ast_node t = create_ast_node(OP_OR_N);
         t->left_child = $1;
         t->left_child->right_sibling = $3;
+        t->lineno = yylineno;
         $$ = t; }
 | '!' expression { 
         ast_node t = create_ast_node(OP_COMPLEMENT_N);
         t->left_child = $2;
+        t->lineno = yylineno;
         $$ = t; }
 | '-' expression  %prec UNARYM  { 
         ast_node t = create_ast_node(OP_UNARYM_N);
         t->left_child = $2;
+        t->lineno = yylineno;
         $$ = t; }
 | var { $$ = $1; }
 | INCREMENT_T var { 
         ast_node t = create_ast_node(OP_INCREMENT_N);
         t->left_child = $2;
+        t->lineno = yylineno;
         $$ = t; }
 | DECREMENT_T var { 
         ast_node t = create_ast_node(OP_DECREMENT_N);
         t->left_child = $2;
+        t->lineno = yylineno;
         $$ = t; }
 | '(' expression ')' { $$ = $2; }
 | call { $$ = $1; }
 | INTCONST_T {
         ast_node t = create_ast_node(INT_LITERAL_N);
         t->value_int = atoi(savedLiteralText);
+        t->dtype = INT_LT;
+        t->lineno = yylineno;
         $$ = t; }
 ;
 
@@ -508,6 +527,7 @@ call : ID_T '(' args ')' {
         ast_node t = create_ast_node(FUNC_CALL_N);
         t->value_string = strdup(savedIDText);
         t->left_child = $3;
+        t->lineno = yylineno;
         $$ = t;
      }
 ;

@@ -37,7 +37,10 @@ typedef struct {
 
 
 typedef enum { ROOT_N,
-	       OP_ASSIGN_N, OP_PLUS_N, OP_MINUS_N, OP_NEG_N, OP_TIMES_N, OP_DIVIDE_N,
+               /* WARNING: Any additional op nodes MUST go between OP_ASSIGN_N
+                * and OP_DECREMENT_N in this enum or all hell breaks loose.
+                */
+               OP_ASSIGN_N, OP_PLUS_N, OP_MINUS_N, OP_NEG_N, OP_TIMES_N, OP_DIVIDE_N,
                OP_MOD_N, OP_LT_N, OP_LTE_N, OP_GT_N, OP_GTE_N, OP_EQUALS_N, 
                OP_NOTEQUALS_N, OP_AND_N, OP_OR_N,
                OP_COMPLEMENT_N, OP_UNARYM_N, OP_INCREMENT_N, OP_DECREMENT_N,
@@ -119,7 +122,7 @@ struct ast_node_struct {
   char *value_string;		/* for IDs, errors, null nodes, etc. */
   int value_int;		/* for INT_LITERAL */
 
-  var_lookup_type dtype;                    /* Data type for expressions and vars */
+  var_lookup_type dtype;        /* Data type for expressions and vars */
   int lineno;                   /* Line number for var declarations */  
 };
 
@@ -130,5 +133,7 @@ ast_node create_ast_node(ast_node_type node_type);
 /* Print the contents of a subtree of an abstract syntax tree, given
    the root of the subtree and the depth of the subtree root. */
 void print_ast(FILE *fp, ast_node root, int depth);
+
+void print_checked_ast(FILE *fp, ast_node root, int depth);
 
 #endif // AST_H_
