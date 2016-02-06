@@ -74,6 +74,7 @@ typedef struct symhashtable {
   int level;			/* level of scope, 0 is outermost */
   int sibno;                    /* 0 is leftmost */
   struct symhashtable *parent, *child, *rightsib;
+  ast_node declaring_func;
   
 } symhashtable_t;
 
@@ -116,10 +117,15 @@ symnode_t *insert_into_symboltable(symboltable_t *symtab, var_lookup_type type, 
    Otherwise, return NULL */
 symnode_t *lookup_in_symboltable(symboltable_t *symtab, char *name);
 
+ast_node lookup_func_def_node(symboltable_t *symtab);
+
+/* Look up calling function declaration node for current scope 
+   Return the calling node; If no caller return NULL */
+ast_node get_function_def_node(symboltable_t *symtab);
 
 /* Enter a new scope. */
 //void enter_scope(symboltable_t *symtab, int type, ast_node node);
-void enter_scope(symboltable_t *symtab);
+void enter_scope(symboltable_t *symtab, ast_node caller);
 
 /* Leave a scope. */
 void leave_scope(symboltable_t *symtab);

@@ -92,7 +92,7 @@ symboltable_t *build_symboltable(symboltable_t *table, ast_node root, ast_node c
 
 
     case COMPOUND_STMT_N :
-      enter_scope(table);
+      enter_scope(table, NULL);
 
       // Loop through declarations, adding them to the current level's table
       // This is the nastiest for-loop I've ever written. But it has to happen
@@ -129,7 +129,7 @@ symboltable_t *build_symboltable(symboltable_t *table, ast_node root, ast_node c
 
 
     case FUNC_N :
-      enter_scope(table);
+      enter_scope(table, curr);
 
       // Loop past the compound statement (function body) and then to the params
       for (child = curr->left_child->right_sibling; child != NULL; child = child->right_sibling) {

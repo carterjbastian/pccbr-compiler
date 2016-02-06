@@ -227,6 +227,25 @@ symnode_t *lookup_in_symboltable(symboltable_t  *symtab, char *name) {
   return node;
 }
 
+/* lookup_func_def_node
+ *
+ * Lookup the function definition for the current node
+ */
+ast_node lookup_func_def_node(symboltable_t *symtab) {
+  ast_node node;
+  symhashtable_t *hashtable;
+
+  assert(symtab);
+
+  for (hashtable = symtab->leaf;
+       (!hashtable->declaring_func);
+       hashtable = hashtable->parent); 
+  
+  node = hashtable->declaring_func;
+  assert(node);
+  return node;
+
+}
 
 /*
  * Create the name for a scope based on the current state of the levels aray
@@ -253,7 +272,7 @@ static char *create_name() {
  * Creates a new symhashtable at the next level and appropriate place.
  *
  */
-void enter_scope(symboltable_t *symtab) {
+void enter_scope(symboltable_t *symtab, ast_node caller) {
   assert(symtab);
   assert(symtab->leaf);
 
@@ -268,6 +287,7 @@ void enter_scope(symboltable_t *symtab) {
   // Set up the symhashtable with the correct basic values
   next->name = create_name(); // WRITE THE NAMING PROTOCOL
   next->level = curr->level + 1;
+  next->declaring_func = caller;
 
   // Create a new symhashtable at the right place
   if (symtab->leaf->child) {
@@ -358,6 +378,16 @@ void print_symhashtable(symhashtable_t *symhash, int offset) {
         print_symnode(curr, offset);
       }
     }
+  }
+
+  if (symhash->declaring_func) {
+    ast_node caller = symhash->declaring_func;
+    printf("| Caller is %s\n", caller->value_string);
+    printf("| Return type is: ");
+    if (caller->value_int == 0)
+      printf("void\n");
+    else
+      printf("int\n");
   }
   printf("\n");
 }
