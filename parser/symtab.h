@@ -23,7 +23,7 @@
 
 // Local Includes
 #include "ast.h"
-
+#include "types.h"
 
 /*
  * ================================================= 
@@ -31,7 +31,13 @@
  * =================================================
  */
 
-/* NOTE: var_lookup_type and type_name_pair defined in ast.h */
+/* NOTE: var_lookup_type */
+
+/* A struct used for ast_node_type -> string value conversion table */
+typedef struct {
+  int val;
+  char *name;
+} type_name_pair;
 
 /*
  * A Table of var_lookup_type -> string representation pairs.
@@ -64,7 +70,6 @@ typedef struct symnode {
   int lineno;                       /* Where in the file the symbol was declared */
 } symnode_t;
 
-
 /* Hash table for a given scope in a symbol table. */
 
 typedef struct symhashtable {
@@ -78,14 +83,10 @@ typedef struct symhashtable {
   
 } symhashtable_t;
 
-
-
 /* Symbol table for all levels of scope. */
 typedef struct {
   symhashtable_t *root, *leaf;
 } symboltable_t;
-
-
 
 /* 
  * =================================================
@@ -117,11 +118,13 @@ symnode_t *insert_into_symboltable(symboltable_t *symtab, var_lookup_type type, 
    Otherwise, return NULL */
 symnode_t *lookup_in_symboltable(symboltable_t *symtab, char *name);
 
-ast_node lookup_func_def_node(symboltable_t *symtab);
+/* Lookup an entry in a symbol table. If found return symbol_t*.
+   Otherwise, return NULL */
+symnode_t *lookup_in_symhashtable(symhashtable_t *hashtable, char *name); 
 
 /* Look up calling function declaration node for current scope 
    Return the calling node; If no caller return NULL */
-ast_node get_function_def_node(symboltable_t *symtab);
+ast_node lookup_func_def_node(symboltable_t *symtab);
 
 /* Enter a new scope. */
 //void enter_scope(symboltable_t *symtab, int type, ast_node node);

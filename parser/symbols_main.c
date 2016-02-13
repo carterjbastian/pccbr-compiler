@@ -18,6 +18,7 @@
 
 #include "ast.h"
 #include "symtab.h"
+#include "tree_check.h"
 
 /* Only include info needed for autoTesting if in Test Mode */
 #ifdef _TESTING_
@@ -56,7 +57,7 @@ FILE *error_out;  // Global conditionally used in testing mode only
  */
 symboltable_t *build_symboltable(symboltable_t *table, ast_node root, ast_node curr) {
   ast_node it;
-  ast_node child;  
+  ast_node child, grandchild;
   /*
    * Use this switch to parse each type of node correctly
    */
@@ -93,6 +94,7 @@ symboltable_t *build_symboltable(symboltable_t *table, ast_node root, ast_node c
 
     case COMPOUND_STMT_N :
       enter_scope(table, NULL);
+      curr->scope = table->leaf;
 
       // Loop through declarations, adding them to the current level's table
       // This is the nastiest for-loop I've ever written. But it has to happen
@@ -130,6 +132,14 @@ symboltable_t *build_symboltable(symboltable_t *table, ast_node root, ast_node c
 
     case FUNC_N :
       enter_scope(table, curr);
+      curr->scope = table->leaf;
+
+      child = curr->left_child;
+      if (child->node_type == COMPOUND_STMT_N) {
+        for (grandchild = child->left_child; grandchild->right_sibling != NULL; grandchild = grandchild->right_sibling);
+        if (grandchild->node_type != RETURN_N)
+          grandchild->right_sibling = create_ast_node(RETURN_N);
+        }
 
       // Loop past the compound statement (function body) and then to the params
       for (child = curr->left_child->right_sibling; child != NULL; child = child->right_sibling) {
@@ -156,65 +166,6 @@ symboltable_t *build_symboltable(symboltable_t *table, ast_node root, ast_node c
   return table;
 }
 
-
-/*
- * Check the tree for consistency with the symbol table
- */
-int typecheck_ast(symboltable_t *table, ast_node node) {
-  ast_node child = node->left_child, rsib = node->right_sibling;
-  ast_node curr;
-  symnode_t *symbol;
-  var_lookup_type group_type;
-  int same_scope = 1; // 1 => same scope, 0 => entered deeper scope
-
-  /* Change scope if necessary */
-  if (node->node_type == FUNC_N || node->node_type == COMPOUND_STMT_N) {
-    /* FIX THIS */
-    if (table->leaf->child)
-      table->leaf = table->leaf->child;
-  }
-
-  /* Recurse on Children */
-  if (child)
-    typecheck_ast(table, child);
-
-  if (rsib)
-    typecheck_ast(table, rsib);
-
-  switch(node->node_type) {
-    case ID_N :
-      symbol = lookup_in_symboltable(table, node->value_string);
-      node->lineno = symbol->lineno;
-      node->dtype = symbol->type;
-      break;
-
-    // #swag
-    case OP_ASSIGN_N ... OP_DECREMENT_N :
-      group_type = child->dtype;
-
-      for (curr = child; curr != NULL; curr = curr->right_sibling) {
-        if (curr->dtype != group_type) {
-          // Make error reporting better?
-          fprintf(stderr, "Type Mismatch on line %d\n", node->lineno);
-          return -1;
-        }
-      }
-
-      node->dtype = group_type;
-
-      break;
-
-    case FUNC_CALL_N :
-
-    default:
-      break;
-  }
-
-  if (same_scope == 0)
-    table->leaf = table->leaf->parent;
-
-  return 0;
-} 
 /*
  * Build the AST and create a Symbol Table for it
  */
@@ -235,9 +186,9 @@ int main() {
   /* Set up the symbol tree */
   symtab = create_symboltable();
   symtab = build_symboltable(symtab, root, root);
-  int retval = typecheck_ast(symtab, root);
   printf("Symtable created...\n");
 
+  int retval = typecheck_ast(symtab, root);
   print_symtab(symtab);
   print_checked_ast(stdout, root, 0);
 

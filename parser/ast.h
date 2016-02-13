@@ -11,31 +11,16 @@
  *  - Declarations of ast-related functions (implemented in ast.c)
  *
  */
-//#include "symtab.h"
 
 #ifndef AST_H_
 #define AST_H_
 
 #include <stdio.h>
+#include "types.h"
 
 /* 
  * The full enumeration of types of nodes in an Abstract Syntax Tree.
  */
-
-
-/* The full enumeration of types of lbles in the C subset */
-typedef enum { INT_LT,
-               INT_ARRAY_LT,
-               FUNC_INT_LT,
-               FUNC_VOID_LT,
-               ERROR_LT} var_lookup_type;
-
-typedef struct {
-  int val;
-  char *name;
-} type_name_pair;
-
-
 typedef enum { ROOT_N,
                /* WARNING: Any additional op nodes MUST go between OP_ASSIGN_N
                 * and OP_DECREMENT_N in this enum or all hell breaks loose.
@@ -55,7 +40,6 @@ typedef struct {
         int val;
         char *name;
 } val_name_pair;
-
 
 /*
  * A table of ast_node_type -> string representation pairs
@@ -109,7 +93,6 @@ static val_name_pair token_table[] = {
 #define NODE_INDEX(X)    ( (X) - ROOT_N)
 #define NODE_NAME(X)     ( token_table[ NODE_INDEX((X)) ].name)
 
-
 /* Structure for nodes of the abstract syntax tree.  Uses the
    left-child/right-sibling representation, so that each node can have
    a variable number of children.  You should add or remove fields as
@@ -117,7 +100,8 @@ static val_name_pair token_table[] = {
 typedef struct ast_node_struct *ast_node;
 struct ast_node_struct {
   ast_node_type node_type;
-  ast_node left_child, right_sibling;
+  ast_node left_child, right_sibling, returns_to;
+  void *scope;
 
   char *value_string;		/* for IDs, errors, null nodes, etc. */
   int value_int;		/* for INT_LITERAL */

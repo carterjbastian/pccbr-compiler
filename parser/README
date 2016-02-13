@@ -1,6 +1,15 @@
 Project:  pccbr-compiler Project Symbol Table
 Authors:  Carter J. Bastian, Quinn Stearns
 
+To test our submission for the bottom-up symbol and type checker, please execute
+bottomUpTests.sh to see all of our test cases. The output from the checker will
+appear above the symbol table and ast print outs.
+
+We modified our parser to include line numbers in its saving of the tree and also
+recorded a reference to the ast node that defines new function scopes to make it easier
+to find that in our symbol table checker. We also added a reference to the scope in the
+ast to make it easier to traverse the symbol scopes.
+
 FILES:
   - symtab.c
     Implementations of symbol table functions declared in ast.c
@@ -21,6 +30,7 @@ FILES:
 
   - symbol_main.c
     A simple driver to build and traverse the parse tree to make a symbol table
+    Also does a bottom up traversal of the parse tree to verify its consistency
 
   - ast_main.c
     A simple driver to only build a parse tree using the grammar in parser.y

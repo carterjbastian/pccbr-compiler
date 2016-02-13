@@ -525,7 +525,7 @@ rValue : expression '+' expression {
 
 call : ID_T '(' args ')' {
         ast_node t = create_ast_node(FUNC_CALL_N);
-        t->value_string = strdup(savedIDText);
+        t->value_string = $1->value_string;
         t->left_child = $3;
         t->lineno = yylineno;
         $$ = t;

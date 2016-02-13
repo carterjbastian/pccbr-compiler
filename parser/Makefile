@@ -10,8 +10,8 @@ FLEXFLAGS = -ll
 .cc.o:
 	$(CC) $(CFLAGS) -c $<
 
-symtab : lex.yy.o parser.tab.o ast.o symtab.o symbols_main.o
-	$(CC) -ggdb -o $@ $(CFLAGS) lex.yy.o parser.tab.o ast.o symtab.o symbols_main.o $(FLEXFLAGS)
+symtab : lex.yy.o parser.tab.o ast.o symtab.o symbols_main.o tree_check.o
+	$(CC) -ggdb -o $@ $(CFLAGS) lex.yy.o parser.tab.o ast.o symtab.o tree_check.o symbols_main.o $(FLEXFLAGS)
 
 parse : lex.yy.o parser.tab.o ast.o symtab.o ast_main.o
 	$(CC) -o $@ $(CFLAGS) lex.yy.o parser.tab.o ast.o symtab.o ast_main.o $(FLEXFLAGS)

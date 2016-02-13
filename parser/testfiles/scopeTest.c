@@ -1,14 +1,14 @@
 int cat = 6;
 int dog;
 
-void hello_world(void) {
+void hello_world(int x, int y) {
   int i, j = 2;
   print "Hello world\n";
   print "Goodbye world\n";
   print "I sure hope this works\n";
 
   if (x == 5) {
-    print "Welcome to a new cope";
+    print "Welcome to a new scope";
     for (i = 10; i < 14; ++i)  {
       print "And another one";
     }

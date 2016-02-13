@@ -119,9 +119,10 @@ symnode_t *lookup_symhashtable(symhashtable_t *hashtable, char *name,
   return node;
 }
 
-
-
-
+/* Looks up a node in a symhashtable without knowing the hashslot */
+symnode_t *lookup_in_symhashtable(symhashtable_t *hashtable, char *name) {
+  return lookup_symhashtable(hashtable, name, NOHASHSLOT);
+}
 
 
 /* Insert a new entry into a symhashtable, but only if it is not
@@ -238,11 +239,10 @@ ast_node lookup_func_def_node(symboltable_t *symtab) {
   assert(symtab);
 
   for (hashtable = symtab->leaf;
-       (!hashtable->declaring_func);
+       (!hashtable->declaring_func && hashtable->parent != NULL);
        hashtable = hashtable->parent); 
   
   node = hashtable->declaring_func;
-  assert(node);
   return node;
 
 }
@@ -272,7 +272,7 @@ static char *create_name() {
  * Creates a new symhashtable at the next level and appropriate place.
  *
  */
-void enter_scope(symboltable_t *symtab, ast_node caller) {
+void enter_scope(symboltable_t *symtab, ast_node definer) {
   assert(symtab);
   assert(symtab->leaf);
 
@@ -287,7 +287,7 @@ void enter_scope(symboltable_t *symtab, ast_node caller) {
   // Set up the symhashtable with the correct basic values
   next->name = create_name(); // WRITE THE NAMING PROTOCOL
   next->level = curr->level + 1;
-  next->declaring_func = caller;
+  next->declaring_func = definer;
 
   // Create a new symhashtable at the right place
   if (symtab->leaf->child) {
@@ -381,10 +381,10 @@ void print_symhashtable(symhashtable_t *symhash, int offset) {
   }
 
   if (symhash->declaring_func) {
-    ast_node caller = symhash->declaring_func;
-    printf("| Caller is %s\n", caller->value_string);
+    ast_node definer = symhash->declaring_func;
+    printf("| definer is %s\n", definer->value_string);
     printf("| Return type is: ");
-    if (caller->value_int == 0)
+    if (definer->value_int == 0)
       printf("void\n");
     else
       printf("int\n");
