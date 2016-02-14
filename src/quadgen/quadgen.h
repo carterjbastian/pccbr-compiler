@@ -37,5 +37,7 @@ struct quad_struct {
 
 symnode_t *code_gen(ast_node node, symboltable_t *table);
 
+symnode_t *NewTemp(symboltable_t *table, var_lookup_type type);
+
 #endif // QUAD_GEN_
 

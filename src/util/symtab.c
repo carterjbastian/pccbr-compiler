@@ -27,6 +27,8 @@
 
 // Global Variable for naming functionality
 int levels[NAME_DEPTH] = { 0, 0 };
+char *constant_prefix = "#c";
+char *temp_prefix = "#t";
 
 /*
  * Local function declarations
@@ -192,20 +194,40 @@ symnode_t *insert_constant(symboltable_t *symtab, var_lookup_type type, char *na
 
   assert(symtab);
   assert(symtab->leaf);
-  
-  symnode_t *node = lookup_symhashtable(symtab->leaf, name, NOHASHSLOT);
 
-  /* error check!! */
+  int name_len = strlen(name);
+  char *typed_name = calloc(1, sizeof(char) * (name_len + 3));
+  sprintf(typed_name, "%s%s", constant_prefix, name);
+
+
+  symnode_t *node = lookup_symhashtable(symtab->leaf, typed_name, NOHASHSLOT);
   
   if (node == NULL) {
-    node = insert_into_symhashtable(symtab->leaf, type, name, lineno, CONST_VT);
+    node = insert_into_symhashtable(symtab->leaf, type, typed_name, lineno, CONST_VT);
     return node;
   } else {
     return NULL;
   }
-   
 }
 
+symnode_t *insert_temp(symboltable_t *symtab, var_lookup_type type, char *name, int lineno) {
+
+  assert(symtab);
+  assert(symtab->leaf);
+
+  int name_len = strlen(name);
+  char *typed_name = calloc(1, sizeof(char) * (name_len + 3));
+  sprintf(typed_name, "%s%s", temp_prefix, name);
+
+  symnode_t *node = lookup_symhashtable(symtab->leaf, typed_name, NOHASHSLOT);
+
+  if (node == NULL) {
+    node = insert_into_symhashtable(symtab->leaf, type, typed_name, lineno, TEMP_VT);
+    return node;
+  } else {
+    return NULL;
+  }
+}
 
 /* 
  * lookup_in_symboltable
@@ -213,17 +235,35 @@ symnode_t *insert_constant(symboltable_t *symtab, var_lookup_type type, char *na
  * Lookup an entry in a symbol table.  If found return a pointer to it.
  * Otherwise, return NULL 
  */
-symnode_t *lookup_in_symboltable(symboltable_t  *symtab, char *name) {
+symnode_t *lookup_in_symboltable(symboltable_t  *symtab, char *name, var_type vType) {
   symnode_t *node;
   symhashtable_t *hashtable;
 
 
   assert(symtab);
 
+  int base_len = strlen(name);
+  // Account for potential prefix and null termination
+  char *typed_name = calloc(1, sizeof(char) * (base_len + 3)); 
+
+  switch(vType) {
+    case TEMP_VT :
+      sprintf(typed_name, "%s%s", temp_prefix, name);
+      break;
+
+    case CONST_VT :
+      sprintf(typed_name, "%s%s", constant_prefix, name);
+      break;
+
+    default :
+      free(typed_name);
+      typed_name = name;
+  }
+
   for (node = NULL, hashtable = symtab->leaf;
        (node == NULL) &&  (hashtable != NULL);
        hashtable = hashtable->parent) {
-    node = lookup_symhashtable(hashtable, name, NOHASHSLOT);
+    node = lookup_symhashtable(hashtable, typed_name, NOHASHSLOT);
   }
 
   return node;

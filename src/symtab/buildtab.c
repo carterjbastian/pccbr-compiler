@@ -19,6 +19,7 @@
  *  IV.   Exit scope and return symbol table so far
  */
 #include "buildtab.h"
+//#include "../quadgen/quadgen.h" // For testing temp generation
 
 symboltable_t *build_symboltable(symboltable_t *table, ast_node root, ast_node curr) {
   ast_node it;
@@ -122,8 +123,9 @@ symboltable_t *build_symboltable(symboltable_t *table, ast_node root, ast_node c
       break;
 
     default :
-      if (curr->node_type == STRING_LITERAL_N)
+      if (curr->node_type == STRING_LITERAL_N) {
         insert_constant(table, STR_LT, curr->value_string, curr->lineno);
+      }
 
       if (curr->node_type == INT_LITERAL_N) {
         // ASSUMES Integers can be only up to 10 digits long
