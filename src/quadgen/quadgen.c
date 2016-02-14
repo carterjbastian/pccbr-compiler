@@ -1,12 +1,12 @@
 #include "quadgen.h"
 #include <stdio.h>
 
-quad_t create_quad(optype op, symnode_t *target, symnode_t *operand1, symnode_t *operand2) {
+quad_t create_quad(optype op, symnode_t *operand1, symnode_t *operand2, symnode_t *operand3) {
   quad_t new_quad = calloc(1, sizeof(struct quad_struct));
   new_quad->op = op;
-  new_quad->target = target;
   new_quad->operand1 = operand1;
   new_quad->operand2 = operand2;
+  new_quad->operand3 = operand3;
 
   return new_quad;
 }

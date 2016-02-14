@@ -24,9 +24,9 @@ typedef enum {
 typedef struct quad_struct *quad_t;
 struct quad_struct {
     optype op;
-    symnode_t *target;
     symnode_t *operand1;
     symnode_t *operand2;
+    symnode_t *operand3;
 };
 
 void code_gen(ast_node node, symboltable_t *table);
