@@ -122,6 +122,17 @@ symboltable_t *build_symboltable(symboltable_t *table, ast_node root, ast_node c
       break;
 
     default :
+      if (curr->node_type == STRING_LITERAL_N)
+        insert_constant(table, STR_LT, curr->value_string, curr->lineno);
+
+      if (curr->node_type == INT_LITERAL_N) {
+        // ASSUMES Integers can be only up to 10 digits long
+        char *name_buf = calloc(1, sizeof(char) * 11);
+        name_buf[10] = '\0';
+        sprintf(name_buf, "%d", curr->value_int);
+        insert_constant(table, INT_LT, name_buf, curr->lineno);
+      }
+
       for (child = curr->left_child; child != NULL; child = child->right_sibling)
         build_symboltable(table, root, child);
       return table;

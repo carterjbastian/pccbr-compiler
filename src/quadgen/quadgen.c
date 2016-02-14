@@ -1,5 +1,11 @@
 #include "quadgen.h"
+#include <string.h>
 #include <stdio.h>
+
+static const char *label_prefix = "L_";
+
+char *NewLabel(char *nodename, char *text);
+
 
 quad_t create_quad(optype op, symnode_t *target, symnode_t *operand1, symnode_t *operand2) {
   quad_t new_quad = calloc(1, sizeof(struct quad_struct));
@@ -32,6 +38,17 @@ void code_gen(ast_node node, symboltable_t *table) {
   if (rsib)
     code_gen(rsib, table);
   printf("%s\n", NODE_NAME(node->node_type));
+  printf("%s\n", NewLabel(node->node_name, LABEL_NODE_NAME(node->node_type)));
 }
 
+char *NewLabel(char *nodename, char *text) {
+  int l1 = strlen(nodename);
+  int l2 = strlen(text);
 
+  // string = "L_" + nodename + "_" + text + '\0'
+  int len = 2 + l1 + 1 + l2 + 1;
+
+  char *label = calloc(1, sizeof(char) * len);
+  sprintf(label, "%s%s_%s", label_prefix, nodename, text);
+  return label;
+}

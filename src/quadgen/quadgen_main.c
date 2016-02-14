@@ -1,3 +1,6 @@
+#include "../util/ast.h"
+#include "../util/symtab.h"
+#include "../symtab/buildtab.h"
 #include "quadgen.h"
 
 ast_node root = NULL;
@@ -11,11 +14,28 @@ int parseError = 0;
 FILE *error_out;  // Global conditionally used in testing mode only
 
 int main() {
-  // Build syntax tree
-  ast_node root = create_ast_node(NULL_N);
-  // TODO: Build symbol table
-  symboltable_t *table = NULL;
-  // Ignore symbol table checking for now?
-  // codeGen(root)
-  code_gen(root, table);
+
+  int noRoot = 0;		/* 0 means we will have a root */
+  symboltable_t *symtab;
+
+  /* Build the tree */
+  error_out = stderr;
+  noRoot = yyparse();
+
+  if (parseError && (!noRoot))
+    fprintf(stderr, "WARNING: There were %d parse errors.\nParse tree may be ill-formed.\n", parseError);
+
+  if (noRoot)
+    fprintf(stderr, "Parsing reached fatal error. No AST was constructed\n");
+
+  /* Set up the symbol tree */
+  symtab = create_symboltable();
+  symtab = build_symboltable(symtab, root, root);
+//  printf("Symtable created...\n");
+//  print_symtab(symtab);
+//  print_ast(stdout, root, 0);
+
+  code_gen(root, symtab);
+
+  return 0;
 }

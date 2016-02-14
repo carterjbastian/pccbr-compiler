@@ -49,6 +49,8 @@ static type_name_pair lt_table[] = {
   { INT_ARRAY_LT, "ARRAY_OF_INTEGERS" },
   { FUNC_INT_LT, "FUNCTION_RETURNING_INTEGER" },
   { FUNC_VOID_LT, "FUNCTION_RETURNING_VOID" },
+  { STR_LT, "CHAR_STRING" },
+  { VOID_LT, "VOID_VALUE" },
   { ERROR_LT, "VARIABLE_WITH_INVALID_DECLARATION" },
   { 0, NULL }
 };
@@ -127,6 +129,8 @@ symboltable_t *create_symboltable();
    make sure it's not already in that scope.  Return a pointer to the
    entry. */
 symnode_t *insert_into_symboltable(symboltable_t *symtab, var_lookup_type type, char *name, int lineno);
+
+symnode_t *insert_constant(symboltable_t *symtab, var_lookup_type type, char *name, int lineno);
 
 /* Lookup an entry in a symbol table.  If found return a pointer to it.
    Otherwise, return NULL */
