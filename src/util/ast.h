@@ -106,6 +106,7 @@ struct ast_node_struct {
   char *value_string;		/* for IDs, errors, null nodes, etc. */
   int value_int;		/* for INT_LITERAL */
 
+  char *node_name;              /* The name of the node */
   var_lookup_type dtype;        /* Data type for expressions and vars */
   int lineno;                   /* Line number for var declarations */  
 };
