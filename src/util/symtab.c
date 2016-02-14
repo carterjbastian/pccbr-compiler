@@ -122,7 +122,7 @@ symnode_t *lookup_in_symhashtable(symhashtable_t *hashtable, char *name) {
 
 /* Insert a new entry into a symhashtable, but only if it is not
    already present. */
-symnode_t *insert_into_symhashtable(symhashtable_t *hashtable, var_lookup_type type, char *name, int lineno) {
+symnode_t *insert_into_symhashtable(symhashtable_t *hashtable, var_lookup_type type, char *name, int lineno, var_type vType) {
 
   assert(hashtable);
 
@@ -133,7 +133,7 @@ symnode_t *insert_into_symhashtable(symhashtable_t *hashtable, var_lookup_type t
 
   if (node == NULL) {
     node = create_symnode(name, type, hashtable, lineno);
-    node->vType = LOCAL_VT;
+    node->vType = vType;
     node->next = hashtable->table[slot];
     hashtable->table[slot] = node;
   }
@@ -180,13 +180,32 @@ symnode_t *insert_into_symboltable(symboltable_t *symtab, var_lookup_type type, 
   /* error check!! */
   
   if (node == NULL) {
-    node = insert_into_symhashtable(symtab->leaf, type, name, lineno);
+    node = insert_into_symhashtable(symtab->leaf, type, name, lineno, LOCAL_VT);
     return node;
   } else {
     return NULL;
   }
    
 }
+
+symnode_t *insert_constant(symboltable_t *symtab, var_lookup_type type, char *name, int lineno) {
+
+  assert(symtab);
+  assert(symtab->leaf);
+  
+  symnode_t *node = lookup_symhashtable(symtab->leaf, name, NOHASHSLOT);
+
+  /* error check!! */
+  
+  if (node == NULL) {
+    node = insert_into_symhashtable(symtab->leaf, type, name, lineno, CONST_VT);
+    return node;
+  } else {
+    return NULL;
+  }
+   
+}
+
 
 /* 
  * lookup_in_symboltable
