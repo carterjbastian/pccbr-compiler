@@ -1,5 +1,10 @@
 #include "quadgen.h"
+#include <string.h>
 #include <stdio.h>
+
+static const char *label_prefix = "L_";
+
+char *NewLabel(char *nodename, char *text);
 
 void code_gen(ast_node node, symboltable_t *table) {
   ast_node child = node->left_child, rsib = node->right_sibling;
@@ -22,6 +27,17 @@ void code_gen(ast_node node, symboltable_t *table) {
   if (rsib)
     code_gen(rsib, table);
   printf("%s\n", NODE_NAME(node->node_type));
+  printf("%s\n", NewLabel(node->node_name, LABEL_NODE_NAME(node->node_type)));
 }
 
+char *NewLabel(char *nodename, char *text) {
+  int l1 = strlen(nodename);
+  int l2 = strlen(text);
 
+  // string = "L_" + nodename + "_" + text + '\0'
+  int len = 2 + l1 + 1 + l2 + 1;
+
+  char *label = calloc(1, sizeof(char) * len);
+  sprintf(label, "%s%s_%s", label_prefix, nodename, text);
+  return label;
+}

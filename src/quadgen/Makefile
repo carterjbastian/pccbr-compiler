@@ -27,3 +27,4 @@ quadgen: ../util/ast.o ../util/symtab.o ../symtab/buildtab.o ../parser/parser.ta
 
 clean :
 	rm -f *.o quadgen
+	cd ../symcheck; make clean
