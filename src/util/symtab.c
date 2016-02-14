@@ -75,13 +75,10 @@ symhashtable_t *create_symhashtable(int entries) {
 
   assert(hashtable->table);
 
-
   /* anything else ? */
   
   return hashtable;
 }
-
-
 
 /* Peter Weinberger's hash function, from Aho, Sethi, & Ullman
    p. 436. */
@@ -97,7 +94,6 @@ static int hashPJW(char *s, int size) {
 
   return h % size;
 }
-
 
 /* Look up an entry in a symhashtable, returning either a pointer to
    the symnode for the entry or NULL.  slot is where to look; if slot
@@ -124,7 +120,6 @@ symnode_t *lookup_in_symhashtable(symhashtable_t *hashtable, char *name) {
   return lookup_symhashtable(hashtable, name, NOHASHSLOT);
 }
 
-
 /* Insert a new entry into a symhashtable, but only if it is not
    already present. */
 symnode_t *insert_into_symhashtable(symhashtable_t *hashtable, var_lookup_type type, char *name, int lineno) {
@@ -145,9 +140,6 @@ symnode_t *insert_into_symhashtable(symhashtable_t *hashtable, var_lookup_type t
   return node;
 }
 
-
-
-
 /*
  * ================================================= 
  * Functions for symboltables.
@@ -157,7 +149,7 @@ symnode_t *insert_into_symhashtable(symhashtable_t *hashtable, var_lookup_type t
 static const int HASHSIZE = 211;
 
 /* Create an empty symbol table. */
-symboltable_t  *create_symboltable() {
+symboltable_t *create_symboltable() {
   symboltable_t *symtab = calloc(1, sizeof(symboltable_t));
   assert(symtab);
 
@@ -169,13 +161,6 @@ symboltable_t  *create_symboltable() {
   symtab->leaf = hashtable;
   return symtab;
 }
-
-
-
-
-
-
-
 
 /* 
  * instert_into_symboltable
@@ -201,10 +186,6 @@ symnode_t *insert_into_symboltable(symboltable_t *symtab, var_lookup_type type, 
   }
    
 }
-
-
-
-
 
 /* 
  * lookup_in_symboltable
@@ -322,6 +303,21 @@ void enter_scope(symboltable_t *symtab, ast_node definer) {
 void leave_scope(symboltable_t *symtab) {
   levels[symtab->leaf->level] = 0;
   symtab->leaf = symtab->leaf->parent;
+}
+
+/* Change to next child scope. */
+void change_scope(symboltable_t *symtab) {
+  symhashtable_t *old_scope = symtab->leaf;
+
+  if (!old_scope->next_child) {
+    symtab->leaf = old_scope->child;
+  }
+
+  else {
+    symtab->leaf = old_scope->next_child;
+  }
+
+  old_scope->next_child = symtab->leaf->rightsib;
 }
 
 /* print the table in a nice way */

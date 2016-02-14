@@ -13,7 +13,7 @@
 %{
 
 #include <string.h>
-#include "../parser/ast.h"
+#include "../util/ast.h"
 
 /* Include these files in the case that we are building the entire compiler */
 #ifdef FULL_BUILD_

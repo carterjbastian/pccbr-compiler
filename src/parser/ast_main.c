@@ -15,7 +15,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "ast.h"
+#include "../util/ast.h"
 
 /* Only include info needed for autoTesting if in Test Mode */
 #ifdef _TESTING_

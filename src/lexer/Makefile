@@ -3,7 +3,6 @@
 
 # Designed for scanner in C, caller in C
 
-
 CC = gcc
 FLEXFLAGS = -ll
 COMPLETEFLAGS = -D FULL_BUILD_

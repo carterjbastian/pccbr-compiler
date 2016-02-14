@@ -18,7 +18,8 @@
  *      b. Recurse on each sibling node in the array
  *  IV.   Exit scope and return symbol table so far
  */
- 
+#include "buildtab.h"
+
 symboltable_t *build_symboltable(symboltable_t *table, ast_node root, ast_node curr) {
   ast_node it;
   ast_node child, grandchild;

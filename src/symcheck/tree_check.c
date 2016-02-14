@@ -28,15 +28,24 @@ int typecheck_ast(symboltable_t *table, ast_node node) {
   int changed_scope = 0; // 0 => same scope, 1 => entered deeper scope
   int arg_count = 0;
 
+
+  printf("Current scope: %s in node of type: %s\n", table->leaf->name, NODE_NAME(node->node_type));
   /* Change scope if necessary */
   if (node->node_type == FUNC_N || node->node_type == COMPOUND_STMT_N) {
-    table->leaf = node->scope;
-    changed_scope = 1;    
+    // Change to next child scope
+    change_scope(table);
+    // table->leaf = table->leaf->child;
+    changed_scope = 1; 
   }
 
   /* Recurse on Children */
   if (child)
     typecheck_ast(table, child);
+  
+  if (changed_scope) {
+    if (table->leaf->parent)
+      table->leaf = table->leaf->parent;
+  }
 
   if (rsib)
     typecheck_ast(table, rsib);
@@ -61,7 +70,6 @@ int typecheck_ast(symboltable_t *table, ast_node node) {
         if (curr->dtype != group_type) {
           // Make error reporting better?
           fprintf(stderr, "Type Mismatch on line %d\n", node->lineno);
-          return -1;
         }
       }
 
@@ -76,7 +84,6 @@ int typecheck_ast(symboltable_t *table, ast_node node) {
       if (!symbol || (symbol->type != FUNC_INT_LT && symbol->type != FUNC_VOID_LT))  {
           // Make error reporting better?
           fprintf(stderr, "Symbol %s is not a function on line %d\n", node->value_string, node->lineno);
-          return -1;
       }
       
       // The hash table containing the parent nodes
@@ -95,22 +102,18 @@ int typecheck_ast(symboltable_t *table, ast_node node) {
             if (curr->node_type == NULL_N) break;
 
           fprintf(stderr, "Too many args in call to %s on line %d\n", node->value_string, node->lineno);
-          return -1;
         }
         
         if (curr->node_type == NULL_N) {
           fprintf(stderr, "Too few args in call to %s on line %d\n", node->value_string, node->lineno);
-          return -1;
         }
 
         if (curr->dtype == INT_LT && parent_curr->node_type != PARAM_N) {
           fprintf(stderr, "Type Mismatch on line %d\n", node->lineno);
-          return -1;
         }
 
         if (curr->dtype == INT_ARRAY_LT && parent_curr->node_type != ARRAY_PARAM_N) {
           fprintf(stderr, "Type Mismatch on line %d\n", node->lineno);
-          return -1;
         }
 
         parent_curr = parent_curr->right_sibling;
@@ -118,7 +121,6 @@ int typecheck_ast(symboltable_t *table, ast_node node) {
 
       if (parent_curr != NULL) {
           fprintf(stderr, "Too few args in call to %s on line %d\n", symbol->name, node->lineno);
-          return -1;
       }
       
       if (symbol->type == FUNC_INT_LT) {
@@ -137,19 +139,16 @@ int typecheck_ast(symboltable_t *table, ast_node node) {
       if (func_scope == NULL) {
         // Make error reporting better?
         fprintf(stderr, "Too many arguments in call to %s on line %d\n", symbol->name, node->lineno);
-        return -1;
       }
 
       if (func_scope->declaring_func->value_int == 1) {
         if(node->left_child == NULL) {
           // Make error reporting better?
           fprintf(stderr, "Void return in function that should return int on line %d\n", node->lineno);
-          return -1;
         }
 
         else if(node->left_child->dtype != INT_LT) {
           fprintf(stderr, "Bad return in function that should return int on line %d\n", node->lineno);
-          return -1;
         }
         node->dtype = INT_LT;
       }
@@ -157,7 +156,6 @@ int typecheck_ast(symboltable_t *table, ast_node node) {
       if (func_scope->declaring_func->value_int == 0) {
         if(node->left_child != NULL) {
           fprintf(stderr, "Returning value in function that should return void on line %d\n", node->lineno);
-          return -1;
         }
         
         node->dtype = VOID_LT;
@@ -170,10 +168,6 @@ int typecheck_ast(symboltable_t *table, ast_node node) {
       break;
   }
 
-  if (changed_scope) {
-    if (table->leaf->parent)
-      table->leaf = table->leaf->parent;
-  } 
-
+  printf("Leaving node %s\n", NODE_NAME(node->node_type));
   return 0;
 } 

@@ -16,8 +16,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "ast.h"
-#include "symtab.h"
+#include "../util/ast.h"
+#include "../util/symtab.h"
+#include "../symtab/buildtab.h"
 #include "tree_check.h"
 
 /* Only include info needed for autoTesting if in Test Mode */
@@ -56,9 +57,10 @@ int main() {
   symtab = create_symboltable();
   symtab = build_symboltable(symtab, root, root);
   printf("Symtable created...\n");
+  print_symtab(symtab);
+  print_ast(stdout, root, 0);
 
   int retval = typecheck_ast(symtab, root);
-  print_symtab(symtab);
   print_checked_ast(stdout, root, 0);
 
   return 0;

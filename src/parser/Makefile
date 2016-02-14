@@ -7,11 +7,8 @@ FLEXFLAGS = -ll
 
 .SUFFIXES: .c
 
-.cc.o:
-	$(CC) $(CFLAGS) -c $<
-
-parse : ../lexer/cscan.yy.o parser.tab.o ast.o ast_main.o
-	$(CC) -o $@ $(CFLAGS) ../lexer/cscan.yy.o parser.tab.o ast.o ast_main.o $(FLEXFLAGS)
+parse : ../lexer/cscan.yy.o parser.tab.o ../util/ast.o ast_main.o
+	$(CC) -o $@ $(CFLAGS) ../lexer/cscan.yy.o parser.tab.o ../util/ast.o ast_main.o $(FLEXFLAGS)
 
 test : ../lexer/cscan.yy.o parser.tab.o ast.o symtab.o symbols_main.o
 	$(CC) -c $(CFLAGS) -D _TESTING_ symbols_main.c

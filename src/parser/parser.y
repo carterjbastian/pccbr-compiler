@@ -17,7 +17,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include "ast.h"
+#include "../util/ast.h"
 
 #define YYSTYPE ast_node
 #define YYDEBUG 1
@@ -41,8 +41,8 @@ char savedFuncText[MAXTOKENLENGTH];
 %}
 
 %code requires {
-  #include "ast.h"
-  #include "symtab.h"
+  #include "../util/ast.h"
+  #include "../util/symtab.h"
   #define YYSTYPE ast_node
 }
 

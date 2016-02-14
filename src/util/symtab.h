@@ -23,7 +23,7 @@
 
 // Local Includes
 #include "ast.h"
-#include "types.h"
+#include "../share/types.h"
 
 /*
  * ================================================= 
@@ -79,6 +79,7 @@ typedef struct symhashtable {
   int level;			/* level of scope, 0 is outermost */
   int sibno;                    /* 0 is leftmost */
   struct symhashtable *parent, *child, *rightsib;
+  struct symhashtable *next_child;
   ast_node declaring_func;
   
 } symhashtable_t;
@@ -132,6 +133,9 @@ void enter_scope(symboltable_t *symtab, ast_node caller);
 
 /* Leave a scope. */
 void leave_scope(symboltable_t *symtab);
+
+/* Change to next child scope. */
+void change_scope(symboltable_t *symtab);
 
 /* print the table in a nice way */
 void print_symtab(symboltable_t *symtab);
