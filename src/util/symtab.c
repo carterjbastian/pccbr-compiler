@@ -403,3 +403,110 @@ void print_symnode(symnode_t *node, int offset) {
 
   printf("%s\tType: %s\tLine: %d\n", node->name, LT_NAME(node->type), node->lineno);
 }
+
+/* 
+ * Function: print_checked_ast
+ *  @root   - the root of the current subtree of an AST
+ *  @depth  - the current overall depth into the AST
+ *
+ * Recursively prints the contents of a subtree of an abstract syntax tree, 
+ * when provided with the root of the subtree and the 
+ * depth of the subtree root. 
+ */
+void print_checked_ast(FILE *fp, ast_node root, int depth) {
+  /* Print two spaces for every level of depth. */
+  int i;
+
+  assert(root);
+  
+  /* Syntactic sugar */
+  fprintf(fp, "| ");
+  for (i = 1; i < depth; i++)
+    fprintf(fp, "- ");
+
+  /* Print the node type. */
+  fprintf(fp, "%s ", NODE_NAME(root->node_type));
+
+  /* Print attributes specific to node types. */
+  switch (root->node_type) {
+  case ID_N:      /* print the id */
+    assert(root->value_string);
+    fprintf(fp, " (%s declared on line %d)", root->value_string, root->lineno);
+    fprintf(fp, " (type = %s)", LT_NAME(root->dtype));
+
+    if (root->value_int != 0) { 
+      if (root->value_int > 0)
+        fprintf(fp, " (array of length %d)", root->value_int);
+      else
+        fprintf(fp, " (array indexed to left-child expression)");
+    }
+
+
+    break;
+
+  case DEC_ID_N:
+    assert(root->value_string);
+    fprintf(fp, "%s", root->value_string);
+
+    if (root->value_int != 0) { 
+      if (root->value_int > 0)
+        fprintf(fp, " (array of length %d)", root->value_int);
+      else
+        fprintf(fp, " (array indexed to left-child expression)");
+    }    
+    break;
+
+  case INT_LITERAL_N:   /* print the int literal */
+    fprintf(fp, "%d", root->value_int);
+    break;
+
+  case STRING_LITERAL_N:        /* print the value of the string literal */
+    assert(root->value_string);
+    fprintf(fp, "\"%s\"", root->value_string);
+    break;
+
+  case PARAM_N:                 /* Print the name of the param */
+    assert(root->value_string);
+    fprintf(fp, "%s", root->value_string);
+    break;
+
+  case ARRAY_PARAM_N:           /* Print the name of the array parameter */
+    assert(root->value_string);
+    fprintf(fp, "%s", root->value_string);
+    break;
+
+  case FUNC_CALL_N:             /* Print the name of the function being called */
+    assert(root->value_string);
+    fprintf(fp, "%s", root->value_string);
+    break;
+
+  case NULL_N:                  /* Print the syntactic purpose of the null node */
+    fprintf(fp, "\t%s", root->value_string);
+    break;
+
+  case FUNC_N:                  /* Print the name of the function */
+    fprintf(fp, "%s", root->value_string);
+    break;
+
+  case ERROR_N:                 /* Print the type of error represented */
+    assert(root->value_string);
+    fprintf(fp, "\t%s", root->value_string);
+    break;
+
+  case OP_ASSIGN_N ... OP_DECREMENT_N :
+    fprintf(fp, " (dtype = %s)", LT_NAME(root->dtype));
+    break;
+
+  default:
+    break;
+  }
+
+  fprintf(fp, "\n");
+
+  /* Recurse on each child of the subtree root, with a depth one
+     greater than the root's depth. */
+  ast_node child;
+  for (child = root->left_child; child != NULL; child = child->right_sibling)
+    print_checked_ast(fp, child, depth + 1);
+
+}

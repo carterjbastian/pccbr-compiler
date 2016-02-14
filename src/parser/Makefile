@@ -10,15 +10,15 @@ FLEXFLAGS = -ll
 .cc.o:
 	$(CC) $(CFLAGS) -c $<
 
-symtab : ../lexer/cscan.yy.o parser.tab.o ast.o symtab.o symbols_main.o tree_check.o
-	$(CC) -ggdb -o $@ $(CFLAGS) ../lexer/cscan.yy.o parser.tab.o ast.o symtab.o tree_check.o symbols_main.o $(FLEXFLAGS)
-
 parse : ../lexer/cscan.yy.o parser.tab.o ast.o ast_main.o
 	$(CC) -o $@ $(CFLAGS) ../lexer/cscan.yy.o parser.tab.o ast.o ast_main.o $(FLEXFLAGS)
 
 test : ../lexer/cscan.yy.o parser.tab.o ast.o symtab.o symbols_main.o
 	$(CC) -c $(CFLAGS) -D _TESTING_ symbols_main.c
 	$(CC) -o $@ $(CFLAGS) -D _TESTING_ ../lexer/cscan.yy.o parser.tab.o ast.o symtab.o symbols_main.o $(FLEXFLAGS)
+
+ast.o :
+	cd ../util; make ast
 
 ../lexer/cscan.yy.o : ../lexer/cscan.l
 	cd ../lexer; make complete
@@ -34,12 +34,6 @@ parser.tab.c : parser.y
 
 ast_main.o : ast_main.c
 	$(CC) -c $(CFLAGS) $<
-
-symbols_main.o : symbols_main.c
-	$(CC) -c $(CFLAGS) symbols_main.c
-
-symtab.o : symtab.c symtab.h
-	$(CC) -c $(CFLAGS) symtab.c
 
 clean :
 	rm -f parser lex.yy.o parser.tab.o tree_main.o ast.o \

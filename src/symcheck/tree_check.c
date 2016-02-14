@@ -1,5 +1,6 @@
 #include "tree_check.h"
 #include <string.h>
+
 symhashtable_t *find_scope_for_function(symhashtable_t *parent_scope, char *func_name) {
   symhashtable_t *curr;
 

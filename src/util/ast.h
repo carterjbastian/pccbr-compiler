@@ -16,7 +16,7 @@
 #define AST_H_
 
 #include <stdio.h>
-#include "types.h"
+#include "../share/types.h"
 
 /* 
  * The full enumeration of types of nodes in an Abstract Syntax Tree.
