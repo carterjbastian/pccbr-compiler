@@ -25,10 +25,12 @@ typedef enum { ROOT_N,
                /* WARNING: Any additional op nodes MUST go between OP_ASSIGN_N
                 * and OP_DECREMENT_N in this enum or all hell breaks loose.
                 */
+               /* START OPS */
                OP_ASSIGN_N, OP_PLUS_N, OP_MINUS_N, OP_NEG_N, OP_TIMES_N, OP_DIVIDE_N,
                OP_MOD_N, OP_LT_N, OP_LTE_N, OP_GT_N, OP_GTE_N, OP_EQUALS_N, 
                OP_NOTEQUALS_N, OP_AND_N, OP_OR_N,
                OP_COMPLEMENT_N, OP_UNARYM_N, OP_INCREMENT_N, OP_DECREMENT_N,
+               /* END OPS */
                FUNC_CALL_N,
                IF_N, IF_ELSE_N, PRINT_N, READ_N, RETURN_N, FOR_N, 
                WHILE_N, DOWHILE_N, COMPOUND_STMT_N,  

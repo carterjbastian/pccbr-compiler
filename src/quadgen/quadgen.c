@@ -1,6 +1,16 @@
 #include "quadgen.h"
 #include <stdio.h>
 
+quad_t create_quad(optype op, symnode_t *target, symnode_t *operand1, symnode_t *operand2) {
+  quad_t new_quad = calloc(1, sizeof(struct quad_struct));
+  new_quad->op = op;
+  new_quad->target = target;
+  new_quad->operand1 = operand1;
+  new_quad->operand2 = operand2;
+
+  return new_quad;
+}
+
 void code_gen(ast_node node, symboltable_t *table) {
   ast_node child = node->left_child, rsib = node->right_sibling;
   int changed_scope = 0;
