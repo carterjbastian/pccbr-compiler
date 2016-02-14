@@ -12,6 +12,11 @@
  * Special Considerations:
  */
 
+#define MAX_NODE_COUNT 1000000
+
+// Global variable
+int nodeCount = 0;
+
 // System Includes:
 #include <stdio.h>
 #include <stdlib.h>
@@ -19,7 +24,23 @@
 
 // Local Includes:
 #include "ast.h"
+
 // Public Function Definitions:
+
+/* 
+ * Function: generate node name
+ */
+char *generate_node_name() {
+  assert(nodeCount < MAX_NODE_COUNT);
+  
+  char *new_name = calloc(1, sizeof(char) * 7);
+  assert(new_name);
+
+  sprintf(new_name, "%s%d", "N", nodeCount);
+  nodeCount++;
+  return new_name;
+}
+
 /* 
  * Function: create_ast_node
  *  @node_type - the type of node to be created (ast_node_type defined in ast.h)
@@ -29,6 +50,7 @@
  */
 ast_node create_ast_node(ast_node_type node_type) {
   ast_node new_node = calloc(1,sizeof(struct ast_node_struct));  // for zeros
+  new_node->node_name = generate_node_name();
   new_node->node_type = node_type;
   return new_node;
 }
@@ -54,7 +76,7 @@ void print_ast(FILE *fp, ast_node root, int depth) {
     fprintf(fp, "- ");
 
   /* Print the node type. */
-  fprintf(fp, "%s ", NODE_NAME(root->node_type));
+  fprintf(fp, "%s (%s) ", NODE_NAME(root->node_type), root->node_name);
 
   /* Print attributes specific to node types. */
   switch (root->node_type) {

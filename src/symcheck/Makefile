@@ -26,3 +26,7 @@ symcheck: ../util/ast.o ../util/symtab.o ../symtab/buildtab.o ../parser/parser.t
 
 clean :
 	rm -f *.o symcheck
+	cd ../parser; make clean
+	cd ../lexer; make clean
+	cd ../util; make clean
+	cd ../symtab; make clean
