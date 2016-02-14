@@ -85,7 +85,7 @@ static val_name_pair token_table[] = {
   { FUNC_N, "FUNCTION" },
   { NULL_N, "EMPTY_NODE" },
   { ID_N, "ID" },
-  { DEC_ID_N, "DECLARED ID"},
+  { DEC_ID_N, "DECLARED_ID"},
   { STRING_LITERAL_N, "STRING_LITERAL" },
   { INT_LITERAL_N, "INT_LITERAL"},
   { ERROR_N, "ERROR_NODE"},
@@ -94,6 +94,57 @@ static val_name_pair token_table[] = {
 
 #define NODE_INDEX(X)    ( (X) - ROOT_N)
 #define NODE_NAME(X)     ( token_table[ NODE_INDEX((X)) ].name)
+
+/*
+ * A special-version with strictly textual (no symbols) in the table.
+ * This is for label generation
+ */
+static val_name_pair label_token_table[] = {
+  { ROOT_N, "ROOT" },
+  { OP_ASSIGN_N, "ASSIGN" },
+  { OP_PLUS_N, "PLUS" },
+  { OP_MINUS_N, "MINUS" },
+  { OP_NEG_N, "NEGATION" },
+  { OP_TIMES_N, "TIMES" },
+  { OP_DIVIDE_N, "DIVIDE" },
+  { OP_MOD_N, "MODULUS" },
+  { OP_LT_N, "LESS_THAN" },
+  { OP_LTE_N, "LESS_THAN_EQ" },
+  { OP_GT_N, "GREATER_THAN" },
+  { OP_GTE_N, "GREATER_THAN_EQ" },
+  { OP_EQUALS_N, "ISEQUAL" },
+  { OP_NOTEQUALS_N, "NOTEQUAL" },
+  { OP_AND_N, "AND" },
+  { OP_OR_N, "OR" },
+  { OP_COMPLEMENT_N, "COMPLEMENT" },
+  { OP_UNARYM_N, "UNARY_MINUS" },
+  { OP_INCREMENT_N, "INCREMENT" },
+  { OP_DECREMENT_N, "DECREMENT" },
+  { FUNC_CALL_N, "FUNC_CALL" },
+  { IF_N, "IF_STMT" },
+  { IF_ELSE_N, "IF_ELSE_STMT" },
+  { PRINT_N, "PRINT_STMT" },
+  { READ_N, "READ_STMT" },
+  { RETURN_N, "RETURN_STMT" },
+  { FOR_N, "FOR_STMT" },
+  { WHILE_N, "WHILE_STMT" },
+  { DOWHILE_N, "DOWHILE_STMT" },
+  { COMPOUND_STMT_N, "COMPOUND"},
+  { DECLARATION_LIST_N, "DECLARATION_LIST" },
+  { PARAM_N, "PARAMETER" },
+  { ARRAY_PARAM_N, "ARRAY_PARAMETER" },
+  { FUNC_N, "FUNCTION" },
+  { NULL_N, "EMPTY_NODE" },
+  { ID_N, "ID" },
+  { DEC_ID_N, "DECLARED_ID"},
+  { STRING_LITERAL_N, "STRING_LITERAL" },
+  { INT_LITERAL_N, "INT_LITERAL"},
+  { ERROR_N, "ERROR_NODE"},
+  { 0, NULL }
+};
+
+#define LABEL_NODE_NAME(X)     ( label_token_table[ NODE_INDEX((X)) ].name)
+
 
 /* Structure for nodes of the abstract syntax tree.  Uses the
    left-child/right-sibling representation, so that each node can have

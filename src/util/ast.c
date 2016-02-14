@@ -33,9 +33,9 @@ int nodeCount = 0;
 char *generate_node_name() {
   assert(nodeCount < MAX_NODE_COUNT);
   
-  char *new_name = calloc(1, sizeof(char) * 7);
+  char *new_name = calloc(1, sizeof(char) * 8);
   assert(new_name);
-
+  new_name[7] = '\0';
   sprintf(new_name, "%s%d", "N", nodeCount);
   nodeCount++;
   return new_name;
