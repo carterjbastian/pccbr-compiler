@@ -133,6 +133,7 @@ symnode_t *insert_into_symhashtable(symhashtable_t *hashtable, var_lookup_type t
 
   if (node == NULL) {
     node = create_symnode(name, type, hashtable, lineno);
+    node->vType = LOCAL_VT;
     node->next = hashtable->table[slot];
     hashtable->table[slot] = node;
   }
@@ -397,7 +398,11 @@ void print_symnode(symnode_t *node, int offset) {
   for (int i = 0; i < offset; i++)
     printf("- ");
 
-  printf("%s\tType: %s\tLine: %d\n", node->name, LT_NAME(node->type), node->lineno);
+  printf("%s\tType: %s\tLine: %d\tvType: %s\n", 
+      node->name, 
+      LT_NAME(node->type), 
+      node->lineno,
+      VT_NAME(node->vType));
 }
 
 /* 

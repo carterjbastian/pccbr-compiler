@@ -56,6 +56,18 @@ static type_name_pair lt_table[] = {
 #define LT_INDEX(X)     ( (X) - INT_LT )
 #define LT_NAME(X)      ( lt_table[ LT_INDEX((X)) ].name )
 
+typedef enum { LOCAL_VT, TEMP_VT, CONST_VT } var_type;
+
+static type_name_pair vt_table[] = {
+  { LOCAL_VT, "LOCAL_VARIABLE" },
+  { TEMP_VT, "TEMP_VARIABLE" },
+  { CONST_VT, "CONSTANT_VARIABLE" },
+  { 0, NULL }
+};
+
+#define VT_INDEX(X)     ( (X) - LOCAL_VT )
+#define VT_NAME(X)      ( vt_table[ VT_INDEX((X)) ].name )
+
 
 /*
  * =================================================
@@ -68,6 +80,7 @@ typedef struct symnode {
   struct symhashtable *parent;
   var_lookup_type type;             /* The type of the symbol */
   int lineno;                       /* Where in the file the symbol was declared */
+  var_type vType;                   /* The type of the variable (temp, const, local) */
 } symnode_t;
 
 /* Hash table for a given scope in a symbol table. */
