@@ -5,10 +5,14 @@
 #include "../util/symtab.h"
 
 typedef enum {
+  /* NULL */
+  NULL_QOP,
   /* ASSIGN */
   ASSN_QOP,
+  /* MEMORY */
+  LOAD_QOP,
   /* ARITHMETIC */
-  ADD_QOP, SUB_QOP, MULL_QOP, DIV_QOP,
+  ADD_QOP, SUB_QOP, MULL_QOP, DIV_QOP, MOD_QOP,
   /* MOVEMENT */
   GOTO_QOP,
   /* CONDITIONALS */
@@ -27,9 +31,11 @@ struct quad_struct {
     symnode_t *operand1;
     symnode_t *operand2;
     symnode_t *operand3;
+
+    quad_t next;
 };
 
-void code_gen(ast_node node, symboltable_t *table);
+symnode_t *code_gen(ast_node node, symboltable_t *table);
 
 #endif // QUAD_GEN_
 

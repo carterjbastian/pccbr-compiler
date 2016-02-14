@@ -11,7 +11,7 @@ quad_t create_quad(optype op, symnode_t *operand1, symnode_t *operand2, symnode_
   return new_quad;
 }
 
-void code_gen(ast_node node, symboltable_t *table) {
+symnode_t *code_gen(ast_node node, symboltable_t *table, quad_t list) {
   ast_node child = node->left_child, rsib = node->right_sibling;
   int changed_scope = 0;
 
@@ -21,17 +21,66 @@ void code_gen(ast_node node, symboltable_t *table) {
     changed_scope = 1; 
   }
 
-  /* Recurse on Children */
-  if (child)
-    code_gen(child, table);
-  
+  switch(node->node_type) {
+    case ROOT_N {
+      // for each child node
+        // code_gen(child)
+      break;
+    }
+
+    case OP_ASSIGN_N {
+      // t0 <- newTemp()
+      // rightVar = codeGen(rightChild)
+      // quad(assn, t0, rightVar, -)
+      // leftVar = codeGen(leftChild)
+      // quad(assn, leftVar, t0, -)
+      // addQuad
+      // return leftVar
+      break;
+    }
+
+    case OP_PLUS_N {
+      // leftVar = codeGen(leftChild)
+      // rightVar = codeGen(rightChild)
+      // t0 = newTemp()
+      // quad(add, t0, leftVar, rightVar) 
+      // return t0
+    }
+
+    case OP_MINUS_N {
+      // Same as plus
+    }
+
+    case OP_TIMES_N {
+      // Same as plus
+    }
+
+    case OP_DIV_N {
+      // Same as minus
+    }
+
+    case OP_TIMES_N {
+      // Same as div
+    }
+
+    case OP_NEG_N {
+      // x = codeGen(leftChild)
+      // t0 = newTemp()
+      // t1 = newTemp()
+      // quad(load, t1, 0, -);
+      // quad(sub, t0, t1, leftVar)
+      // return t0
+    }
+
+    case OP_MOD
+      // Same as divide
+  }
+
   if (changed_scope) {
     table->leaf = table->leaf->parent;
   }
 
-  if (rsib)
-    code_gen(rsib, table);
-  printf("%s\n", NODE_NAME(node->node_type));
+  return NULL;
 }
 
 
