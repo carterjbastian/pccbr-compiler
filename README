@@ -1,16 +1,54 @@
 Project:  pccbr-compiler Project Symbol Table
 Authors:  Carter J. Bastian, Quinn Stearns
 
-To test our submission for the bottom-up symbol and type checker, please execute
-bottomUpTests.sh to see all of our test cases. The output from the checker will
-appear above the symbol table and ast print outs.
+We have udpated the pccbr compiler to include support for generating an intermediate
+representation of our source. This update comes with a major restructuring of our
+source code (outlined below). Our quadgen code creates a linked list of three-address
+operations that will be easily converted in assembly.
 
-We modified our parser to include line numbers in its saving of the tree and also
-recorded a reference to the ast node that defines new function scopes to make it easier
-to find that in our symbol table checker. We also added a reference to the scope in the
-ast to make it easier to traverse the symbol scopes.
+In order to build the quad generator:
 
+cd src/quadgen
+make
+
+In order to execute our tests, run:
+
+src/quadgen/quadTests.sh
+
+We confirmed the results of our test cases manually. The results of the test will appear
+in src/quadgen/outfiles as .quad files.
+
+Relevant source code appears primarily in quadgen/quadgen.c. Our quad data structures
+are defined in quadgen.h.
 FILES:
+
+|__src
+   |__lexer
+   |  |__cscan.c
+   |  |__cscan.l
+   |
+   |__parser
+   |  |__parser.y
+   |  |__ast_main.c
+   |
+   |__symtab
+   |  |__buildtab.c
+   |
+   |__symcheck
+   |  |__treecheck.c
+   |
+   |__share
+   |  |__types.h
+   |
+   |__util
+   |  |__ast.c
+   |  |__symtab.c
+   |
+   |__quadgen
+      |__quadgen.c
+      |__quad_main.c
+
+
   - symtab.c
     Implementations of symbol table functions declared in ast.c
 
@@ -35,6 +73,9 @@ FILES:
   - ast_main.c
     A simple driver to only build a parse tree using the grammar in parser.y
 
+  - quadgen.c
+    This file contains our implementation of a IR-generator, which genrates three
+    address quads
 
 DEPENDENCIES:
 - Our build requires Bison 3.0.0 or later. Notice that Mac's generally have an
@@ -121,6 +162,15 @@ ERROR REPORTING AND RECOVERY:
   Edge cases related to error reporting and recovery are tested in the file
   testfiles/declaredErrors.c
 
+NOTES ON SYMBOL CHECKER:
+To test our submission for the bottom-up symbol and type checker, please execute
+bottomUpTests.sh to see all of our test cases. The output from the checker will
+appear above the symbol table and ast print outs.
+
+We modified our parser to include line numbers in its saving of the tree and also
+recorded a reference to the ast node that defines new function scopes to make it easier
+to find that in our symbol table checker. We also added a reference to the scope in the
+ast to make it easier to traverse the symbol scopes.
 
 USAGE:
 To build and print the symbol table for any given file:
