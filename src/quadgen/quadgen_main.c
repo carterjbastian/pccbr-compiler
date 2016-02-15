@@ -3,7 +3,10 @@
 #include "../symtab/buildtab.h"
 #include "quadgen.h"
 
+#include <stdio.h>
+
 ast_node root = NULL;
+quad_t list;
 
 extern int yyparse();
 extern int yydebug;
@@ -17,6 +20,7 @@ int main() {
 
   int noRoot = 0;		/* 0 means we will have a root */
   symboltable_t *symtab;
+  list = NULL;
 
   /* Build the tree */
   error_out = stderr;
@@ -33,9 +37,10 @@ int main() {
   symtab = build_symboltable(symtab, root, root);
   printf("Symtable created...\n");
   print_symtab(symtab);
-//  print_ast(stdout, root, 0);
+  print_ast(stdout, root, 0);
 
   code_gen(root, symtab);
 
+  print_quad_list(stdout, list);
   return 0;
 }
