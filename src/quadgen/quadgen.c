@@ -178,6 +178,71 @@ symnode_t *code_gen(ast_node node, symboltable_t *table, quad_t list) {
     // (post_return, t, func_call, -)
     // return t
 
+  case IF_N:
+    // x = codeGen(leftChild)
+    // L1 = label("END_IF")
+    // (ifFalse, x, L1, -)
+    // codeGen(rightChild)
+    // (label, L1, -, -)
+
+  case IF_ELSE_N:
+    // x = codeGen(leftChild)
+    // L1 = newlabel("ELSE")
+    // L2 = newLabel("END_IF")
+    // (ifFalse, x, L1, -)
+    // codeGen(second_child)
+    // (goto, L2, -, -)
+    // (label, L1, -, -)
+    // codeGen(third_child)
+    // (label, L2, -, -)
+
+  case PRINT_N:
+    // x = codeGen(leftChild)
+    // (print, x, -, -)
+
+  case READ_N:
+    // NOTE: This might need more thinking through cause we're probably expecting to write to an
+    // address. In this conception t0 returns the address of the string stored in memory.
+    
+    // t0 = newTemp()
+    // (read, t0, -, -)
+    // return t0
+
+  case RETURN_N:
+    // t0 = newTemp()
+    // x = codeGen(leftChild)
+    // (assn, t0, x, -)
+    // (return, t0, -, -)
+
+  case FOR_N:
+    // x = codeGen(leftChild)
+    // L1 = newLable("COND")
+    // L2 = newLable("END_FOR")
+    // (label, L1, -, -)
+    // y = codeGen(secondChild)
+    // (ifFalse, y, L2, -)
+    // codeGen(fourthChild)
+    // codeGen(thirdChild)
+    // (goto, L1, -, -)
+    // (label, L2, -, -)
+
+  case WHILE_N:
+    // L1 = newLabel("COND")
+    // L2 = newLabel("END_WHILE")
+    // label(L1, -, -, -)
+    // x = codeGen(leftChild)
+    // (ifFalse, x, L2, -)
+    // codeGen(rightChild)
+    // (goto, L1, -, -)
+    // label(L2, -, -, -)
+
+  case DO_WHILE_N:
+    // L1 = newLabel("START")
+    // (label, L1, -, -)
+    // codeGen(rightChild)
+    // x = codeGen(leftChild)
+    // (ifTrue, x, L1, -) 
+    
   if (changed_scope) {
     table->leaf = table->leaf->parent;
   }
