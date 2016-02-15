@@ -1,6 +1,8 @@
 #ifndef QUAD_GEN_
 #define QUAD_GEN_
 
+#include <stdio.h>
+
 #include "../util/ast.h"
 #include "../util/symtab.h"
 
@@ -37,7 +39,8 @@ struct quad_struct {
 
 symnode_t *code_gen(ast_node node, symboltable_t *table);
 
-symnode_t *NewTemp(symboltable_t *table, var_lookup_type type);
+symnode_t *NewTemp(symboltable_t *table);
 
+void print_quad_list(FILE *fp, quad_t list);
 #endif // QUAD_GEN_
 
