@@ -25,6 +25,32 @@ typedef enum {
   FUNC_PRO_QOP, FUNC_EP_QOP, ARG_QOP
 } optype;
 
+static val_name_pair qop_table [] = {
+  { NULL_QOP, "NULL_QOP" },
+  { ASSN_QOP, "ASSN_QOP" },
+  { ADD_QOP,  "ADD_QOP" },
+  { SUB_QOP, "SUB_QOP" },
+  { MULL_QOP, "MULL_QOP" },
+  { DIV_QOP, "DIV_QOP" },
+  { MOD_QOP, "MOD_QOP" },
+  { GOTO_QOP, "GOTO_QOP" },
+  { IF_FALSE_QOP, "IF_FALSE_QOP" },
+  { IF_TRUE_QOP, "IF_TRUE_QOP" },
+  { EQ_QOP, "EQ_QOP" },
+  { LT_QOP, "LT_QOP" },
+  { GT_QOP, "GT_QOP" },
+  { LTE_QOP, "LTE_QOP" },
+  { GTE_QOP, "GTE_QOP" },
+  { LABEL_QOP, "LABEL_QOP" },
+  { PRINT_QOP, "PRINT_QOP" },
+  { READ_QOP, "READ_QOP" },
+  { FUNC_PRO_QOP, "FUNC_PRO_QOP" },
+  { FUNC_EP_QOP, "FUNC_EP_QOP" },
+  { ARG_QOP, "ARG_QOP"} };
+  
+#define QOP_IDX(X)    ( (X) - NULL_QOP )
+#define QOP_NAME(X)   ( qop_table[ QOP_IDX((X)) ].name )
+
 typedef struct quad_struct *quad_t;
 struct quad_struct {
     optype op;
