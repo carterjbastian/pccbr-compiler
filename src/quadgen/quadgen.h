@@ -35,6 +35,7 @@ static val_name_pair qop_table [] = {
   { MULL_QOP, "MULL_QOP" },
   { DIV_QOP, "DIV_QOP" },
   { MOD_QOP, "MOD_QOP" },
+  { INDEX_QOP, "INDEX_QOP" },
   { GOTO_QOP, "GOTO_QOP" },
   { IF_FALSE_QOP, "IF_FALSE_QOP" },
   { IF_TRUE_QOP, "IF_TRUE_QOP" },

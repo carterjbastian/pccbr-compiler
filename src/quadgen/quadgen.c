@@ -35,6 +35,8 @@ quad_t add_quad(optype op, symnode_t *operand1, symnode_t *operand2, symnode_t *
 }
 
 symnode_t *code_gen(ast_node node, symboltable_t *table) {
+  if (node == NULL)
+    return NULL;
   ast_node child = node->left_child;
   int changed_scope = 0;
   symnode_t *retval = NULL;
@@ -527,6 +529,7 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
     add_quad(RETURN_QOP, t0, NULL, NULL); 
     break;
 
+
   case FOR_N:
     // x = codeGen(leftChild)
     // L1 = newLable("COND")
@@ -570,6 +573,7 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
     add_quad(LABEL_QOP, l2, NULL, NULL);
 
     break;
+
   case DOWHILE_N:
     // L1 = newLabel("START")
     // (label, L1, -, -)
@@ -581,7 +585,7 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
     code_gen(child->right_sibling, table);
     x = code_gen(child, table);
     add_quad(IF_TRUE_QOP, x, l1, NULL);
-
+    break;
 
   case FUNC_CALL_N:
     // For each arg_node (should be all children unless child is no_formal_params)
@@ -597,16 +601,36 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
 
     // (post_return, t, func_call, -)
     // return t
+    for (iterator = child; iterator != NULL; iterator = iterator->right_sibling) {
+      t0 = NewTemp(table);
+      x = code_gen(iterator, table);
+      add_quad(ASSN_QOP, t0, x, NULL);
+      add_quad(ARG_QOP, t0, NULL, NULL);
+    }
+
+    y = lookup_in_symboltable(table, node->value_string, LOCAL_VT);
+    add_quad(PRE_CALL_QOP, y, NULL, NULL);
+
+    t1 = ((y->type == FUNC_INT_LT) ? NewTemp(table) : NULL);
+    add_quad(POST_RET_QOP, t1, y, NULL);
+    retval = t1;
+    break;
+
 
   case COMPOUND_STMT_N:
-    // for each child
-      // codeGen(child)
+    for (iterator = child; iterator != NULL; iterator = iterator->right_sibling)
+      code_gen(iterator, table);
+    break;
 
   case FUNC_N:
     // L1 = newLabel(node->value_string -- should be func name --)
     // (label, L1, -, -)
-    // child = first Compound statement child
     // codeGen(child)
+    l1 = NewLabel(node->node_name, node->value_string);
+    add_quad(LABEL_QOP, l1, NULL, NULL);
+    code_gen(child, table);
+    break;
+
 
   case ID_N:
     // t0 = newTemp()
@@ -617,8 +641,23 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
     // else
       // (assn, t0, lookUpInSymtab(), -)
     // return t0
-      retval = lookup_in_symboltable(table, node->value_string, LOCAL_VT);
-      break;
+    t0 = NewTemp(table);
+    if (node->value_int != 0) {
+      buff = calloc(1, sizeof(char) * 11); // Assumes int <= 10 digits
+      buff[10] = '\0';
+      sprintf(buff, "%d", node->value_int);
+
+      x = create_symnode(buff, TEMP_LT, NULL, -1);
+      y = lookup_in_symboltable(table, node->value_string, LOCAL_VT);
+      add_quad(INDEX_QOP, t0, y, x);
+    } else {
+      x = lookup_in_symboltable(table, node->value_string, LOCAL_VT);
+      add_quad(ASSN_QOP, t0, x, NULL);
+    }
+    retval = t0;
+    break;
+//    retval = lookup_in_symboltable(table, node->value_string, LOCAL_VT);
+//      break;
 
     
   case INT_LITERAL_N :
@@ -634,13 +673,20 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
       } 
       break;
 
-    case DEC_ID_N :
+  case STRING_LITERAL_N :
+    retval = lookup_in_symboltable(table, node->value_string, CONST_VT);
+    if (retval == NULL) 
+      retval = create_symnode(node->value_string, TEMP_LT, NULL, -1);
+    break; 
+
+  case DEC_ID_N :
       retval = lookup_in_symboltable(table, node->value_string, LOCAL_VT);
       break;
 
-    default :
+  default :
       retval = NULL;
   } // End of Case Statement
+
 
 
   if (changed_scope) {

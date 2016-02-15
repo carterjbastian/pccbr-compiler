@@ -1,0 +1,6 @@
+PARSING ERROR:	Statement on line 4 Discarded due to an invalid expression
+Parsing reached fatal error. No AST was constructed
+(NULL_QOP, -, -, -)
+(LABEL_QOP, L_N11_main, -, -)
+(ASSN_QOP, #tT0, -, -)
+(RETURN_QOP, #tT0, -, -)

@@ -1,0 +1,23 @@
+PARSING ERROR:	Invalid variable declaration discarded on line 1
+PARSING ERROR:	Invalid variable declaration discarded on line 8
+PARSING ERROR:	Invalid variable declaration discarded on line 15
+PARSING ERROR:	Invalid variable declaration discarded on line 23
+PARSING ERROR:	Statement on line 24 Discarded due to an invalid expression
+PARSING ERROR:	Invalid variable declaration discarded on line 35
+WARNING: There were 6 parse errors.
+Parse tree may be ill-formed.
+(NULL_QOP, -, -, -)
+(LABEL_QOP, L_N34_hello_cat, -, -)
+(ASSN_QOP, #tT0, -, -)
+(RETURN_QOP, #tT0, -, -)
+(LABEL_QOP, L_N48_goodbye, -, -)
+(ASSN_QOP, #tT1, -, -)
+(RETURN_QOP, #tT1, -, -)
+(LABEL_QOP, L_N71_dothings, -, -)
+(READ_QOP, #tT2, -, -)
+(ASSN_QOP, #tT3, #c4, -)
+(RETURN_QOP, #tT3, -, -)
+(LABEL_QOP, L_N79_cheers, -, -)
+(PRINT_QOP, #cCheers, mate, -, -)
+(ASSN_QOP, #tT4, -, -)
+(RETURN_QOP, #tT4, -, -)
