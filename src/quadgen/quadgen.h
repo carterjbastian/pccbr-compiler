@@ -44,8 +44,9 @@ static val_name_pair qop_table [] = {
   { LABEL_QOP, "LABEL_QOP" },
   { PRINT_QOP, "PRINT_QOP" },
   { READ_QOP, "READ_QOP" },
-  { FUNC_PRO_QOP, "FUNC_PRO_QOP" },
-  { FUNC_EP_QOP, "FUNC_EP_QOP" },
+  { PRE_CALL_QOP, "PRE_CALL_QOP" },
+  { POST_RET_QOP, "POST_RET_QOP" },
+  { RETURN_QOP, "RETURN_QOP" },
   { ARG_QOP, "ARG_QOP"} };
   
 #define QOP_IDX(X)    ( (X) - NULL_QOP )

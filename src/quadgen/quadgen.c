@@ -427,7 +427,182 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
       break;
 
 
-    case INT_LITERAL_N :
+  case OP_INCREMENT_N:
+    // t0, t1 = newTemp()
+    // x = codeGen(leftChild)
+    // (assn, t1, 1, 0)
+    // (add, t0, x, 1)
+    // return t0
+      t0 = NewTemp(table);
+      t1 = NewTemp(table);
+      t2 = create_symnode("1", TEMP_LT, NULL, -1);
+
+      x = code_gen(child, table);
+      
+      add_quad(ASSN_QOP, t1, t2, NULL);
+      add_quad(ADD_QOP, t0, x, t1);
+
+      retval = t0;
+      break;
+
+  case OP_DECREMENT_N:
+      t0 = NewTemp(table);
+      t1 = NewTemp(table);
+      t2 = create_symnode("1", TEMP_LT, NULL, -1);
+
+      x = code_gen(child, table);
+      
+      add_quad(ASSN_QOP, t1, t2, NULL);
+      add_quad(SUB_QOP, t0, x, t1);
+
+      retval = t0;
+      break;
+
+
+  case IF_N:
+    // x = codeGen(leftChild)
+    // L1 = label("END_IF")
+    // (ifFalse, x, L1, -)
+    // codeGen(rightChild)
+    // (label, L1, -, -)
+    x = code_gen(child, table);
+    l1 = NewLabel(node->node_name, "END_IF");
+    add_quad(IF_FALSE_QOP, x, l1, NULL);
+    code_gen(child->right_sibling, table);
+    add_quad(LABEL_QOP, l1, NULL, NULL);
+
+    break;
+
+  case IF_ELSE_N:
+    // x = codeGen(leftChild)
+    // L1 = newlabel("ELSE")
+    // L2 = newLabel("END_IF")
+    // (ifFalse, x, L1, -)
+    // codeGen(second_child)
+    // (goto, L2, -, -)
+    // (label, L1, -, -)
+    // codeGen(third_child)
+    // (label, L2, -, -)
+    x = code_gen(child, table);
+    l1 = NewLabel(node->node_name, "ELSE");
+    l2 = NewLabel(node->node_name, "END_IF");
+
+    add_quad(IF_FALSE_QOP, x, l1, NULL);
+    code_gen(child->right_sibling, table);
+    add_quad(GOTO_QOP, l2, NULL, NULL);
+    add_quad(LABEL_QOP, l1, NULL, NULL);
+
+    code_gen(child->right_sibling->right_sibling, table);
+    add_quad(LABEL_QOP, l2, NULL, NULL);
+    
+    break;
+
+  case PRINT_N:
+    // x = codeGen(leftChild)
+    // (print, x, -, -)
+    x = code_gen(child, table);
+    add_quad(PRINT_QOP, x, NULL, NULL);
+
+    break;
+
+  case READ_N:
+    // NOTE: This might need more thinking through cause we're probably expecting to write to an
+    // address. In this conception t0 returns the address of the string stored in memory.
+    
+    // t0 = newTemp()
+    // (read, t0, -, -)
+    // return t0
+    t0 = NewTemp(table);
+    add_quad(READ_QOP, t0, NULL, NULL);
+    retval = t0;
+    break;
+
+  case RETURN_N:
+    // t0 = newTemp()
+    // x = codeGen(leftChild)
+    // (assn, t0, x, -)
+    // (return, t0, -, -)
+    t0 = NewTemp(table);
+    x = code_gen(child, table);
+    add_quad(ASSN_QOP, t0, x, NULL);
+    add_quad(RETURN_QOP, t0, NULL, NULL); 
+    break;
+
+  case FOR_N:
+    // x = codeGen(leftChild)
+    // L1 = newLable("COND")
+    // L2 = newLable("END_FOR")
+    // (label, L1, -, -)
+    // y = codeGen(secondChild)
+    // (ifFalse, y, L2, -)
+    // codeGen(fourthChild)
+    // codeGen(thirdChild)
+    // (goto, L1, -, -)
+    // (label, L2, -, -)
+    x = code_gen(child, table);
+    l1 = NewLabel(node->node_name, "COND");
+    l2 = NewLabel(node->node_name, "END_FOR");
+    add_quad(LABEL_QOP, l1, NULL, NULL);
+    y = code_gen(child->right_sibling, table);
+    add_quad(IF_FALSE_QOP, y, l2, NULL);
+    code_gen(child->right_sibling->right_sibling->right_sibling, table);
+    code_gen(child->right_sibling->right_sibling, table);
+    add_quad(GOTO_QOP, l1, NULL, NULL);
+    add_quad(LABEL_QOP, l2, NULL, NULL);
+
+    break;
+
+  case WHILE_N:
+    // L1 = newLabel("COND")
+    // L2 = newLabel("END_WHILE")
+    // label(L1, -, -, -)
+    // x = codeGen(leftChild)
+    // (ifFalse, x, L2, -)
+    // codeGen(rightChild)
+    // (goto, L1, -, -)
+    // label(L2, -, -, -)
+    l1 = NewLabel(node->node_name, "COND");
+    l2 = NewLabel(node->node_name, "END_WHILE");
+    add_quad(LABEL_QOP, l1, NULL, NULL);
+    x = code_gen(child, table);
+    add_quad(IF_FALSE_QOP, x, l2, NULL);
+    code_gen(child->right_sibling, table);
+    add_quad(GOTO_QOP, l1, NULL, NULL);
+    add_quad(LABEL_QOP, l2, NULL, NULL);
+
+    break;
+  case DOWHILE_N:
+    // L1 = newLabel("START")
+    // (label, L1, -, -)
+    // codeGen(rightChild)
+    // x = codeGen(leftChild)
+    // (ifTrue, x, L1, -) 
+    l1 = NewLabel(node->node_name, "START");
+    add_quad(LABEL_QOP, l1, NULL, NULL);
+    code_gen(child->right_sibling, table);
+    x = code_gen(child, table);
+    add_quad(IF_TRUE_QOP, x, l1, NULL);
+
+
+
+
+  case FUNC_CALL_N:
+    // For each arg_node (should be all children unless child is no_formal_params)
+      // t0 = newTemp()
+      // t0 = codeGen(arg_node)
+      // (arg, t, -, -)
+    // func_call = look_up_symnode(node->value_string) -- need to find node for current value so we can reference function
+    // (pre_call, func_call, -, -)
+    // if (func_returns) 
+      // t1 = newTemp()
+    // else
+      // t1 = NULL
+
+    // (post_return, t, func_call, -)
+    // return t
+
+    
+  case INT_LITERAL_N :
       buff = calloc(1, sizeof(char) * 11); // Assumes int <= 10 digits
       buff[10] = '\0';
       sprintf(buff, "%d", node->value_int);
@@ -452,96 +627,7 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
       retval = NULL;
   } // End of Case Statement
 
-  case OP_INCREMENT_N:
-    // t0, t1 = newTemp()
-    // x = codeGen(leftChild)
-    // (assn, t1, 1, 0)
-    // (add, t0, x, 1)
-    // return t0
 
-  case OP_DECREMENT_N:
-    // Same as increment
-
-  case FUNC_CALL_N:
-    // For each arg_node (should be all children unless child is no_formal_params)
-      // t0 = newTemp()
-      // t0 = codeGen(arg_node)
-      // (arg, t, -, -)
-    // func_call = look_up_symnode(node->value_string) -- need to find node for current value so we can reference function
-    // (pre_call, func_call, -, -)
-    // if (func_returns) 
-      // t1 = newTemp()
-    // else
-      // t1 = NULL
-
-    // (post_return, t, func_call, -)
-    // return t
-
-  case IF_N:
-    // x = codeGen(leftChild)
-    // L1 = label("END_IF")
-    // (ifFalse, x, L1, -)
-    // codeGen(rightChild)
-    // (label, L1, -, -)
-
-  case IF_ELSE_N:
-    // x = codeGen(leftChild)
-    // L1 = newlabel("ELSE")
-    // L2 = newLabel("END_IF")
-    // (ifFalse, x, L1, -)
-    // codeGen(second_child)
-    // (goto, L2, -, -)
-    // (label, L1, -, -)
-    // codeGen(third_child)
-    // (label, L2, -, -)
-
-  case PRINT_N:
-    // x = codeGen(leftChild)
-    // (print, x, -, -)
-
-  case READ_N:
-    // NOTE: This might need more thinking through cause we're probably expecting to write to an
-    // address. In this conception t0 returns the address of the string stored in memory.
-    
-    // t0 = newTemp()
-    // (read, t0, -, -)
-    // return t0
-
-  case RETURN_N:
-    // t0 = newTemp()
-    // x = codeGen(leftChild)
-    // (assn, t0, x, -)
-    // (return, t0, -, -)
-
-  case FOR_N:
-    // x = codeGen(leftChild)
-    // L1 = newLable("COND")
-    // L2 = newLable("END_FOR")
-    // (label, L1, -, -)
-    // y = codeGen(secondChild)
-    // (ifFalse, y, L2, -)
-    // codeGen(fourthChild)
-    // codeGen(thirdChild)
-    // (goto, L1, -, -)
-    // (label, L2, -, -)
-
-  case WHILE_N:
-    // L1 = newLabel("COND")
-    // L2 = newLabel("END_WHILE")
-    // label(L1, -, -, -)
-    // x = codeGen(leftChild)
-    // (ifFalse, x, L2, -)
-    // codeGen(rightChild)
-    // (goto, L1, -, -)
-    // label(L2, -, -, -)
-
-  case DO_WHILE_N:
-    // L1 = newLabel("START")
-    // (label, L1, -, -)
-    // codeGen(rightChild)
-    // x = codeGen(leftChild)
-    // (ifTrue, x, L1, -) 
-    
   if (changed_scope) {
     table->leaf = table->leaf->parent;
   }
