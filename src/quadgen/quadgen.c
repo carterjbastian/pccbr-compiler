@@ -393,7 +393,6 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
       retval = t0;
       break;
 
-
   case OP_COMPLEMENT_N:
     // t0 = newTemp()
     // L1 = newLabel("IS_FALSE")
@@ -584,8 +583,6 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
     add_quad(IF_TRUE_QOP, x, l1, NULL);
 
 
-
-
   case FUNC_CALL_N:
     // For each arg_node (should be all children unless child is no_formal_params)
       // t0 = newTemp()
@@ -601,6 +598,28 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
     // (post_return, t, func_call, -)
     // return t
 
+  case COMPOUND_STMT_N:
+    // for each child
+      // codeGen(child)
+
+  case FUNC_N:
+    // L1 = newLabel(node->value_string -- should be func name --)
+    // (label, L1, -, -)
+    // child = first Compound statement child
+    // codeGen(child)
+
+  case ID_N:
+    // t0 = newTemp()
+    // if is an array (check node->value_int)
+      // x = codeGen(child)
+      // y = lookupInSymtab()
+      // (index, t0, y, x)
+    // else
+      // (assn, t0, lookUpInSymtab(), -)
+    // return t0
+      retval = lookup_in_symboltable(table, node->value_string, LOCAL_VT);
+      break;
+
     
   case INT_LITERAL_N :
       buff = calloc(1, sizeof(char) * 11); // Assumes int <= 10 digits
@@ -613,10 +632,6 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
         retval = create_symnode(buff, TEMP_LT, NULL, -1);
         buff = NULL;
       } 
-      break;
-
-    case ID_N :
-      retval = lookup_in_symboltable(table, node->value_string, LOCAL_VT);
       break;
 
     case DEC_ID_N :
