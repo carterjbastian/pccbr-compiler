@@ -8,6 +8,7 @@ typedef enum { INT_LT,
                FUNC_VOID_LT,
                STR_LT,
                TEMP_LT,
+               LABEL_LT,
                VOID_LT,
                ERROR_LT} var_lookup_type;
 

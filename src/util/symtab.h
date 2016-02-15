@@ -51,6 +51,7 @@ static type_name_pair lt_table[] = {
   { FUNC_VOID_LT, "FUNCTION_RETURNING_VOID" },
   { STR_LT, "CHAR_STRING" },
   { TEMP_LT, "TEMPORARY_VALUE" },
+  { LABEL_LT, "LABEL_VALUE" },
   { VOID_LT, "VOID_VALUE" },
   { ERROR_LT, "VARIABLE_WITH_INVALID_DECLARATION" },
   { 0, NULL }

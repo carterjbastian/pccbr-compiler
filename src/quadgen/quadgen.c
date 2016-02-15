@@ -13,7 +13,7 @@ static const char *temp_prefix = "T";
 
 static int tempCount = 0;
 
-char *NewLabel(char *nodename, char *text);
+symnode_t *NewLabel(char *nodename, char *text);
 char *generate_temp_name();
 void print_quad(FILE *fp, quad_t quad);
 
@@ -39,7 +39,7 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
   int changed_scope = 0;
   symnode_t *retval = NULL;
   // Basic temps and intermideary values
-  symnode_t *t0, *t1, *tx, *ty, *x, *y;
+  symnode_t *t0, *t1, *t2, *tx, *ty, *x, *y, *l1, *l2;
   ast_node iterator;
   char *buff;
 
@@ -230,28 +230,96 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
      *        Boolean Nodes
      * ==================================================
      */
+
+    // x = codeGen(leftChild)
+    // y = codeGen(rightChild)
+    // (lt, t2, x, y) 
+    // return t2
     case OP_LT_N:
-      // x = codeGen(leftChild)
-      // y = codeGen(rightChild)
-      // t0, t1 = newTemp()
-      // t2 = newTemp()
-      // (lt, t2, x, y) 
-      // return t2
+      t0 = NewTemp(table);
+      tx = NewTemp(table);
+      ty = NewTemp(table);
+
+      x = code_gen(child, table);
+      add_quad(ASSN_QOP, tx, x, NULL);
+
+      y = code_gen(child->right_sibling, table);
+      add_quad(ASSN_QOP, ty, y, NULL);
+      
+      add_quad(LT_QOP, t0, tx, ty);
+
+      retval = t0;
+      break;
 
     case OP_LTE_N:
-      // same w/ LTE_QOP
+      t0 = NewTemp(table);
+      tx = NewTemp(table);
+      ty = NewTemp(table);
+
+      x = code_gen(child, table);
+      add_quad(ASSN_QOP, tx, x, NULL);
+
+      y = code_gen(child->right_sibling, table);
+      add_quad(ASSN_QOP, ty, y, NULL);
+      
+      add_quad(LTE_QOP, t0, tx, ty);
+
+      retval = t0;
+      break;
     
     case OP_EQUALS_N:
+      t0 = NewTemp(table);
+      tx = NewTemp(table);
+      ty = NewTemp(table);
+
+      x = code_gen(child, table);
+      add_quad(ASSN_QOP, tx, x, NULL);
+
+      y = code_gen(child->right_sibling, table);
+      add_quad(ASSN_QOP, ty, y, NULL);
+      
+      add_quad(EQ_QOP, t0, tx, ty);
+
+      retval = t0;
+      break;
       // same w/ EQ_QOP
 
     case OP_GT_N:
+      t0 = NewTemp(table);
+      tx = NewTemp(table);
+      ty = NewTemp(table);
+
+      x = code_gen(child, table);
+      add_quad(ASSN_QOP, tx, x, NULL);
+
+      y = code_gen(child->right_sibling, table);
+      add_quad(ASSN_QOP, ty, y, NULL);
+      
+      add_quad(GT_QOP, t0, tx, ty);
+
+      retval = t0;
+      break;
       // same w/ EQ_QOP
 
     case OP_GTE_N:
+      t0 = NewTemp(table);
+      tx = NewTemp(table);
+      ty = NewTemp(table);
+
+      x = code_gen(child, table);
+      add_quad(ASSN_QOP, tx, x, NULL);
+
+      y = code_gen(child->right_sibling, table);
+      add_quad(ASSN_QOP, ty, y, NULL);
+      
+      add_quad(GTE_QOP, t0, tx, ty);
+
+      retval = t0;
+      break;
       // same w/ GTE_QOP
 
     case OP_AND_N:
-      // t0 = newTemp()
+      //t0 = newTemp()
       // L1 = newLabel(node->node_name, "IS_FALSE")
       // L2 = newLabel(node->node_name, "END")
       // x = codeGen(leftChild)
@@ -264,7 +332,30 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
       // (assn, t0, 0, -)
       // (label, l2, -, -)
       // return t0
-  
+      t0 = NewTemp(table);
+
+      t1 = create_symnode("0", TEMP_LT, NULL, -1);
+      t2 = create_symnode("1", TEMP_LT, NULL, -1);
+
+      l1 = NewLabel(node->node_name, "IS_FALSE");
+      l2 = NewLabel(node->node_name, "END");
+
+      x = code_gen(child, table);
+      add_quad(IF_FALSE_QOP, x, l1, NULL);
+
+      y = code_gen(child->right_sibling, table);
+      add_quad(IF_FALSE_QOP, y, l1, NULL);
+
+      add_quad(ASSN_QOP, t0, t2, NULL);
+      add_quad(GOTO_QOP, l2, NULL, NULL);
+      add_quad(LABEL_QOP, l1, NULL, NULL);
+      add_quad(ASSN_QOP, t0, t1, NULL);
+      add_quad(LABEL_QOP, l2, NULL, NULL);
+
+      retval = t0;
+      break;
+
+
   case OP_OR_N:
       // t0 = newTemp()
       // L1 = newLabel(node->node_name, "IS_TRUE")
@@ -279,7 +370,62 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
       // (assn, t0, 1, -)
       // (label, l2, -, -)
       // return t0
+      t0 = NewTemp(table);
+
+      t1 = create_symnode("0", TEMP_LT, NULL, -1);
+      t2 = create_symnode("1", TEMP_LT, NULL, -1);
+
+      l1 = NewLabel(node->node_name, "IS_TRUE");
+      l2 = NewLabel(node->node_name, "END");
+
+      x = code_gen(child, table);
+      add_quad(IF_TRUE_QOP, x, l1, NULL);
+
+      y = code_gen(child->right_sibling, table);
+      add_quad(IF_TRUE_QOP, y, l1, NULL);
     
+      add_quad(ASSN_QOP, t0, t1, NULL);
+      add_quad(GOTO_QOP, l2, NULL, NULL);
+      add_quad(LABEL_QOP, l1, NULL, NULL);
+      add_quad(ASSN_QOP, t0, t2, NULL);
+      add_quad(LABEL_QOP, l2, NULL, NULL);
+
+      retval = t0;
+      break;
+
+
+  case OP_COMPLEMENT_N:
+    // t0 = newTemp()
+    // L1 = newLabel("IS_FALSE")
+    // L2 = newLabel(end)
+    // x = codeGen(leftChild)
+    // (ifFalse, x, L1, -)
+    // (assn, t0, 0, -)
+    // (goto, L2, -, -)
+    // (label, L1, -, -)
+    // (assn, t0, 1, -)
+    // (label, l2, -, -)
+    // return t0
+      t0 = NewTemp(table);
+
+      t1 = create_symnode("0", TEMP_LT, NULL, -1);
+      t2 = create_symnode("1", TEMP_LT, NULL, -1);
+
+      l1 = NewLabel(node->node_name, "IS_FALSE");
+      l2 = NewLabel(node->node_name, "END");
+
+      x = code_gen(child, table);
+      add_quad(IF_FALSE_QOP, x, l1, NULL);
+
+      add_quad(ASSN_QOP, t0, t1, NULL);
+      add_quad(GOTO_QOP, l2, NULL, NULL);
+      add_quad(LABEL_QOP, l1, NULL, NULL);
+      add_quad(ASSN_QOP, t0, t2, NULL);
+      add_quad(LABEL_QOP, l2, NULL, NULL);
+
+      retval = t0;
+      break;
+
 
     case INT_LITERAL_N :
       buff = calloc(1, sizeof(char) * 11); // Assumes int <= 10 digits
@@ -305,20 +451,6 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
     default :
       retval = NULL;
   } // End of Case Statement
->>>>>>> Implementations
-
-  case OP_COMPLEMENT_N:
-    // t0 = newTemp()
-    // L1 = newLabel("IS_FALSE")
-    // L2 = newLabel(end)
-    // x = codeGen(leftChild)
-    // (ifFalse, x, L1, -)
-    // (assn, t0, 0, -)
-    // (goto, L2, -, -)
-    // (label, L1, -, -)
-    // (assn, t0, 1, -)
-    // (label, l2, -, -)
-    // return t0
 
   case OP_INCREMENT_N:
     // t0, t1 = newTemp()
@@ -414,7 +546,6 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
     table->leaf = table->leaf->parent;
   }
 
-  printf("%s\n", NewLabel(node->node_name, LABEL_NODE_NAME(node->node_type)));
   return retval;
 }
 
@@ -442,7 +573,7 @@ void print_quad_list(FILE *fp, quad_t list) {
 
 void print_quad(FILE *fp, quad_t quad) {
   assert(quad);
-  fprintf(fp, "(%d, ", quad->op);
+  fprintf(fp, "(%s, ", QOP_NAME(quad->op));
   if (quad->operand1)
     fprintf(fp, "%s, ", quad->operand1->name);
   else
@@ -470,7 +601,8 @@ char *generate_temp_name() {
   return tName;
 }
 
-char *NewLabel(char *nodename, char *text) {
+symnode_t *NewLabel(char *nodename, char *text) {
+  symnode_t *retval = NULL;
   int l1 = strlen(nodename);
   int l2 = strlen(text);
 
@@ -479,5 +611,7 @@ char *NewLabel(char *nodename, char *text) {
 
   char *label = calloc(1, sizeof(char) * len);
   sprintf(label, "%s%s_%s", label_prefix, nodename, text);
-  return label;
+  
+  retval = create_symnode(label, LABEL_LT, NULL, -1);
+  return retval;
 }
