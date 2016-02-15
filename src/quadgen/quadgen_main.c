@@ -35,9 +35,8 @@ int main() {
   /* Set up the symbol tree */
   symtab = create_symboltable();
   symtab = build_symboltable(symtab, root, root);
-  printf("Symtable created...\n");
-  print_symtab(symtab);
-  print_ast(stdout, root, 0);
+//  print_symtab(symtab);
+//  print_ast(stdout, root, 0);
 
   code_gen(root, symtab);
 

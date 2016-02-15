@@ -1,0 +1,5 @@
+(NULL_QOP, -, -, -)
+(ASSN_QOP, #tT0, 5, -)
+(ASSN_QOP, a, #tT0, -)
+(ASSN_QOP, #tT1, 9, -)
+(ASSN_QOP, b, #tT1, -)

@@ -1,0 +1,14 @@
+PARSING ERROR:	Invalid variable declaration discarded on line 2
+PARSING ERROR:	Statement on line 4 Discarded due to an invalid expression
+PARSING ERROR:	Malformed Print Statement discarded on line 5
+PARSING ERROR:	Malformed Read Statement discarded on line 6
+PARSING ERROR:	Invalid Return Statement discarded on line 8
+PARSING ERROR:	Statement on line 11 Discarded due to an invalid expression
+PARSING ERROR:	For Loop Header discarded on line 13
+		Note: All statements inside loop are discarded as well
+PARSING ERROR:	Do-While loop discarded due to invalid condition on line 21
+PARSING ERROR:	While-Loop starting on line 25 discarded due to invalid condition
+PARSING ERROR:	If-Statement discarded due to invalid condition on line 31
+PARSING ERROR:	If-Else statement discarded due to invalid condition on line 35
+WARNING: There were 11 parse errors.
+Parse tree may be ill-formed.
