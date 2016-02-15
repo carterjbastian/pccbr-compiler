@@ -305,7 +305,6 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
     default :
       retval = NULL;
   } // End of Case Statement
->>>>>>> Implementations
 
   case OP_COMPLEMENT_N:
     // t0 = newTemp()
@@ -409,7 +408,34 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
     // codeGen(rightChild)
     // x = codeGen(leftChild)
     // (ifTrue, x, L1, -) 
-    
+
+  case DO_WHILE_N:
+    // L1 = newLabel("START")
+    // (label, L1, -, -)
+    // codeGen(rightChild)
+    // x = codeGen(leftChild)
+    // (ifTrue, x, L1, -)    
+
+  case COMPOUND_STATEMENT_N:
+    // for each child
+      // codeGen(child)
+
+  case FUNC_N:
+    // L1 = newLabel(node->value_string -- should be func name --)
+    // (label, L1, -, -)
+    // child = first Compound statement child
+    // codeGen(child)
+
+  case ID_N:
+    // t0 = newTemp()
+    // if is an array (check node->value_int)
+      // x = codeGen(child)
+      // y = lookupInSymtab()
+      // (index, t0, y, x)
+    // else
+      // (assn, t0, lookUpInSymtab(), -)
+    // return t0
+
   if (changed_scope) {
     table->leaf = table->leaf->parent;
   }
