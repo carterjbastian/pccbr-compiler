@@ -20,7 +20,7 @@ typedef enum {
   /* HIGH LEVEL FUNCTIONS */
   PRINT_QOP, READ_QOP,
   /* FUNCTION CALL HANDLING */
-  FUNC_PRO_QOP, FUNC_EP_QOP, ARG_QOP
+  PRE_CALL_QOP, POST_RET_QOP, ARG_QOP
 } optype;
 
 typedef struct quad_struct *quad_t;

@@ -145,6 +145,31 @@ symnode_t *code_gen(ast_node node, symboltable_t *table, quad_t list) {
     // (label, l2, -, -)
     // return t0
 
+  case OP_INCREMENT_N:
+    // t0, t1 = newTemp()
+    // x = codeGen(leftChild)
+    // (assn, t1, 1, 0)
+    // (add, t0, x, 1)
+    // return t0
+
+  case OP_DECREMENT_N:
+    // Same as increment
+
+  case FUNC_CALL_N:
+    // For each arg_node (should be all children unless child is no_formal_params)
+      // t0 = newTemp()
+      // t0 = codeGen(arg_node)
+      // (arg, t, -, -)
+    // func_call = look_up_symnode(node->value_string) -- need to find node for current value so we can reference function
+    // (pre_call, func_call, -, -)
+    // if (func_returns) 
+      // t1 = newTemp()
+    // else
+      // t1 = NULL
+
+    // (post_return, t, func_call, -)
+    // return t
+
   if (changed_scope) {
     table->leaf = table->leaf->parent;
   }
