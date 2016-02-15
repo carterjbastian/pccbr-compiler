@@ -52,7 +52,7 @@ int typecheck_ast(symboltable_t *table, ast_node node) {
 
   switch(node->node_type) {
     case ID_N :
-      symbol = lookup_in_symboltable(table, node->value_string);
+      symbol = lookup_in_symboltable(table, node->value_string, LOCAL_VT);
       if (!symbol) {
         fprintf(stderr, "Invalid use of symbol %s on line %d\n", node->value_string, node->lineno);
         node->dtype = ERROR_LT;
@@ -79,7 +79,7 @@ int typecheck_ast(symboltable_t *table, ast_node node) {
 
     case FUNC_CALL_N :
       // Check to see if the current symbol is valid
-      symbol = lookup_in_symboltable(table, node->value_string);
+      symbol = lookup_in_symboltable(table, node->value_string, LOCAL_VT);
 
       if (!symbol || (symbol->type != FUNC_INT_LT && symbol->type != FUNC_VOID_LT))  {
           // Make error reporting better?

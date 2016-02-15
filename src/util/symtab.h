@@ -130,11 +130,13 @@ symboltable_t *create_symboltable();
    entry. */
 symnode_t *insert_into_symboltable(symboltable_t *symtab, var_lookup_type type, char *name, int lineno);
 
-symnode_t *insert_constant(symboltable_t *symtab, var_lookup_type type, char *name, int lineno);
+symnode_t *insert_temp(symboltable_t *symtab, var_lookup_type type, char *name, int lineno);
+
+  symnode_t *insert_constant(symboltable_t *symtab, var_lookup_type type, char *name, int lineno);
 
 /* Lookup an entry in a symbol table.  If found return a pointer to it.
    Otherwise, return NULL */
-symnode_t *lookup_in_symboltable(symboltable_t *symtab, char *name);
+symnode_t *lookup_in_symboltable(symboltable_t *symtab, char *name, var_type vType);
 
 /* Lookup an entry in a symbol table. If found return symbol_t*.
    Otherwise, return NULL */
