@@ -79,7 +79,71 @@ symnode_t *code_gen(ast_node node, symboltable_t *table, quad_t list) {
 
     case OP_MOD
       // Same as divide
+    
+    case OP_LT_N:
+      // x = codeGen(leftChild)
+      // y = codeGen(rightChild)
+      // t0, t1 = newTemp()
+      // t2 = newTemp()
+      // (lt, t2, x, y) 
+      // return t2
+
+    case OP_LTE_N:
+      // same w/ LTE_QOP
+    
+    case OP_EQUALS_N:
+      // same w/ EQ_QOP
+
+    case OP_GT_N:
+      // same w/ EQ_QOP
+
+    case OP_GTE_N:
+      // same w/ GTE_QOP
+
+    case OP_AND_N:
+      // t0 = newTemp()
+      // L1 = newLabel(node->node_name, "IS_FALSE")
+      // L2 = newLabel(node->node_name, "END")
+      // x = codeGen(leftChild)
+      // (ifFalse, x, L1, -)
+      // y = codeGen(rightChild)
+      // (ifFalse, y, L1, -)
+      // (assn, t0, 1, -)
+      // (goto, L2, -, -)
+      // (label, L1, -, -)
+      // (assn, t0, 0, -)
+      // (label, l2, -, -)
+      // return t0
   }
+  
+  case OP_OR_N:
+      // t0 = newTemp()
+      // L1 = newLabel(node->node_name, "IS_TRUE")
+      // L2 = newLabel(node->node_name, "END")
+      // x = codeGen(leftChild)
+      // (ifTrue, x, L1, -)
+      // y = codeGen(rightChild)
+      // (ifTrue, y, L1, -)
+      // (assn, t0, 0, -)
+      // (goto, L2, -, -)
+      // (label, L1, -, -)
+      // (assn, t0, 1, -)
+      // (label, l2, -, -)
+      // return t0
+  }
+
+  case OP_COMPLEMENT_N:
+    // t0 = newTemp()
+    // L1 = newLabel("IS_FALSE")
+    // L2 = newLabel(end)
+    // x = codeGen(leftChild)
+    // (ifFalse, x, L1, -)
+    // (assn, t0, 0, -)
+    // (goto, L2, -, -)
+    // (label, L1, -, -)
+    // (assn, t0, 1, -)
+    // (label, l2, -, -)
+    // return t0
 
   if (changed_scope) {
     table->leaf = table->leaf->parent;
