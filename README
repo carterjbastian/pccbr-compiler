@@ -18,6 +18,9 @@ src/quadgen/quadTests.sh
 We confirmed the results of our test cases manually. The results of the test will appear
 in src/quadgen/outfiles as .quad files.
 
+The original output files can be fined in their respective directories. Each component of
+the project can be made and tested individually.
+
 Relevant source code appears primarily in quadgen/quadgen.c. Our quad data structures
 are defined in quadgen.h.
 FILES:
