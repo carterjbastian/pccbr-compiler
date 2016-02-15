@@ -132,13 +132,13 @@ varDeclarationList : varDeclarationList ',' varDec {
 
 varDec : ID_T { 
         ast_node t = create_ast_node(DEC_ID_N);
-        t->value_string = strdup(savedIDText);
+        t->value_string = $1->value_string;
         t->value_int = 0;
         t->lineno = yylineno;
         $$ = t; }
 | ID_T '=' expression {
         ast_node t = create_ast_node(DEC_ID_N);
-        t->value_string = strdup(savedIDText);
+        t->value_string = $1->value_string;
         t->value_int = 0;
         t->lineno = yylineno;
 
