@@ -5,8 +5,9 @@
 
 #include "../util/ast.h"
 #include "../util/symtab.h"
+#include "../quadgen/quadgen.h"
 
-int code_gen(FILE *fp, quad_t ir, symboltable_t *table);
+int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table);
 
 #endif // CODE_GEN_
 

@@ -8,12 +8,13 @@
 extern quad_t list;
 quad_t list_end;
 
+
 static const char *label_prefix = "L_";
 static const char *temp_prefix = "T";
 
-static int tempCount = 0;
+int tempCount = 0;
 
-symnode_t *NewLabel(char *nodename, char *text);
+//symnode_t *NewLabel(char *nodename, char *text);
 char *generate_temp_name();
 void print_quad(FILE *fp, quad_t quad);
 
@@ -626,7 +627,12 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
     // L1 = newLabel(node->value_string -- should be func name --)
     // (label, L1, -, -)
     // codeGen(child)
-    l1 = NewLabel(node->node_name, node->value_string);
+    if (strncmp(node->value_string, "main", 4) == 0) {
+      l1 = create_symnode("L_MAIN", LABEL_LT, NULL, -1);
+    } else {
+      l1 = NewLabel(node->node_name, node->value_string);
+    }
+
     add_quad(LABEL_QOP, l1, NULL, NULL);
     code_gen(child, table);
     break;
@@ -753,12 +759,15 @@ symnode_t *NewLabel(char *nodename, char *text) {
   int l1 = strlen(nodename);
   int l2 = strlen(text);
 
+  if (strcmp(text, "main") == 0)
+    return create_symnode("L_MAIN", LABEL_LT, NULL, -1);
+
   // string = "L_" + nodename + "_" + text + '\0'
   int len = 2 + l1 + 1 + l2 + 1;
 
   char *label = calloc(1, sizeof(char) * len);
   sprintf(label, "%s%s_%s", label_prefix, nodename, text);
   
-  retval = create_symnode(label, LABEL_LT, NULL, -1);
+   retval = create_symnode(label, LABEL_LT, NULL, -1);
   return retval;
 }

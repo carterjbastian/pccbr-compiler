@@ -2,10 +2,10 @@ CC = gcc
 CFLAGS = -g
 FLEXFLAGS = -ll
 
-all: quadgen
+all: codegen
 
-quadgen: ../util/ast.o ../util/symtab.o ../symtab/buildtab.o ../parser/parser.tab.o ../lexer/cscan.yy.o quadgen.o quadgen_main.o
-	$(CC) -o $@ $(CFLAGS) ../lexer/cscan.yy.o ../symtab/buildtab.o ../parser/parser.tab.o ../util/ast.o ../util/symtab.o quadgen.o quadgen_main.o $(FLEXFLAGS)
+codegen: ../util/ast.o ../util/symtab.o ../symtab/buildtab.o ../parser/parser.tab.o ../lexer/cscan.yy.o ../quadgen/quadgen.o codegen.o codegen_main.o
+	$(CC) -o $@ $(CFLAGS) ../lexer/cscan.yy.o ../symtab/buildtab.o ../parser/parser.tab.o ../util/ast.o ../util/symtab.o ../quadgen/quadgen.o codegen.o codegen_main.o $(FLEXFLAGS)
 
 %.o : %.c
 	$(CC) $(CFLAGS) -c $<
@@ -25,6 +25,10 @@ quadgen: ../util/ast.o ../util/symtab.o ../symtab/buildtab.o ../parser/parser.ta
 ../lexer/cscan.yy.o:
 	cd ../lexer; make complete
 
+../quadgen/quadgen.o:
+	cd ../quadgen; make
+
 clean :
-	rm -f *.o quadgen
+	rm -f *.o codegen
 	cd ../symcheck; make clean
+	cd ../quadgen; make clean

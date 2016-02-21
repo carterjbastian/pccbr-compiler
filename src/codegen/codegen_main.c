@@ -1,7 +1,8 @@
 #include "../util/ast.h"
 #include "../util/symtab.h"
 #include "../symtab/buildtab.h"
-#include "quadgen.h"
+#include "../quadgen/quadgen.h"
+#include "codegen.h"
 
 #include <stdio.h>
 
@@ -41,5 +42,7 @@ int main() {
   code_gen(root, symtab);
 
   print_quad_list(stdout, list);
+  fprintf(stdout, "\n\nASSEMBLY\n");
+  generate_assembly(stdout, list, symtab);
   return 0;
 }

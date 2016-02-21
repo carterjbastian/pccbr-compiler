@@ -70,5 +70,7 @@ symnode_t *code_gen(ast_node node, symboltable_t *table);
 symnode_t *NewTemp(symboltable_t *table);
 
 void print_quad_list(FILE *fp, quad_t list);
+
+symnode_t *NewLabel(char *nodename, char *text);
 #endif // QUAD_GEN_
 
