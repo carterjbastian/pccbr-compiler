@@ -12,10 +12,5 @@ quad_t list_end;
 static const char *label_prefix = "L_";
 static const char *temp_prefix = "T";
 
-static int tempCount = 0;
-
-symnode_t *NewLabel(char *nodename, char *text);
-char *generate_temp_name();
-void print_quad(FILE *fp, quad_t quad);
 
 
