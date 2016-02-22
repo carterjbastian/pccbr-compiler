@@ -20,8 +20,8 @@ int curr_pos;
 
 // Initialize register table
 reg_t registers[] = {
-  {"%%eax", NULL, 1}, {"%%ecx", NULL, 1}, {"%%edx", NULL, 1}, {"%%ebx", NULL, 1}, 
-  {"%%esi", NULL, 1}, {"%%edi", NULL, 1} 
+  {"%eax", NULL, 1}, {"%ecx", NULL, 1}, {"%edx", NULL, 1}, {"%ebx", NULL, 1}, 
+  {"%esi", NULL, 1}, {"%edi", NULL, 1} 
 };
 
 int create_constants(FILE *fp, symhashtable_t *scope, int curr_pos);
@@ -130,6 +130,8 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
   for (quad = ir; quad != NULL; quad = quad->next) {
     int mem_loc1 = 0;
     int mem_loc2 = 0;
+    reg_t *reg1 = NULL;
+    reg_t *reg2 = NULL;
     int push_val = 0;
     int assn_val = 0;
 
@@ -146,6 +148,8 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
 
       /* CASE 1: ASSN_QOP */
       case ASSN_QOP :
+        reg1 = get_available_register(fp, registers);
+
         // Load in each variable's location from memory
         switch (quad->operand1->vType) {
           case TEMP_VT:
@@ -171,7 +175,8 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
         }
 
         if (quad->operand2 == NULL) {
-          fprintf(fp, "\timmovl 0x%08x, 0x0\n", mem_loc1);
+          fprintf(fp, "\tirmovl 0x0, %s\n", reg1->name); 
+          fprintf(fp, "\trmmovl %s, 0x%08x\n", reg1->name, mem_loc1);
           break;
         }
 
@@ -206,17 +211,20 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
         // We need to create a new value
         if (push_val) {
           if (mem_loc2 > 0) {
-            fprintf(fp, "\tpushl (0x%08x)\n", mem_loc2);
+            fprintf(fp, "\tmrmovl 0x%08x, %s\n", mem_loc2, reg1->name);
+            fprintf(fp, "\tpushl %s\n", reg1->name);
             quad->operand1->mem_location = local_offset;
             local_offset -= 4;
             fprintf(fp, "\t\t#Putting local %s with offset from ebp of %d\n", quad->operand1->name, quad->operand1->mem_location);
           } else if (mem_loc2 < 0) {
-            fprintf(fp, "\tpushl %d(%%ebp)\n", mem_loc2);
+            fprintf(fp, "\tmrmovl %d(%%esp), %s\n", mem_loc2, reg1->name);
+            fprintf(fp, "\tpushl %s\n", reg1->name);
             quad->operand1->mem_location = local_offset;
             local_offset -= 4;
             fprintf(fp, "\t\t#Putting local %s with offset from ebp of %d\n", quad->operand1->name, quad->operand1->mem_location);
           } else {
-            fprintf(fp, "\tpushl 0x%x\n", assn_val);
+            fprintf(fp, "\tirmovl 0x%08x, %s\n", assn_val, reg1->name);
+            fprintf(fp, "\tpushl %s\n", reg1->name);
             quad->operand1->mem_location = local_offset;
             local_offset -= 4;
             fprintf(fp, "\t\t#Putting local %s with offset from ebp of %d\n", quad->operand1->name, quad->operand1->mem_location);
@@ -225,23 +233,29 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
         } else {
           if (mem_loc1 > 0) {
             if (mem_loc2 > 0) {
-              fprintf(fp, "\tmmmovl 0x%08x, 0x%08x\n", mem_loc1, mem_loc2);
+              fprintf(fp, "\tmrmovl 0x%08x, %s\n", mem_loc2, reg1->name);
+              fprintf(fp, "\trmmovl %s, 0x%08x\n", reg1->name, mem_loc1);
             } else if (mem_loc2 < 0) {
-              fprintf(fp, "\tmmmovl 0x%08x, %d(esp)\n", mem_loc1, mem_loc2);
+              fprintf(fp, "\tmrmovl %d(%%esp), %s\n", mem_loc2, reg1->name);
+              fprintf(fp, "\trmmovl %s, 0x%08x\n", reg1->name, mem_loc1);
             } else {
-              fprintf(fp, "\timmovl 0x%08x, 0x%08x\n", mem_loc1, assn_val);
+              fprintf(fp, "\tirmovl 0x%08x, %s\n", assn_val, reg1->name);
+              fprintf(fp, "\trmmovl %s, 0x%08x\n", reg1->name, mem_loc1);
             }
           } else {
             if (mem_loc2 > 0) {
-              fprintf(fp, "\tmmmovl %d(esp), 0x%08x\n", mem_loc1, mem_loc2);
+              fprintf(fp, "\tmrmovl 0x%08x, %s\n", mem_loc2, reg1->name);
+              fprintf(fp, "\trmmovl %s, %d(%%esp)\n", reg1->name, mem_loc1);
             } else if (mem_loc2 < 0) {
-              fprintf(fp, "\tmmmovl %d(esp), %d(esp)\n", mem_loc1, mem_loc2);
+              fprintf(fp, "\tmrmovl %d(%%esp), %s\n", mem_loc2, reg1->name);
+              fprintf(fp, "\trmmovl %s, %d(%%esp)\n", reg1->name, mem_loc1);
             } else {
-              fprintf(fp, "\timmovl %d(esp), 0x%08x\n", mem_loc1, assn_val);
+              fprintf(fp, "\tirmovl 0x%08x, %s\n", assn_val, reg1->name);
+              fprintf(fp, "\trmmovl %s, %d(%%esp)\n", reg1->name, mem_loc1);
             }
           }
         }
-        fprintf(fp, "\tASSN_QOP\n");
+        //fprintf(fp, "\tASSN_QOP\n");
         break;
 
       /* CASE 2: LABEL_QOP */
@@ -324,9 +338,19 @@ reg_t *get_available_register(FILE *fp, reg_t *registers) {
       return &registers[i];
   }
   
-  // Take the last register and replace it 
-  fprintf(fp, "#NO REGISTER AVAILABLE\n");
-  return NULL;
+  // Take the last register and replace it
+  for (int i = 0; i < REGISTER_COUNT; i++) {
+    if (registers[i].contents->mem_location > 0) {
+      fprintf(fp, "\t\t#Clearing out register %d\n", i);
+      fprintf(fp, "\trmmovl %s, 0x%08x\n", registers[i].name, registers[i].contents->mem_location);
+      // CLEAR OUT THE REGISTER
+      return &registers[i];
+    }
+  }
+
+  fprintf(fp, "#Clearing out the first register\n");
+  fprintf(fp, "\trmmovl %s, %d(%%ebp)\n", registers[0].name, registers[0].contents->mem_location);
+  return &registers[0];
 }
 
 

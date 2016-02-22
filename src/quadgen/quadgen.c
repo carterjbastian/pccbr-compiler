@@ -73,7 +73,7 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
     // return leftVar
     case OP_ASSIGN_N :
       t0 = NewTemp(table); 
-     
+       
       // we have to treat declaration ID's slightly different
       if (child->node_type == DEC_ID_N && child->right_sibling->node_type == INT_LITERAL_N) {
         // Manually create a value for the untracked constant
