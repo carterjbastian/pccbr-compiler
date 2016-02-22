@@ -1,4 +1,5 @@
-/* symtab.c   a file implementing functions to work with symbol tables
+/*
+ * symtab.c   a file implementing functions to work with symbol tables
  *
  * Authors:
  *  Originally written by THC for CS57 and modified by SWS

@@ -7,6 +7,9 @@ ast.o : ast.c
 symtab.o : symtab.c
 	$(CC) $(CFLAGS) -c $<
 
+unescape.o : unescape.c
+	$(CC) $(CFLAGS) -c $<
+
 %.o : %.c
 	$(CC) $(CFLAGS) -c $< 
 

@@ -17,6 +17,9 @@ static const char *temp_prefix = "T";
 const int START_POS   12;
 int cur_pos;
 
+int create_constants(FILE *fp, symhashtable_t *scope, curr_pos);
+int add_constant(FILE *fp, symbol_t symbol);
+
 /*
  * The function to generate assembly from quads
  */
@@ -133,3 +136,42 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
   fprintf(fp, "\t.long 0x%08x\n", 0xFFFFFFFF);
   return 0;
 }
+
+
+int create_constants(FILE *fp, symhashtable_t *scope, curr_pos) {
+  symbol_t symbol;
+  int num_bytes = 0;
+
+  for (int i = 0; i < scope->size; i++) {
+    for (symbol = scope->table[i]; symbol != NULL; symbol = symbol->next) {
+      if (symbol->vType = CONST_VT)
+        num_bytes += add_constant(fp, symbol);
+    }
+  }
+
+  return num_bytes;
+}
+
+int add_constant(FILE *fp, symbol_t symbol) {
+  switch (symbol->type):
+    case INT_LT:
+      fprintf(fp, "# Creation of int %s\n", symbol->name);
+      fprintf(fp, "\t.long 0x%x\n", symbol->val);
+      break;
+
+    case STR_LT:
+      fprintf(fp, "# Creation of string for %s\n", symbol->name);
+      char *clean_str = calloc(strlen(symbol->name) - 1, 1);
+      sscanf(symbol->name, "#c%s", clean_str);
+      for (int i = 0; i < strlen(clean_str); i++) {
+        fprintf("\t.byte 0x%02x\n", clean_str[i]);
+      }
+      fprintf("\t.byte 0x00\n");
+      break;
+
+    default:
+      break;
+}
+
+
+
