@@ -81,6 +81,9 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
         buff[10] = '\0';
         sprintf(buff, "%d", child->right_sibling->value_int);
         y = create_symnode(buff, TEMP_LT, NULL, -1);
+        y->hasVal = 1;
+        y->val = child->right_sibling->value_int;
+        y->mem_location = 0;
         buff = NULL;
 
         add_quad(ASSN_QOP, t0, y, NULL);
@@ -654,6 +657,8 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
       sprintf(buff, "%d", node->value_int);
 
       x = create_symnode(buff, TEMP_LT, NULL, -1);
+      x->hasVal = 1;
+      x->val = node->value_int;
       y = lookup_in_symboltable(table, node->value_string, LOCAL_VT);
       add_quad(INDEX_QOP, t0, y, x);
     } else {
@@ -675,6 +680,8 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
 
       if (retval == NULL) {
         retval = create_symnode(buff, TEMP_LT, NULL, -1);
+        retval->hasVal = 1;
+        retval->val = node->value_int;
         buff = NULL;
       } 
       break;

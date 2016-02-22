@@ -49,7 +49,10 @@ symnode_t *create_symnode(char *name, var_lookup_type type, symhashtable_t *pare
   node->type = type;
   node->parent = parent;
   node->lineno = lineno;
-
+  node->mem_location = 0x0;
+  node->reg_number = 0;
+  node->hasVal = 0;
+  node->val = 0;
   return node;
 }
 
@@ -203,7 +206,7 @@ symnode_t *insert_constant(symboltable_t *symtab, var_lookup_type type, char *na
   symnode_t *node = lookup_symhashtable(symtab->leaf, typed_name, NOHASHSLOT);
   
   if (node == NULL) {
-    node = insert_into_symhashtable(symtab->leaf, type, typed_name, lineno, CONST_VT);
+    node = insert_into_symhashtable(symtab->root, type, typed_name, lineno, CONST_VT);
     return node;
   } else {
     return NULL;
@@ -222,7 +225,7 @@ symnode_t *insert_temp(symboltable_t *symtab, var_lookup_type type, char *name, 
   symnode_t *node = lookup_symhashtable(symtab->leaf, typed_name, NOHASHSLOT);
 
   if (node == NULL) {
-    node = insert_into_symhashtable(symtab->leaf, type, typed_name, lineno, TEMP_VT);
+    node = insert_into_symhashtable(symtab->root, type, typed_name, lineno, TEMP_VT);
     return node;
   } else {
     return NULL;
