@@ -42,12 +42,12 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
 
   /* Set up */
   // Stack
-  fprintf(fp, ".pos 0\n");
+  fprintf(fp, ".pos 0x0\n");
   fprintf(fp, "\tirmovl stack, %%esp\n");
 
   /* Constants */
   fprintf(fp, "\n");
-  fprintf(fp, ".pos %x\n", START_POS);
+  fprintf(fp, ".pos 0x%x\n", START_POS);
   fprintf(fp, "L_CONSTANTS:\n");
   // For each constant in root of symbol table
     // Give it current address
@@ -59,7 +59,7 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
   // Loop through
   curr_pos = ((curr_pos / 4) * 4) + 4;
   fprintf(fp, "\n");
-  fprintf(fp, ".pos %x\n", curr_pos);
+  fprintf(fp, ".pos 0x%x\n", curr_pos);
   fprintf(fp, "L_GLOBALS:\n");
   scope = table->root;
   tab_size = scope->size;
@@ -88,7 +88,7 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
   /* Temps */
   curr_pos = ((curr_pos / 4) * 4) + 4;
   fprintf(fp, "\n");
-  fprintf(fp, ".pos %x\n", curr_pos);
+  fprintf(fp, ".pos 0x%x\n", curr_pos);
   fprintf(fp, "L_TEMPS:\n");
 
   // Loop through each bucket in the global scope

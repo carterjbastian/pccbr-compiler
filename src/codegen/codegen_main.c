@@ -18,7 +18,7 @@ int parseError = 0;
 FILE *error_out;  // Global conditionally used in testing mode only
 
 int main() {
-
+  FILE *ys = fopen("./sample.ys", "w");
   int noRoot = 0;		/* 0 means we will have a root */
   symboltable_t *symtab;
   list = NULL;
@@ -42,7 +42,6 @@ int main() {
   print_symtab(symtab);
 
   print_quad_list(stdout, list);
-  fprintf(stdout, "\n\nASSEMBLY\n");
-  generate_assembly(stdout, list, symtab);
+  generate_assembly(ys, list, symtab);
   return 0;
 }
