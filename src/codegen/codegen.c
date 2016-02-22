@@ -113,6 +113,9 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
 
 
   // Jump to global assignment section
+  curr_pos = ((curr_pos / 4) * 4) + 4;
+  fprintf(fp, "\n");
+  fprintf(fp, ".pos %x\n", curr_pos);
   fprintf(fp, "\tjmp GLOBAL_ASSIGNMENTS\n");
 
   // Label for calling main
@@ -255,6 +258,7 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
             }
           }
         }
+        reg1->available = 1;
         //fprintf(fp, "\tASSN_QOP\n");
         break;
 
@@ -296,9 +300,10 @@ int create_constants(FILE *fp, symhashtable_t *scope, int curr_pos) {
 
   for (int i = 0; i < scope->size; i++) {
     for (symbol = scope->table[i]; symbol != NULL; symbol = symbol->next) {
-      if (symbol->vType == CONST_VT)
+      if (symbol->vType == CONST_VT) {
         symbol->mem_location = curr_pos + num_bytes;
         num_bytes += add_constant(fp, symbol);
+      }
     }
   }
 
@@ -334,8 +339,10 @@ int add_constant(FILE *fp, symnode_t *symbol) {
 
 reg_t *get_available_register(FILE *fp, reg_t *registers) {
   for (int i = 0; i < REGISTER_COUNT; i++) {
-    if (registers[i].available)
+    if (registers[i].available) {
+      registers[i].available = 0;
       return &registers[i];
+    }
   }
   
   // Take the last register and replace it
@@ -344,12 +351,14 @@ reg_t *get_available_register(FILE *fp, reg_t *registers) {
       fprintf(fp, "\t\t#Clearing out register %d\n", i);
       fprintf(fp, "\trmmovl %s, 0x%08x\n", registers[i].name, registers[i].contents->mem_location);
       // CLEAR OUT THE REGISTER
+      registers[i].available = 0;
       return &registers[i];
     }
   }
 
   fprintf(fp, "#Clearing out the first register\n");
   fprintf(fp, "\trmmovl %s, %d(%%ebp)\n", registers[0].name, registers[0].contents->mem_location);
+  registers[0].available = 0;
   return &registers[0];
 }
 

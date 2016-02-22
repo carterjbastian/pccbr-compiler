@@ -677,6 +677,8 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
       sprintf(buff, "%d", node->value_int);
  
       retval = lookup_in_symboltable(table, buff, CONST_VT);
+      retval->hasVal = 1;
+      retval->val = node->value_int;
 
       if (retval == NULL) {
         retval = create_symnode(buff, TEMP_LT, NULL, -1);
