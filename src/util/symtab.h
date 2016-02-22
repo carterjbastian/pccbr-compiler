@@ -85,6 +85,10 @@ typedef struct symnode {
   var_lookup_type type;             /* The type of the symbol */
   int lineno;                       /* Where in the file the symbol was declared */
   var_type vType;                   /* The type of the variable (temp, const, local) */
+  int mem_location;                 /* The variable's location in memory */
+  int reg_number;                   /* The register the variable is currently in */
+  int hasVal;
+  int val;
 } symnode_t;
 
 /* Hash table for a given scope in a symbol table. */

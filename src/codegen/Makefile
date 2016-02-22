@@ -17,7 +17,7 @@ codegen: ../util/ast.o ../util/symtab.o ../util/unescape.o ../symtab/buildtab.o 
 	cd ../util; make symtab.o
 
 ../util/unescape.o : ../util/unescape.c
-	cd ../util; make unescape.c
+	cd ../util; make unescape.o
 
 ../symtab/buildtab.o :
 	cd ../symtab; make
