@@ -89,6 +89,8 @@ typedef struct symnode {
   int reg_number;                   /* The register the variable is currently in */
   int hasVal;
   int val;
+  char *func_label;                 /* If this symnode is a function, what is the title of its label */
+  int func_arg_count;               /* The number of arguments this function has */
 } symnode_t;
 
 /* Hash table for a given scope in a symbol table. */

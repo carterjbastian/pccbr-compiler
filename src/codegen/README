@@ -1,0 +1,3 @@
+Changes to previous code:
+  - Moving argument quads to after the PRE_CALL quad (so all we have to do is push it)
+  - Changes to the symnode structure to account for labels and absolute addressing

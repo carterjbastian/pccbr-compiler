@@ -40,6 +40,7 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
     return NULL;
   ast_node child = node->left_child;
   int changed_scope = 0;
+  int count = 0;
   symnode_t *retval = NULL;
   // Basic temps and intermideary values
   symnode_t *t0, *t1, *t2, *tx, *ty, *x, *y, *l1, *l2;
@@ -88,14 +89,16 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
 
         add_quad(ASSN_QOP, t0, y, NULL);
 
-        x = code_gen(child, table);
+        //x = code_gen(child, table);
+        x = lookup_in_symboltable(table, child->value_string, LOCAL_VT);
         add_quad(ASSN_QOP, x, t0, NULL);
 
       } else {
         y = code_gen(child->right_sibling, table);
         add_quad(ASSN_QOP, t0, y, NULL);
-      
-        x = code_gen(child, table);
+     
+        //x = code_gen(child, table);
+        x = lookup_in_symboltable(table, child->value_string, LOCAL_VT);
         add_quad(ASSN_QOP, x, t0, NULL);
       }
       retval = x;
@@ -605,16 +608,19 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
 
     // (post_return, t, func_call, -)
     // return t
+    y = lookup_in_symboltable(table, node->value_string, LOCAL_VT);
+    add_quad(PRE_CALL_QOP, y, NULL, NULL);
+    count = 0;
     for (iterator = child; iterator != NULL; iterator = iterator->right_sibling) {
       t0 = NewTemp(table);
       x = code_gen(iterator, table);
       add_quad(ASSN_QOP, t0, x, NULL);
       add_quad(ARG_QOP, t0, NULL, NULL);
+      count++;
     }
 
-    y = lookup_in_symboltable(table, node->value_string, LOCAL_VT);
-    add_quad(PRE_CALL_QOP, y, NULL, NULL);
-
+    add_quad(POST_PARAMS_QOP, y, NULL, NULL);
+    y->func_arg_count = count;
     t1 = ((y->type == FUNC_INT_LT) ? NewTemp(table) : NULL);
     add_quad(POST_RET_QOP, t1, y, NULL);
     retval = t1;
@@ -637,6 +643,12 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
     }
 
     add_quad(LABEL_QOP, l1, NULL, NULL);
+    y = lookup_in_symboltable(table, node->value_string, LOCAL_VT);
+    assert(y);
+    printf("Function's name in symtab: %s\n", y->name);
+    y->func_label = l1->name; // Give the function entry in the table it's label
+    printf("Function's func_label in symtab: %s\n", y->func_label);
+
     code_gen(child, table);
     break;
 
@@ -659,6 +671,7 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
       x = create_symnode(buff, TEMP_LT, NULL, -1);
       x->hasVal = 1;
       x->val = node->value_int;
+      x->mem_location = 0;
       y = lookup_in_symboltable(table, node->value_string, LOCAL_VT);
       add_quad(INDEX_QOP, t0, y, x);
     } else {
@@ -677,15 +690,19 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
       sprintf(buff, "%d", node->value_int);
  
       retval = lookup_in_symboltable(table, buff, CONST_VT);
-      retval->hasVal = 1;
-      retval->val = node->value_int;
 
       if (retval == NULL) {
         retval = create_symnode(buff, TEMP_LT, NULL, -1);
         retval->hasVal = 1;
         retval->val = node->value_int;
+        retval->mem_location = 0;
         buff = NULL;
-      } 
+      } else {
+        retval->hasVal = 1;
+        retval->val = node->value_int;
+        retval->mem_location = 0;
+      }
+
       break;
 
   case STRING_LITERAL_N :

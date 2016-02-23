@@ -37,11 +37,11 @@ int main() {
   symtab = create_symboltable();
   symtab = build_symboltable(symtab, root, root);
 //  print_ast(stdout, root, 0);
-
+  print_symtab(symtab);
   code_gen(root, symtab);
   print_symtab(symtab);
 
   print_quad_list(stdout, list);
-  generate_assembly(ys, list, symtab);
+  generate_assembly(stdout, list, symtab);
   return 0;
 }

@@ -24,7 +24,7 @@ typedef enum {
   /* HIGH LEVEL FUNCTIONS */
   PRINT_QOP, READ_QOP,
   /* FUNCTION CALL HANDLING */
-  PRE_CALL_QOP, POST_RET_QOP, RETURN_QOP, ARG_QOP
+  PRE_CALL_QOP, POST_PARAMS_QOP, POST_RET_QOP, RETURN_QOP, ARG_QOP
 } optype;
 
 static val_name_pair qop_table [] = {
@@ -48,6 +48,7 @@ static val_name_pair qop_table [] = {
   { PRINT_QOP, "PRINT_QOP" },
   { READ_QOP, "READ_QOP" },
   { PRE_CALL_QOP, "PRE_CALL_QOP" },
+  { POST_PARAMS_QOP, "POST_PARAMS_QOP" },
   { POST_RET_QOP, "POST_RET_QOP" },
   { RETURN_QOP, "RETURN_QOP" },
   { ARG_QOP, "ARG_QOP"} };
