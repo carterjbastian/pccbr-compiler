@@ -364,8 +364,16 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
 
         break;
 
+      /* CASE 8: PRINT_QOP */
+      case PRINT_QOP :
+        fprintf(fp, "\t# We are printing this string: \"%s\"\n", quad->operand1->name);
+        // irmovl %08x(quad->curr_pos) to %[reg]
+        // rmmovl %[reg], 0x00FFFE10
+        break;
+
       default :
         fprintf(fp, "#Go Fuck Yourself\n");
+        break;
 
     }
   }
