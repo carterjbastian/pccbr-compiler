@@ -406,6 +406,126 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
 
         break;
 
+      case ADD_QOP :
+        // NOTE: we assume both operands and target and will be temporaries
+        fprintf(fp, "\t\t#Adding operation\n");
+
+        // We'll need two registers
+        reg1 = get_available_register(fp, registers);
+        reg2 = get_available_register(fp, registers);
+
+        // Load operands into registers
+        fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand2->mem_location, reg1->name);
+        fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand3->mem_location, reg2->name);
+
+        // Do the adding
+        fprintf(fp, "\taddl %s, %s\n", reg2->name, reg1->name);
+
+        // Put the result into the proper place in memory
+        fprintf(fp, "\trmmovl %s, 0x%08x\n", reg1->name, quad->operand1->mem_location);
+
+        // Free the registers
+        reg1->available = 1;
+        reg2->available = 1;
+
+        break;
+
+      case SUB_QOP :
+        // NOTE: we assume both operands and target and will be temporaries
+        fprintf(fp, "\t\t#Subtraction operation\n");
+
+        // We'll need two registers
+        reg1 = get_available_register(fp, registers);
+        reg2 = get_available_register(fp, registers);
+
+        // Load operands into registers
+        fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand2->mem_location, reg1->name);
+        fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand3->mem_location, reg2->name);
+
+        // Do the adding
+        fprintf(fp, "\tsubl %s, %s\n", reg2->name, reg1->name);
+
+        // Put the result into the proper place in memory
+        fprintf(fp, "\trmmovl %s, 0x%08x\n", reg1->name, quad->operand1->mem_location);
+
+        // Free the registers
+        reg1->available = 1;
+        reg2->available = 1;
+
+        break;
+
+      case MULL_QOP :
+        // NOTE: we assume both operands and target and will be temporaries
+        fprintf(fp, "\t\t#Multiply operation\n");
+
+        // We'll need two registers
+        reg1 = get_available_register(fp, registers);
+        reg2 = get_available_register(fp, registers);
+
+        // Load operands into registers
+        fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand2->mem_location, reg1->name);
+        fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand3->mem_location, reg2->name);
+
+        // Do the adding
+        fprintf(fp, "\tmull %s, %s\n", reg2->name, reg1->name);
+
+        // Put the result into the proper place in memory
+        fprintf(fp, "\trmmovl %s, 0x%08x\n", reg1->name, quad->operand1->mem_location);
+
+        // Free the registers
+        reg1->available = 1;
+        reg2->available = 1;
+
+        break;
+
+      case DIV_QOP :
+        // NOTE: we assume both operands and target and will be temporaries
+        fprintf(fp, "\t\t#Divide operation\n");
+
+        // We'll need two registers
+        reg1 = get_available_register(fp, registers);
+        reg2 = get_available_register(fp, registers);
+
+        // Load operands into registers
+        fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand2->mem_location, reg1->name);
+        fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand3->mem_location, reg2->name);
+
+        // Do the adding
+        fprintf(fp, "\tdivl %s, %s\n", reg2->name, reg1->name);
+
+        // Put the result into the proper place in memory
+        fprintf(fp, "\trmmovl %s, 0x%08x\n", reg1->name, quad->operand1->mem_location);
+
+        // Free the registers
+        reg1->available = 1;
+        reg2->available = 1;
+
+        break;
+
+      case MOD_QOP :
+        // NOTE: we assume both operands and target and will be temporaries
+        fprintf(fp, "\t\t#Mod operation\n");
+
+        // We'll need two registers
+        reg1 = get_available_register(fp, registers);
+        reg2 = get_available_register(fp, registers);
+
+        // Load operands into registers
+        fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand2->mem_location, reg1->name);
+        fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand3->mem_location, reg2->name);
+
+        // Do the adding
+        fprintf(fp, "\tmodl %s, %s\n", reg2->name, reg1->name);
+
+        // Put the result into the proper place in memory
+        fprintf(fp, "\trmmovl %s, 0x%08x\n", reg1->name, quad->operand1->mem_location);
+
+        // Free the registers
+        reg1->available = 1;
+        reg2->available = 1;
+
+        break;
+
       default :
         fprintf(fp, "#Go Fuck Yourself\n");
 
