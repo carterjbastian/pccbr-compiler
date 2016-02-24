@@ -1,15 +1,15 @@
-int x = 5;
+int x = 2;
 int y;
 
-void called(int a) {
-  a = x;  // Set the parameter equal to the global
+void called() {
+  int a = 10;
   y = a;  // Assign to the other global
-  a = 0;  // Assign to the parameter (NOT the global)
 }
 
 int main() {
-  x = 10; // Redefine the global
-  called(x); // Call the function
+  int a = 2;
+  x = 5; // Redefine the global
+  called(); // Call the function
   return y;
 }
 

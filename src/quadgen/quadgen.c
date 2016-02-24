@@ -617,6 +617,7 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
       add_quad(ASSN_QOP, t0, x, NULL);
       add_quad(ARG_QOP, t0, NULL, NULL);
       count++;
+      /* ADD IN FUNCTIONALITY FOR NULL CHILD? */
     }
 
     add_quad(POST_PARAMS_QOP, y, NULL, NULL);

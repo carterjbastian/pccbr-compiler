@@ -24,6 +24,8 @@
 symboltable_t *build_symboltable(symboltable_t *table, ast_node root, ast_node curr) {
   ast_node it;
   ast_node child, grandchild;
+  symnode_t *param_entry;
+  int param_count = 0;
   /*
    * Use this switch to parse each type of node correctly
    */
@@ -105,14 +107,25 @@ symboltable_t *build_symboltable(symboltable_t *table, ast_node root, ast_node c
         for (grandchild = child->left_child; grandchild->right_sibling != NULL; grandchild = grandchild->right_sibling);
         if (grandchild->node_type != RETURN_N)
           grandchild->right_sibling = create_ast_node(RETURN_N);
-        }
+      }
+
+      // Count the number of parameters
+      param_count = 0;
+      for (child = curr->left_child->right_sibling; child != NULL; child = child->right_sibling)
+        param_count++;
 
       // Loop past the compound statement (function body) and then to the params
       for (child = curr->left_child->right_sibling; child != NULL; child = child->right_sibling) {
         if (child->node_type == PARAM_N) {
-          insert_into_symboltable(table, INT_LT, child->value_string, child->lineno);
+          param_entry = insert_into_symboltable(table, INT_LT, child->value_string, child->lineno);
+          param_entry->mem_location = param_count * 4;
+          param_count--;
+          param_entry->absolute_address = 0;
         } else if (child->node_type == ARRAY_PARAM_N) {
-          insert_into_symboltable(table, INT_ARRAY_LT, child->value_string, child->lineno);
+          param_entry = insert_into_symboltable(table, INT_ARRAY_LT, child->value_string, child->lineno);
+          param_entry->mem_location = param_count * 4;
+          param_count--;
+          param_entry->absolute_address = 0;
         } else {
           continue; // Void => break from the for-loop
         }

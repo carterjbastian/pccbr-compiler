@@ -17,6 +17,7 @@ static const char *temp_prefix = "T";
 
 const int START_POS = 12;
 int curr_pos;
+int last_stomped = 0;
 
 // Initialize register table
 reg_t registers[] = {
@@ -37,7 +38,7 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
   symnode_t *node;
   int tab_size;
   int local_offset = -4;
-
+  int firstLabel = 1;
   curr_pos = START_POS;
 
   /* Set up */
@@ -77,8 +78,10 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
             (node->type != FUNC_INT_LT) && (node->type != FUNC_VOID_LT) ) {
           node->mem_location = curr_pos;
           curr_pos += 4;
+          // Mark this value as a global
+          node->vType = GLOBAL_VT;
           // Set globals address to curr_pos and increment curr_pos
-          printf("\t\t#Putting global %s at memory location %08x\n", node->name, node->mem_location);
+          fprintf(fp, "\t\t#Putting global %s at memory location %08x\n", node->name, node->mem_location);
         }
         
       }
@@ -104,7 +107,7 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
           node->mem_location = curr_pos;
           curr_pos += 4;
           // Set globals address to curr_pos and increment curr_pos
-          printf("\t\t#Putting temp %s at memory location %08x\n", node->name, node->mem_location);
+          fprintf(fp, "\t\t#Putting temp %s at memory location %08x\n", node->name, node->mem_location);
         }
         
       }
@@ -166,6 +169,8 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
             break;
 
           case LOCAL_VT:
+            quad->operand1->absolute_address = 0;
+            
             // Does this local variable have a memory address?
             if (quad->operand1->mem_location) {
               mem_loc1 = quad->operand1->mem_location;
@@ -175,6 +180,10 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
             }
             break;
 
+          case GLOBAL_VT:
+            mem_loc1 = quad->operand1->mem_location;
+            break;
+
           default :
             fprintf(fp, "#ERROR: unrecognized variable type...\n");
         }
@@ -182,6 +191,7 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
         if (quad->operand2 == NULL) {
           fprintf(fp, "\tirmovl 0x0, %s\n", reg1->name); 
           fprintf(fp, "\trmmovl %s, 0x%08x\n", reg1->name, mem_loc1);
+          reg1->available = 1;
           break;
         }
 
@@ -206,16 +216,22 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
 
           case LOCAL_VT:
             // Does this local variable have a memory address?
+            quad->operand2->absolute_address = 0;
             if (quad->operand2->mem_location) {
               mem_loc2 = quad->operand2->mem_location;
             } else {
               if (quad->operand2->hasVal) {
                 assn_val = quad->operand2->val;
                 mem_loc2 = 0x0;
+                quad->operand2->absolute_address = 1;
               } else {
                 fprintf(fp, "#ERROR: second operand in ASSN_QOP should never be unassigned local\n");
               }
             }
+            break;
+
+          case GLOBAL_VT:
+            mem_loc2 = quad->operand2->mem_location;
             break;
 
           default :
@@ -224,20 +240,22 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
 
         // We need to create a new value
         if (push_val) {
-          if (mem_loc2 > 0) {
-            fprintf(fp, "\tmrmovl 0x%08x, %s\n", mem_loc2, reg1->name);
-            fprintf(fp, "\tpushl %s\n", reg1->name);
-            quad->operand1->mem_location = local_offset;
-            local_offset -= 4;
-            fprintf(fp, "\t\t#Putting local %s with offset from ebp of %d\n", quad->operand1->name, quad->operand1->mem_location);
-          } else if (mem_loc2 < 0) {
-            fprintf(fp, "\tmrmovl %d(%%ebp), %s\n", mem_loc2, reg1->name);
-            fprintf(fp, "\tpushl %s\n", reg1->name);
-            quad->operand1->mem_location = local_offset;
-            local_offset -= 4;
-            fprintf(fp, "\t\t#Putting local %s with offset from ebp of %d\n", quad->operand1->name, quad->operand1->mem_location);
+          if (quad->operand2->absolute_address) {
+            if (mem_loc2 == 0) {
+              fprintf(fp, "\tirmovl 0x%08x, %s\n", assn_val, reg1->name);
+              fprintf(fp, "\tpushl %s\n", reg1->name);
+              quad->operand1->mem_location = local_offset;
+              local_offset -= 4;
+              fprintf(fp, "\t\t#Putting local %s with offset from ebp of %d\n", quad->operand1->name, quad->operand1->mem_location);
+            } else {
+              fprintf(fp, "\tmrmovl 0x%08x, %s\n", mem_loc2, reg1->name);
+              fprintf(fp, "\tpushl %s\n", reg1->name);
+              quad->operand1->mem_location = local_offset;
+              local_offset -= 4;
+              fprintf(fp, "\t\t#Putting local %s with offset from ebp of %d\n", quad->operand1->name, quad->operand1->mem_location);
+            }
           } else {
-            fprintf(fp, "\tirmovl 0x%08x, %s\n", assn_val, reg1->name);
+            fprintf(fp, "\tmrmovl %d(%%ebp), %s\n", mem_loc2, reg1->name);
             fprintf(fp, "\tpushl %s\n", reg1->name);
             quad->operand1->mem_location = local_offset;
             local_offset -= 4;
@@ -245,26 +263,31 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
           }
 
         } else {
-          if (mem_loc1 > 0) {
-            if (mem_loc2 > 0) {
-              fprintf(fp, "\tmrmovl 0x%08x, %s\n", mem_loc2, reg1->name);
-              fprintf(fp, "\trmmovl %s, 0x%08x\n", reg1->name, mem_loc1);
-            } else if (mem_loc2 < 0) {
-              fprintf(fp, "\tmrmovl %d(%%ebp), %s\n", mem_loc2, reg1->name);
-              fprintf(fp, "\trmmovl %s, 0x%08x\n", reg1->name, mem_loc1);
+          if (quad->operand1->absolute_address) {
+            if (quad->operand2->absolute_address) {
+              if (mem_loc2 == 0) {
+                fprintf(fp, "\tirmovl 0x%08x, %s\n", assn_val, reg1->name);
+                fprintf(fp, "\trmmovl %s, 0x%08x\n", reg1->name, mem_loc1);
+
+              } else {
+                fprintf(fp, "\tmrmovl 0x%08x, %s\n", mem_loc2, reg1->name);
+                fprintf(fp, "\trmmovl %s, 0x%08x\n", reg1->name, mem_loc1);
+              }
             } else {
-              fprintf(fp, "\tirmovl 0x%08x, %s\n", assn_val, reg1->name);
+              fprintf(fp, "\tmrmovl %d(%%ebp), %s\n", mem_loc2, reg1->name);
               fprintf(fp, "\trmmovl %s, 0x%08x\n", reg1->name, mem_loc1);
             }
           } else {
-            if (mem_loc2 > 0) {
-              fprintf(fp, "\tmrmovl 0x%08x, %s\n", mem_loc2, reg1->name);
-              fprintf(fp, "\trmmovl %s, %d(%%ebp)\n", reg1->name, mem_loc1);
-            } else if (mem_loc2 < 0) {
-              fprintf(fp, "\tmrmovl %d(%%ebp), %s\n", mem_loc2, reg1->name);
-              fprintf(fp, "\trmmovl %s, %d(%%ebp)\n", reg1->name, mem_loc1);
+            if (quad->operand2->absolute_address) {
+              if (mem_loc2 == 0) {
+                fprintf(fp, "\tirmovl 0x%08x, %s\n", assn_val, reg1->name);
+                fprintf(fp, "\trmmovl %s, %d(%%ebp)\n", reg1->name, mem_loc1);
+              } else {
+                fprintf(fp, "\tmrmovl 0x%08x, %s\n", mem_loc2, reg1->name);
+                fprintf(fp, "\trmmovl %s, %d(%%ebp)\n", reg1->name, mem_loc1);
+              }
             } else {
-              fprintf(fp, "\tirmovl 0x%08x, %s\n", assn_val, reg1->name);
+              fprintf(fp, "\tmrmovl %d(%%ebp), %s\n", mem_loc2, reg1->name);
               fprintf(fp, "\trmmovl %s, %d(%%ebp)\n", reg1->name, mem_loc1);
             }
           }
@@ -275,11 +298,16 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
 
       /* CASE 2: LABEL_QOP */
       case LABEL_QOP :
+        if (firstLabel == 1) {
+          fprintf(fp, "\tjmp CALL_MAIN\n");
+          firstLabel = 0;
+        }
+        /*
         if (strcmp(quad->operand1->name, "L_MAIN") == 0) {
           fprintf(fp, "\tjmp CALL_MAIN\n");
-       
         }
-        fprintf(fp, "%s:\n", quad->operand1->name);
+        */
+        fprintf(fp, "\n%s:\n", quad->operand1->name);
         if (strcmp(quad->operand1->name, "L_MAIN") == 0)
           fprintf(fp, "\trrmovl %%esp, %%ebp\n");
         break;
@@ -287,6 +315,7 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
       /* CASE 3: RETURN_QOP */
       case RETURN_QOP :
         // Pop off the local variables by setting %esp to %ebp
+        fprintf(fp, "\t\t#Popping off local variables\n");
         fprintf(fp, "\trrmovl %%ebp, %%esp\n");
         local_offset = -4; // WARNING: WILL THIS CAUSE PROBLEMS?
         
@@ -299,11 +328,14 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
       case PRE_CALL_QOP:
         // Push all of the general purpose registers
           // NOTE: This can be optimized!
+        fprintf(fp, "\t\t#Caller-save storing registers\n");
         for (int i = 0; i < REGISTER_COUNT; i++) 
           fprintf(fp, "\tpushl %s\n", registers[i].name);
 
+        fprintf(fp, "\t\t#Storing the caller's ebp\n");
         // Push the current frame's base pointer
         fprintf(fp, "\tpushl %%ebp\n");
+        fprintf(fp, "\t\t#Pushing %d arguments for the function\n", quad->operand1->func_arg_count); 
         break;
 
 
@@ -311,12 +343,15 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
       case ARG_QOP :
         // Argument will be in a temporary
         reg1 = get_available_register(fp, registers);
-
+ 
         // Load it to a register 
         fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand1->mem_location, reg1->name);
 
         // push it onto the stack
         fprintf(fp, "\tpushl %s\n", reg1->name);
+        
+        // Free register 1
+        reg1->available = 1;
         break;
 
 
@@ -326,6 +361,7 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
         reg1 = get_available_register(fp, registers);
         reg2 = get_available_register(fp, registers);
 
+        fprintf(fp, "\t\t#Setting the callee's base pointer\n");
         // Subtract four from the ESP and store the resulting address in a reg
         fprintf(fp, "\tirmovl 0x4, %s\n", reg1->name);
         fprintf(fp, "\trrmovl %%esp, %s\n", reg2->name);
@@ -333,6 +369,8 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
 
         // Set the base pointer to that value
         fprintf(fp, "\trrmovl %s, %%ebp\n", reg2->name);
+
+        // Modify the scope in such a way that  
 
         // Call the function
         fprintf(fp, "\tcall %s\n", quad->operand1->func_label);
@@ -348,17 +386,21 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
 
         // Do we need to save the return value? It will be in %eax
         if (quad->operand1 != NULL) {
+          fprintf(fp, "\t\t#Saving return value from the function call\n");
           fprintf(fp, "\trmmovl %%eax, 0x%08x\n", quad->operand1->mem_location);
         }
 
         // Pop off the parameters to get to the old base pointer
+        fprintf(fp, "\t\t#Popping off %d parameters\n", quad->operand2->func_arg_count);
         for (int i = 0; i < quad->operand2->func_arg_count; i++)
           fprintf(fp, "\tpopl %%esi\n");
 
         // Pop the EBP into the right place
+        fprintf(fp, "\t\t#Restoring Caller's EBP\n");
         fprintf(fp, "\tpopl %%ebp\n");
 
         // Pop the registers in order (caller save)
+        fprintf(fp, "\t\t#Restoring Caller's Registers\n");  
         for (int i = REGISTER_COUNT - 1; i >= 0; i--)
           fprintf(fp, "\tpopl %s\n", registers[i].name);
 
@@ -374,7 +416,7 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
   // String definitions
 
   // .pos for stack
-  fprintf(fp, ".pos 0x%x\n", 0x10c);
+  fprintf(fp, "\n.pos 0x%x\n", 0x800);
 
   // stack location
   fprintf(fp, "stack:\n");
@@ -425,7 +467,11 @@ int add_constant(FILE *fp, symnode_t *symbol) {
     return bytes;
 }
 
+/*
+ * TO DO: Figure out how to save registers' values if issues are caused
+ */
 reg_t *get_available_register(FILE *fp, reg_t *registers) {
+  int to_stomp = 0;
   for (int i = 0; i < REGISTER_COUNT; i++) {
     if (registers[i].available) {
       registers[i].available = 0;
@@ -434,7 +480,7 @@ reg_t *get_available_register(FILE *fp, reg_t *registers) {
   }
   
   // Take the last register and replace it
-  for (int i = 0; i < REGISTER_COUNT; i++) {
+/*  for (int i = 0; i < REGISTER_COUNT; i++) {
     if (registers[i].contents->mem_location > 0) {
       fprintf(fp, "\t\t#Clearing out register %d\n", i);
       fprintf(fp, "\trmmovl %s, 0x%08x\n", registers[i].name, registers[i].contents->mem_location);
@@ -442,12 +488,17 @@ reg_t *get_available_register(FILE *fp, reg_t *registers) {
       registers[i].available = 0;
       return &registers[i];
     }
-  }
-
+  } */
+  /*
   fprintf(fp, "#Clearing out the first register\n");
   fprintf(fp, "\trmmovl %s, %d(%%ebp)\n", registers[0].name, registers[0].contents->mem_location);
   registers[0].available = 0;
-  return &registers[0];
+  */
+  to_stomp = ((last_stomped + 1) % REGISTER_COUNT);
+  last_stomped = to_stomp;
+  fprintf(fp, "\t\t#Stomping on register %d\n", to_stomp);
+  registers[to_stomp].available = 0;
+  return &registers[to_stomp];
 }
 
 
