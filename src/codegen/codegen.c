@@ -526,6 +526,48 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
 
         break;
 
+      case GOTO_QOP:
+        fprintf(fp, "\tjmp %s\n", quad->operand1->name);
+        break;
+
+      case IF_FALSE_QOP:
+        reg1 = get_available_register(fp, registers);
+        reg2 = get_available_register(fp, registers);
+
+        // Get the value to be tested in a register
+        fprintf(fp, "\t\t#IF_FALSE operation\n");
+        fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand1->mem_location, reg1->name);
+        fprintf(fp, "\tirmovl 0x0, %s\n", reg2->name);
+
+        // Move conditionally based on the result
+        fprintf(fp, "\taddl %s, %s\n", reg1->name, reg2->name);
+        fprintf(fp, "\tje %s\n", quad->operand2->name);
+
+        // Free the registers
+        reg1->available = 1;
+        reg2->available = 1;
+
+        break;
+
+      case IF_TRUE_QOP:
+        reg1 = get_available_register(fp, registers);
+        reg2 = get_available_register(fp, registers);
+
+        // Get the value to be tested in a register
+        fprintf(fp, "\t\t#IF_FALSE operation\n");
+        fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand1->mem_location, reg1->name);
+        fprintf(fp, "\tirmovl 0x0, %s\n", reg2->name);
+
+        // Move conditionally based on the result
+        fprintf(fp, "\taddl %s, %s\n", reg1->name, reg2->name);
+        fprintf(fp, "\tjne %s\n", quad->operand2->name);
+
+        // Free the registers
+        reg1->available = 1;
+        reg2->available = 1;
+
+        break;
+
       default :
         fprintf(fp, "#Go Fuck Yourself\n");
 
