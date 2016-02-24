@@ -211,8 +211,8 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
       
       // Negation
       add_quad(SUB_QOP, t0, t1, tx);
-
-      retval = t0;
+      add_quad(ASSN_QOP, x, t0, NULL);
+      retval = x;
       break;
 
     case OP_UNARYM_N :
@@ -229,8 +229,9 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
       
       // Negation
       add_quad(SUB_QOP, t0, t1, tx);
+      add_quad(ASSN_QOP, x, t0, NULL);
 
-      retval = t0;
+      retval = 0;
       break;
 
 
@@ -344,7 +345,12 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
       t0 = NewTemp(table);
 
       t1 = create_symnode("0", TEMP_LT, NULL, -1);
+      t1->hasVal = 1;
+      t1->val = 0;
+
       t2 = create_symnode("1", TEMP_LT, NULL, -1);
+      t2->hasVal = 1;
+      t2->val = 1;
 
       l1 = NewLabel(node->node_name, "IS_FALSE");
       l2 = NewLabel(node->node_name, "END");
@@ -382,7 +388,12 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
       t0 = NewTemp(table);
 
       t1 = create_symnode("0", TEMP_LT, NULL, -1);
+      t1->hasVal = 1;
+      t1->val = 0;
+
       t2 = create_symnode("1", TEMP_LT, NULL, -1);
+      t2->hasVal = 1;
+      t2->val = 1;
 
       l1 = NewLabel(node->node_name, "IS_TRUE");
       l2 = NewLabel(node->node_name, "END");
@@ -417,7 +428,12 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
       t0 = NewTemp(table);
 
       t1 = create_symnode("0", TEMP_LT, NULL, -1);
+      t1->hasVal = 1;
+      t1->val = 0;
+
       t2 = create_symnode("1", TEMP_LT, NULL, -1);
+      t2->hasVal = 1;
+      t2->val = 1;
 
       l1 = NewLabel(node->node_name, "IS_FALSE");
       l2 = NewLabel(node->node_name, "END");
@@ -444,26 +460,32 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
       t0 = NewTemp(table);
       t1 = NewTemp(table);
       t2 = create_symnode("1", TEMP_LT, NULL, -1);
+      t2->hasVal = 1;
+      t2->val = 1;
 
       x = code_gen(child, table);
       
       add_quad(ASSN_QOP, t1, t2, NULL);
       add_quad(ADD_QOP, t0, x, t1);
+      add_quad(ASSN_QOP, x, t0, NULL);
 
-      retval = t0;
+      retval = x;
       break;
 
   case OP_DECREMENT_N:
       t0 = NewTemp(table);
       t1 = NewTemp(table);
       t2 = create_symnode("1", TEMP_LT, NULL, -1);
+      t2->hasVal = 1;
+      t2->val = 1;
 
       x = code_gen(child, table);
       
       add_quad(ASSN_QOP, t1, t2, NULL);
       add_quad(SUB_QOP, t0, x, t1);
+      add_quad(ASSN_QOP, x, t0, NULL);
 
-      retval = t0;
+      retval = x;
       break;
 
 
@@ -675,11 +697,13 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
       x->mem_location = 0;
       y = lookup_in_symboltable(table, node->value_string, LOCAL_VT);
       add_quad(INDEX_QOP, t0, y, x);
+      retval = t0;
     } else {
       x = lookup_in_symboltable(table, node->value_string, LOCAL_VT);
-      add_quad(ASSN_QOP, t0, x, NULL);
+      retval = x;
+      //add_quad(ASSN_QOP, t0, x, NULL);
+
     }
-    retval = t0;
     break;
 //    retval = lookup_in_symboltable(table, node->value_string, LOCAL_VT);
 //      break;

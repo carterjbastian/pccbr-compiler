@@ -140,6 +140,8 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
     int mem_loc2 = 0;
     reg_t *reg1 = NULL;
     reg_t *reg2 = NULL;
+    reg_t *truth_reg = NULL;
+    reg_t *false_reg = NULL;
     int push_val = 0;
     int assn_val = 0;
 
@@ -200,6 +202,7 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
           case TEMP_VT:
             if (quad->operand2->mem_location) {
               mem_loc2 = quad->operand2->mem_location;
+              
             } else {
               if (quad->operand2->hasVal) {
                 assn_val = quad->operand2->val;
@@ -345,8 +348,11 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
         reg1 = get_available_register(fp, registers);
  
         // Load it to a register 
-        fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand1->mem_location, reg1->name);
-
+        if (quad->operand1->absolute_address) {
+          fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand1->mem_location, reg1->name);
+        } else {
+          fprintf(fp, "\tmrmovl %d(%%ebp), %s\n", quad->operand1->mem_location, reg1->name);
+        }
         // push it onto the stack
         fprintf(fp, "\tpushl %s\n", reg1->name);
         
@@ -383,13 +389,6 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
 
       /* CASE 7: POST_CALL_QOP */
       case POST_RET_QOP :
-
-        // Do we need to save the return value? It will be in %eax
-        if (quad->operand1 != NULL) {
-          fprintf(fp, "\t\t#Saving return value from the function call\n");
-          fprintf(fp, "\trmmovl %%eax, 0x%08x\n", quad->operand1->mem_location);
-        }
-
         // Pop off the parameters to get to the old base pointer
         fprintf(fp, "\t\t#Popping off %d parameters\n", quad->operand2->func_arg_count);
         for (int i = 0; i < quad->operand2->func_arg_count; i++)
@@ -398,6 +397,19 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
         // Pop the EBP into the right place
         fprintf(fp, "\t\t#Restoring Caller's EBP\n");
         fprintf(fp, "\tpopl %%ebp\n");
+
+
+        // Do we need to save the return value? It will be in %eax
+        if (quad->operand1 != NULL) {
+          fprintf(fp, "\t\t#Saving return value from the function call\n");
+          
+          if (quad->operand1->absolute_address) {
+            fprintf(fp, "\trmmovl %%eax, 0x%08x\n", quad->operand1->mem_location);
+          } else {
+            fprintf(fp, "\trmmovl %%eax, %d(%%ebp)\n", quad->operand1->mem_location);
+          }
+        }
+
 
         // Pop the registers in order (caller save)
         fprintf(fp, "\t\t#Restoring Caller's Registers\n");  
@@ -415,14 +427,27 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
         reg2 = get_available_register(fp, registers);
 
         // Load operands into registers
-        fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand2->mem_location, reg1->name);
-        fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand3->mem_location, reg2->name);
+        if (quad->operand2->absolute_address) {
+          fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand2->mem_location, reg1->name);
+        } else {
+          fprintf(fp, "\tmrmovl %d(%%ebp), %s\n", quad->operand2->mem_location, reg1->name);
+        }
+
+        if (quad->operand3->absolute_address) {
+          fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand3->mem_location, reg2->name);
+        } else {
+          fprintf(fp, "\tmrmovl %d(%%ebp), %s\n", quad->operand3->mem_location, reg2->name);
+        }
 
         // Do the adding
         fprintf(fp, "\taddl %s, %s\n", reg2->name, reg1->name);
 
         // Put the result into the proper place in memory
-        fprintf(fp, "\trmmovl %s, 0x%08x\n", reg1->name, quad->operand1->mem_location);
+        if (quad->operand1->absolute_address) {
+          fprintf(fp, "\trmmovl %s, 0x%08x\n", reg1->name, quad->operand1->mem_location);
+        } else {
+          fprintf(fp, "\trmmovl %s, %d(%%ebp)\n", reg1->name, quad->operand1->mem_location);
+        }
 
         // Free the registers
         reg1->available = 1;
@@ -439,15 +464,27 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
         reg2 = get_available_register(fp, registers);
 
         // Load operands into registers
-        fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand2->mem_location, reg1->name);
-        fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand3->mem_location, reg2->name);
+        if (quad->operand2->absolute_address) {
+          fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand2->mem_location, reg1->name);
+        } else {
+          fprintf(fp, "\tmrmovl %d(%%ebp), %s\n", quad->operand2->mem_location, reg1->name);
+        }
+
+        if (quad->operand3->absolute_address) {
+          fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand3->mem_location, reg2->name);
+        } else {
+          fprintf(fp, "\tmrmovl %d(%%ebp), %s\n", quad->operand3->mem_location, reg2->name);
+        }
 
         // Do the adding
         fprintf(fp, "\tsubl %s, %s\n", reg2->name, reg1->name);
 
         // Put the result into the proper place in memory
-        fprintf(fp, "\trmmovl %s, 0x%08x\n", reg1->name, quad->operand1->mem_location);
-
+        if (quad->operand1->absolute_address) {
+          fprintf(fp, "\trmmovl %s, 0x%08x\n", reg1->name, quad->operand1->mem_location);
+        } else {
+          fprintf(fp, "\trmmovl %s, %d(%%ebp)\n", reg1->name, quad->operand1->mem_location);
+        }
         // Free the registers
         reg1->available = 1;
         reg2->available = 1;
@@ -463,14 +500,27 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
         reg2 = get_available_register(fp, registers);
 
         // Load operands into registers
-        fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand2->mem_location, reg1->name);
-        fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand3->mem_location, reg2->name);
+        if (quad->operand2->absolute_address) {
+          fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand2->mem_location, reg1->name);
+        } else {
+          fprintf(fp, "\tmrmovl %d(%%ebp), %s\n", quad->operand2->mem_location, reg1->name);
+        }
+
+        if (quad->operand3->absolute_address) {
+          fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand3->mem_location, reg2->name);
+        } else {
+          fprintf(fp, "\tmrmovl %d(%%ebp), %s\n", quad->operand3->mem_location, reg2->name);
+        }
 
         // Do the adding
         fprintf(fp, "\tmull %s, %s\n", reg2->name, reg1->name);
 
         // Put the result into the proper place in memory
-        fprintf(fp, "\trmmovl %s, 0x%08x\n", reg1->name, quad->operand1->mem_location);
+        if (quad->operand1->absolute_address) {
+          fprintf(fp, "\trmmovl %s, 0x%08x\n", reg1->name, quad->operand1->mem_location);
+        } else {
+          fprintf(fp, "\trmmovl %s, %d(%%ebp)\n", reg1->name, quad->operand1->mem_location);
+        }
 
         // Free the registers
         reg1->available = 1;
@@ -487,14 +537,27 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
         reg2 = get_available_register(fp, registers);
 
         // Load operands into registers
-        fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand2->mem_location, reg1->name);
-        fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand3->mem_location, reg2->name);
+        if (quad->operand2->absolute_address) {
+          fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand2->mem_location, reg1->name);
+        } else {
+          fprintf(fp, "\tmrmovl %d(%%ebp), %s\n", quad->operand2->mem_location, reg1->name);
+        }
+
+        if (quad->operand3->absolute_address) {
+          fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand3->mem_location, reg2->name);
+        } else {
+          fprintf(fp, "\tmrmovl %d(%%ebp), %s\n", quad->operand3->mem_location, reg2->name);
+        }
 
         // Do the adding
         fprintf(fp, "\tdivl %s, %s\n", reg2->name, reg1->name);
 
         // Put the result into the proper place in memory
-        fprintf(fp, "\trmmovl %s, 0x%08x\n", reg1->name, quad->operand1->mem_location);
+        if (quad->operand1->absolute_address) {
+          fprintf(fp, "\trmmovl %s, 0x%08x\n", reg1->name, quad->operand1->mem_location);
+        } else {
+          fprintf(fp, "\trmmovl %s, %d(%%ebp)\n", reg1->name, quad->operand1->mem_location);
+        }
 
         // Free the registers
         reg1->available = 1;
@@ -511,14 +574,28 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
         reg2 = get_available_register(fp, registers);
 
         // Load operands into registers
-        fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand2->mem_location, reg1->name);
-        fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand3->mem_location, reg2->name);
+        if (quad->operand2->absolute_address) {
+          fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand2->mem_location, reg1->name);
+        } else {
+          fprintf(fp, "\tmrmovl %d(%%ebp), %s\n", quad->operand2->mem_location, reg1->name);
+        }
+
+        if (quad->operand3->absolute_address) {
+          fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand3->mem_location, reg2->name);
+        } else {
+          fprintf(fp, "\tmrmovl %d(%%ebp), %s\n", quad->operand3->mem_location, reg2->name);
+        }
 
         // Do the adding
         fprintf(fp, "\tmodl %s, %s\n", reg2->name, reg1->name);
 
+
         // Put the result into the proper place in memory
-        fprintf(fp, "\trmmovl %s, 0x%08x\n", reg1->name, quad->operand1->mem_location);
+        if (quad->operand1->absolute_address) {
+          fprintf(fp, "\trmmovl %s, 0x%08x\n", reg1->name, quad->operand1->mem_location);
+        } else {
+          fprintf(fp, "\trmmovl %s, %d(%%ebp)\n", reg1->name, quad->operand1->mem_location);
+        }
 
         // Free the registers
         reg1->available = 1;
@@ -536,7 +613,13 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
 
         // Get the value to be tested in a register
         fprintf(fp, "\t\t#IF_FALSE operation\n");
-        fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand1->mem_location, reg1->name);
+
+        if (quad->operand1->absolute_address) {
+          fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand1->mem_location, reg1->name);
+        } else {
+          fprintf(fp, "\tmrmovl %d(%%ebp), %s\n", quad->operand1->mem_location, reg1->name);
+        }
+
         fprintf(fp, "\tirmovl 0x0, %s\n", reg2->name);
 
         // Move conditionally based on the result
@@ -549,13 +632,20 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
 
         break;
 
+
       case IF_TRUE_QOP:
         reg1 = get_available_register(fp, registers);
         reg2 = get_available_register(fp, registers);
 
         // Get the value to be tested in a register
         fprintf(fp, "\t\t#IF_FALSE operation\n");
-        fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand1->mem_location, reg1->name);
+
+        if (quad->operand1->absolute_address) {
+          fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand1->mem_location, reg1->name);
+        } else {
+          fprintf(fp, "\tmrmovl %d(%%ebp), %s\n", quad->operand1->mem_location, reg1->name);
+        }
+
         fprintf(fp, "\tirmovl 0x0, %s\n", reg2->name);
 
         // Move conditionally based on the result
@@ -567,6 +657,246 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
         reg2->available = 1;
 
         break;
+
+
+      case EQ_QOP:
+        fprintf(fp, "\t\t#EQ Conditional Evaluation\n");
+        
+        reg1 = get_available_register(fp, registers);
+        reg2 = get_available_register(fp, registers);
+
+        truth_reg = get_available_register(fp, registers);
+        false_reg = get_available_register(fp, registers);
+
+        // Load in the values
+        if (quad->operand2->absolute_address) {
+          fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand2->mem_location, reg1->name);
+        } else {
+          fprintf(fp, "\tmrmovl %d(%%ebp), %s\n", quad->operand2->mem_location, reg1->name);
+        }
+
+        if (quad->operand3->absolute_address) {
+          fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand3->mem_location, reg2->name);
+        } else {
+          fprintf(fp, "\tmrmovl %d(%%ebp), %s\n", quad->operand3->mem_location, reg2->name);
+        }
+
+        // Load in truth and false
+        fprintf(fp, "\tirmovl 0x1, %s\n", truth_reg->name);
+        fprintf(fp, "\tirmovl 0x0, %s\n", false_reg->name);
+
+        // Assume the comparison to be false (result goes into the false register)
+        fprintf(fp, "\tsubl %s, %s\n", reg2->name, reg1->name);
+
+        // Do the comparison and conditionally assign
+        fprintf(fp, "\tcmove %s, %s\n", truth_reg->name, false_reg->name);
+
+        // Move the results into the results memory location
+        if (quad->operand1->absolute_address) {
+          fprintf(fp, "\trmmovl %s, 0x%08x\n", reg1->name, quad->operand1->mem_location);
+        } else {
+          fprintf(fp, "\trmmovl %s, %d(%%ebp)\n", reg1->name, quad->operand1->mem_location);
+        }
+
+        // Free Registers
+        reg1->available = 1;
+        reg2->available = 1;
+        truth_reg->available = 1;
+        false_reg->available = 1;
+
+        break;
+
+
+      case LT_QOP:
+        fprintf(fp, "\t\t#LT Conditional Evaluation\n");
+        
+        reg1 = get_available_register(fp, registers);
+        reg2 = get_available_register(fp, registers);
+
+        truth_reg = get_available_register(fp, registers);
+        false_reg = get_available_register(fp, registers);
+
+        // Load in the values
+        if (quad->operand2->absolute_address) {
+          fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand2->mem_location, reg1->name);
+        } else {
+          fprintf(fp, "\tmrmovl %d(%%ebp), %s\n", quad->operand2->mem_location, reg1->name);
+        }
+
+        if (quad->operand3->absolute_address) {
+          fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand3->mem_location, reg2->name);
+        } else {
+          fprintf(fp, "\tmrmovl %d(%%ebp), %s\n", quad->operand3->mem_location, reg2->name);
+        }
+
+        // Load in truth and false
+        fprintf(fp, "\tirmovl 0x1, %s\n", truth_reg->name);
+        fprintf(fp, "\tirmovl 0x0, %s\n", false_reg->name);
+
+        // Assume the comparison to be false (result goes into the false register)
+        fprintf(fp, "\tsubl %s, %s\n", reg2->name, reg1->name);
+
+        // Do the comparison and conditionally assign
+        fprintf(fp, "\tcmovl %s, %s\n", truth_reg->name, false_reg->name);
+
+        // Move the results into the results memory location
+        if (quad->operand1->absolute_address) {
+          fprintf(fp, "\trmmovl %s, 0x%08x\n", reg1->name, quad->operand1->mem_location);
+        } else {
+          fprintf(fp, "\trmmovl %s, %d(%%ebp)\n", reg1->name, quad->operand1->mem_location);
+        }
+
+        // Free Registers
+        reg1->available = 1;
+        reg2->available = 1;
+        truth_reg->available = 1;
+        false_reg->available = 1;
+
+        break;
+
+
+      case LTE_QOP:
+        fprintf(fp, "\t\t#LTE Conditional Evaluation\n");
+        
+        reg1 = get_available_register(fp, registers);
+        reg2 = get_available_register(fp, registers);
+
+        truth_reg = get_available_register(fp, registers);
+        false_reg = get_available_register(fp, registers);
+
+        // Load in the values
+        if (quad->operand2->absolute_address) {
+          fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand2->mem_location, reg1->name);
+        } else {
+          fprintf(fp, "\tmrmovl %d(%%ebp), %s\n", quad->operand2->mem_location, reg1->name);
+        }
+
+        if (quad->operand3->absolute_address) {
+          fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand3->mem_location, reg2->name);
+        } else {
+          fprintf(fp, "\tmrmovl %d(%%ebp), %s\n", quad->operand3->mem_location, reg2->name);
+        }
+
+        // Load in truth and false
+        fprintf(fp, "\tirmovl 0x1, %s\n", truth_reg->name);
+        fprintf(fp, "\tirmovl 0x0, %s\n", false_reg->name);
+
+        // Assume the comparison to be false (result goes into the false register)
+        fprintf(fp, "\tsubl %s, %s\n", reg2->name, reg1->name);
+
+        // Do the comparison and conditionally assign
+        fprintf(fp, "\tcmovle %s, %s\n", truth_reg->name, false_reg->name);
+
+        // Move the results into the results memory location
+        if (quad->operand1->absolute_address) {
+          fprintf(fp, "\trmmovl %s, 0x%08x\n", reg1->name, quad->operand1->mem_location);
+        } else {
+          fprintf(fp, "\trmmovl %s, %d(%%ebp)\n", reg1->name, quad->operand1->mem_location);
+        }
+
+        // Free Registers
+        reg1->available = 1;
+        reg2->available = 1;
+        truth_reg->available = 1;
+        false_reg->available = 1;
+
+        break;
+
+
+      case GT_QOP:
+        fprintf(fp, "\t\t#GT Conditional Evaluation\n");
+        
+        reg1 = get_available_register(fp, registers);
+        reg2 = get_available_register(fp, registers);
+
+        truth_reg = get_available_register(fp, registers);
+        false_reg = get_available_register(fp, registers);
+
+        // Load in the values
+        if (quad->operand2->absolute_address) {
+          fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand2->mem_location, reg1->name);
+        } else {
+          fprintf(fp, "\tmrmovl %d(%%ebp), %s\n", quad->operand2->mem_location, reg1->name);
+        }
+
+        if (quad->operand3->absolute_address) {
+          fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand3->mem_location, reg2->name);
+        } else {
+          fprintf(fp, "\tmrmovl %d(%%ebp), %s\n", quad->operand3->mem_location, reg2->name);
+        }
+
+        // Load in truth and false
+        fprintf(fp, "\tirmovl 0x1, %s\n", truth_reg->name);
+        fprintf(fp, "\tirmovl 0x0, %s\n", false_reg->name);
+
+        // Assume the comparison to be false (result goes into the false register)
+        fprintf(fp, "\tsubl %s, %s\n", reg2->name, reg1->name);
+
+        // Do the comparison and conditionally assign
+        fprintf(fp, "\tcmovg %s, %s\n", truth_reg->name, false_reg->name);
+
+        if (quad->operand1->absolute_address) {
+          fprintf(fp, "\trmmovl %s, 0x%08x\n", reg1->name, quad->operand1->mem_location);
+        } else {
+          fprintf(fp, "\trmmovl %s, %d(%%ebp)\n", reg1->name, quad->operand1->mem_location);
+        }
+
+        // Free Registers
+        reg1->available = 1;
+        reg2->available = 1;
+        truth_reg->available = 1;
+        false_reg->available = 1;
+
+        break;
+
+
+      case GTE_QOP:
+        fprintf(fp, "\t\t#GTE Conditional Evaluation\n");
+        
+        reg1 = get_available_register(fp, registers);
+        reg2 = get_available_register(fp, registers);
+
+        truth_reg = get_available_register(fp, registers);
+        false_reg = get_available_register(fp, registers);
+
+        // Load in the values
+        if (quad->operand2->absolute_address) {
+          fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand2->mem_location, reg1->name);
+        } else {
+          fprintf(fp, "\tmrmovl %d(%%ebp), %s\n", quad->operand2->mem_location, reg1->name);
+        }
+
+        if (quad->operand3->absolute_address) {
+          fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand3->mem_location, reg2->name);
+        } else {
+          fprintf(fp, "\tmrmovl %d(%%ebp), %s\n", quad->operand3->mem_location, reg2->name);
+        }
+
+        // Load in truth and false
+        fprintf(fp, "\tirmovl 0x1, %s\n", truth_reg->name);
+        fprintf(fp, "\tirmovl 0x0, %s\n", false_reg->name);
+
+        // Assume the comparison to be false (result goes into the false register)
+        fprintf(fp, "\tsubl %s, %s\n", reg2->name, reg1->name);
+
+        // Do the comparison and conditionally assign
+        fprintf(fp, "\tcmovge %s, %s\n", truth_reg->name, false_reg->name);
+
+        // Move the results into the results memory location
+        if (quad->operand1->absolute_address) {
+          fprintf(fp, "\trmmovl %s, 0x%08x\n", reg1->name, quad->operand1->mem_location);
+        } else {
+          fprintf(fp, "\trmmovl %s, %d(%%ebp)\n", reg1->name, quad->operand1->mem_location);
+        }
+
+        // Free Registers
+        reg1->available = 1;
+        reg2->available = 1;
+        truth_reg->available = 1;
+        false_reg->available = 1;
+
+        break;
+
 
       default :
         fprintf(fp, "#Go Fuck Yourself\n");
@@ -608,7 +938,7 @@ int add_constant(FILE *fp, symnode_t *symbol) {
     case INT_LT:
       fprintf(fp, "# Creation of int %s at location 0x%08x\n", symbol->name, symbol->mem_location);
       fprintf(fp, "\t.long 0x%08x\n", symbol->val);
-      bytes = 8;
+      bytes = 4;
       break;
 
     case STR_LT:
