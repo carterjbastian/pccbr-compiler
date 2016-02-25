@@ -14,7 +14,7 @@ typedef enum {
   /* ARITHMETIC */
   ADD_QOP, SUB_QOP, MULL_QOP, DIV_QOP, MOD_QOP,
   /* ARRAYS */
-  INDEX_QOP,
+  INDEX_QOP, INDEX_ASSN_QOP,
   /* MOVEMENT */
   GOTO_QOP, IF_FALSE_QOP, IF_TRUE_QOP,
   /* CONDITIONALS */
@@ -36,6 +36,7 @@ static val_name_pair qop_table [] = {
   { DIV_QOP, "DIV_QOP" },
   { MOD_QOP, "MOD_QOP" },
   { INDEX_QOP, "INDEX_QOP" },
+  { INDEX_ASSN_QOP, "INDEX_ASSN_QOP" },
   { GOTO_QOP, "GOTO_QOP" },
   { IF_FALSE_QOP, "IF_FALSE_QOP" },
   { IF_TRUE_QOP, "IF_TRUE_QOP" },

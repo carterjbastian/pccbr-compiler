@@ -401,13 +401,15 @@ expression : var '=' expression %prec EXPR_P {
 
 var : ID_T %prec VAR_P { 
         ast_node t = create_ast_node(ID_N);
-        t->value_string = strdup(savedIDText);
+        t->value_string = $1->value_string;
+        //t->value_string = strdup(savedIDText);
         t->value_int = 0;
         t->lineno = yylineno;
         $$ = t; }
 | ID_T '[' expression ']' { 
         ast_node t = create_ast_node(ID_N);
-        t->value_string = strdup(savedIDText);
+        t->value_string = $1->value_string;
+        //t->value_string = strdup(savedIDText);
         t->value_int = -1; // Denotes a complex array index
         t->left_child = $3;
         t->lineno = yylineno;

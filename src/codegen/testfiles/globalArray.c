@@ -3,14 +3,14 @@ int y[10];
 int y;
 
 int main() {
-  int i;
+  int i = 1;
 
   /*for (i = 0; i < 10; i++) {
     x[i] = i;
   } */
-  x[1] = 10;
-  y[1] = x[1];
-  i = x[1];
+  x[i + 1] = 10;
+  //y[1] = x[1];
+  //i = x[1];
 
   return i;
 }

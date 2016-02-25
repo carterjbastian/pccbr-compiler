@@ -147,11 +147,13 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
     int mem_loc2 = 0;
     reg_t *reg1 = NULL;
     reg_t *reg2 = NULL;
+    reg_t *reg3 = NULL;
+    reg_t *reg4 = NULL;
     reg_t *truth_reg = NULL;
     reg_t *false_reg = NULL;
     int push_val = 0;
     int assn_val = 0;
-
+    int old_mem_loc = 0;
 
 
     /* The switch statement to deal with quads */
@@ -905,8 +907,69 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
         break;
 
 
+      case INDEX_ASSN_QOP :
+        reg1 = get_available_register(fp, registers); 
+        reg2 = get_available_register(fp, registers);
+        reg3 = get_available_register(fp, registers);
+        reg4 = get_available_register(fp, registers);
+
+        fprintf(fp, "\t\t#Assigning to an element in an array\n");
+ 
+        // Store the results value into reg 1
+        if (quad->operand3->absolute_address) {
+          if (quad->operand3->hasVal) { // If the value is an int literal
+            fprintf(fp, "\tirmovl 0x%08x, %s\n", quad->operand3->val, reg1->name);
+          } else { // if the value is a temp, global, or constant
+            fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand3->mem_location, reg1->name);
+          }
+        } else { // If the value is a local or parameter
+          fprintf(fp, "\tmrmovl %d(%%ebp), %s\n", quad->operand3->mem_location, reg1->name);
+        }
+
+        // Get the address of the element in the array to register 4
+        // Load address of variable into register 2
+          // NOTE: this may be a relative address
+        fprintf(fp, "\t\t#Putting the address of the array element in register %s\n", reg4->name);
+        fprintf(fp, "\tirmovl 0x%08x, %s\n", quad->operand1->mem_location, reg2->name);
+
+        // Load index into register 3
+        if (quad->operand2->absolute_address) {
+          if (quad->operand2->hasVal) { // If the value is an int literal
+            fprintf(fp, "\tirmovl 0x%08x, %s\n", quad->operand2->val, reg3->name);
+          } else { // if the value is a temp, global, or constant
+            fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand2->mem_location, reg3->name);
+          }
+        } else { // If the value is a local or parameter
+          fprintf(fp, "\tmrmovl %d(%%ebp), %s\n", quad->operand2->mem_location, reg3->name);
+        }
+        
+        // multiply the index by 4 (stored in reg 4)
+        fprintf(fp, "\tirmovl 0x4, %s\n", reg4->name);
+        fprintf(fp, "\tmull %s, %s\n", reg3->name, reg4->name);
+
+        // Add variable address and the offset
+        fprintf(fp, "\taddl %s, %s\n", reg2->name, reg4->name);
+        
+        // rmmovl the results (int register 1) into the address stored in register 4
+        fprintf(fp, "\t\t#Moving results into the array location\n");
+        if (quad->operand1->absolute_address) {
+        // IF the array is global, the memory address is absolute
+          fprintf(fp, "\trmmovl %s, (%s)\n", reg1->name, reg4->name);
+        } else { // Array is local -> memory address in reg4 is an offset of ebp
+          fprintf(fp, "\taddl %%ebp, %s\n", reg4->name);
+          fprintf(fp, "\trmmovl %s, (%s)\n", reg1->name, reg4->name);
+        }
+
+        // Free the registers (#FreeWilly)
+        reg1->available = 1;
+        reg2->available = 1;
+        reg3->available = 1;
+        reg4->available = 1;
+
+        break;
+
       default :
-        fprintf(fp, "#Go Fuck Yourself\n");
+        fprintf(fp, "#You are dumb. You are so dumb. Fo real\n");
 
     }
   }
