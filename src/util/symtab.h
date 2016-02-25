@@ -60,12 +60,13 @@ static type_name_pair lt_table[] = {
 #define LT_INDEX(X)     ( (X) - INT_LT )
 #define LT_NAME(X)      ( lt_table[ LT_INDEX((X)) ].name )
 
-typedef enum { LOCAL_VT, TEMP_VT, CONST_VT } var_type;
+typedef enum { LOCAL_VT, TEMP_VT, CONST_VT, GLOBAL_VT } var_type;
 
 static type_name_pair vt_table[] = {
   { LOCAL_VT, "LOCAL_VARIABLE" },
   { TEMP_VT, "TEMP_VARIABLE" },
   { CONST_VT, "CONSTANT_VARIABLE" },
+  { GLOBAL_VT, "GLOBAL_VARIABLE" },
   { 0, NULL }
 };
 
@@ -85,6 +86,7 @@ typedef struct symnode {
   var_lookup_type type;             /* The type of the symbol */
   int lineno;                       /* Where in the file the symbol was declared */
   var_type vType;                   /* The type of the variable (temp, const, local) */
+  int absolute_address;              /* Is this an absolute address or offset? */
   int mem_location;                 /* The variable's location in memory */
   int reg_number;                   /* The register the variable is currently in */
   int hasVal;
@@ -140,7 +142,7 @@ symnode_t *insert_into_symboltable(symboltable_t *symtab, var_lookup_type type, 
 
 symnode_t *insert_temp(symboltable_t *symtab, var_lookup_type type, char *name, int lineno);
 
-  symnode_t *insert_constant(symboltable_t *symtab, var_lookup_type type, char *name, int lineno);
+symnode_t *insert_constant(symboltable_t *symtab, var_lookup_type type, char *name, int lineno);
 
 /* Lookup an entry in a symbol table.  If found return a pointer to it.
    Otherwise, return NULL */

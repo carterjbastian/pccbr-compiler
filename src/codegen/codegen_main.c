@@ -42,6 +42,6 @@ int main() {
   print_symtab(symtab);
 
   print_quad_list(stdout, list);
-  generate_assembly(stdout, list, symtab);
+  generate_assembly(ys, list, symtab);
   return 0;
 }

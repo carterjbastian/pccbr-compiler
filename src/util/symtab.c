@@ -54,6 +54,7 @@ symnode_t *create_symnode(char *name, var_lookup_type type, symhashtable_t *pare
   node->reg_number = 0;
   node->hasVal = 0;
   node->val = 0;
+  node->absolute_address = 1;
   return node;
 }
 
