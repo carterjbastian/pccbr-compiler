@@ -1,7 +1,7 @@
-int x[10];
-int y[10];
-
 int main() {
+  int x[10];
+  int y[10];
+
   int i;
 
   for (i = 0; i < 10; ++i) {
