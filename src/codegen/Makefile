@@ -35,3 +35,4 @@ clean :
 	rm -f *.o codegen
 	cd ../symcheck; make clean
 	cd ../quadgen; make clean
+	rm -f *.ys *.yo
