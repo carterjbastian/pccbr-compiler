@@ -691,10 +691,13 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
       buff[10] = '\0';
       sprintf(buff, "%d", node->value_int);
 
+      /*
       x = create_symnode(buff, TEMP_LT, NULL, -1);
       x->hasVal = 1;
       x->val = node->value_int;
       x->mem_location = 0;
+      */
+      x = code_gen(child, table);
       y = lookup_in_symboltable(table, node->value_string, LOCAL_VT);
       add_quad(INDEX_QOP, t0, y, x);
       retval = t0;

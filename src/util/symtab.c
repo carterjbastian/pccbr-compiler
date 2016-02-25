@@ -55,6 +55,7 @@ symnode_t *create_symnode(char *name, var_lookup_type type, symhashtable_t *pare
   node->hasVal = 0;
   node->val = 0;
   node->absolute_address = 1;
+  node->array_elem_count = 0;
   return node;
 }
 

@@ -77,7 +77,14 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
         if (node->vType == LOCAL_VT && 
             (node->type != FUNC_INT_LT) && (node->type != FUNC_VOID_LT) ) {
           node->mem_location = curr_pos;
-          curr_pos += 4;
+          
+          // Consider allocating an array
+          if (node->array_elem_count != 0) {
+            curr_pos += (4 * node->array_elem_count);
+          } else { // Or just allocate space for one int
+            curr_pos += 4;
+          }
+
           // Mark this value as a global
           node->vType = GLOBAL_VT;
           // Set globals address to curr_pos and increment curr_pos
