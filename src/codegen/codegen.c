@@ -429,6 +429,10 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
         fprintf(fp, "\trmmovl %s, 0x00FFFE10\n", reg1->name);
         break;
 
+      case READ_QOP :
+        // rmmovl %[reg], KHXR
+        // assign to somethign?
+
       case ADD_QOP :
         // NOTE: we assume both operands and target and will be temporaries
         fprintf(fp, "\t\t#Adding operation\n");
