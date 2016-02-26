@@ -457,7 +457,7 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
 
       /* CASE 8: PRINT_QOP */
       case PRINT_QOP :
-        fprintf(fp, "\t# We are printing this string: \"%s\"\n", quad->operand1->name);
+        fprintf(fp, "\t\t# We are printing this string: \"%s\"\n", quad->operand1->name);
 
         reg1 = get_available_register(fp, registers);
         // irmovl %08x(quad->curr_pos) to %[reg]
@@ -465,6 +465,21 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
         // rmmovl %[reg], 0x00FFFE10
         fprintf(fp, "\trmmovl %s, 0x00FFFE10\n", reg1->name);
         break;
+
+
+      case READ_QOP :
+        fprintf(fp, "\t\t# Reading from the keyboard\n");
+        reg1 = get_available_register(fp, registers);
+        fprintf(fp, "\tmrmovl 0x00FFFE1C, %s\n", reg1->name);
+        
+        if (quad->operand1->absolute_address) {
+          fprintf(fp, "\trmmovl %s, 0x%08x\n", reg1->name, quad->operand1->mem_location);
+        } else {
+          fprintf(fp, "\trmmovl %s, %d(%%ebp)\n", reg1->name, quad->operand1->mem_location);
+        }
+
+        break;
+
 
       case ADD_QOP :
         // NOTE: we assume both operands and target and will be temporaries

@@ -549,13 +549,16 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
   case READ_N:
     // NOTE: This might need more thinking through cause we're probably expecting to write to an
     // address. In this conception t0 returns the address of the string stored in memory.
+    x = lookup_in_symboltable(table, child->value_string, LOCAL_VT); // Does this work for globals?
     
-    // t0 = newTemp()
-    // (read, t0, -, -)
-    // return t0
-    t0 = NewTemp(table);
-    add_quad(READ_QOP, t0, NULL, NULL);
-    retval = t0;
+    // Ensure it's been assigned before
+    t1 = create_symnode("0", TEMP_LT, NULL, -1);
+    t1->hasVal = 1;
+    t1->val = 1;
+
+    add_quad(ASSN_QOP, x, t1, NULL);
+    add_quad(READ_QOP, x, NULL, NULL);
+    retval = x;
     break;
 
   case RETURN_N:
