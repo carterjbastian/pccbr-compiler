@@ -16,9 +16,9 @@ make
 In order to execute our tests, from the src/codegen directory run:
 
 ./codegen < testfiles/helloWorld.c
-./codegen < testfiles/varTest.c
+./codegen < testfiles/scopeTest.c
 ./codegen < testfiles/funcTest.c
-./codegen < testfiles/arithmeticTest.c
+./codegen < testfiles/math.c
 
 You can see the output of the compiler in the file sample.ys after each invocation
 and assemble it using the yas assembler. We confirmed the results of our test cases
@@ -27,8 +27,9 @@ manually.
 The original output files can be found in their respective directories. Each component of
 the project can be made and tested individually.
 
-Relevant source code appears primarily in quadgen/quadgen.c. Our quad data structures
-are defined in quadgen.h.
+Relevant source code appears primarily in codegen/codegen.c. Our quad data structures
+are defined in codegen.h.
+
 FILES:
 
 |__src
