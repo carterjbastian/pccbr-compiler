@@ -14,7 +14,7 @@ typedef enum {
   /* ARITHMETIC */
   ADD_QOP, SUB_QOP, MULL_QOP, DIV_QOP, MOD_QOP,
   /* ARRAYS */
-  INDEX_QOP,
+  INDEX_QOP, INDEX_ASSN_QOP,
   /* MOVEMENT */
   GOTO_QOP, IF_FALSE_QOP, IF_TRUE_QOP,
   /* CONDITIONALS */
@@ -24,7 +24,7 @@ typedef enum {
   /* HIGH LEVEL FUNCTIONS */
   PRINT_QOP, READ_QOP,
   /* FUNCTION CALL HANDLING */
-  PRE_CALL_QOP, POST_PARAMS_QOP, POST_RET_QOP, RETURN_QOP, ARG_QOP
+  PRE_CALL_QOP, POST_PARAMS_QOP, POST_RET_QOP, RETURN_QOP, ARG_QOP, ARG_ARRAY_QOP
 } optype;
 
 static val_name_pair qop_table [] = {
@@ -36,6 +36,7 @@ static val_name_pair qop_table [] = {
   { DIV_QOP, "DIV_QOP" },
   { MOD_QOP, "MOD_QOP" },
   { INDEX_QOP, "INDEX_QOP" },
+  { INDEX_ASSN_QOP, "INDEX_ASSN_QOP" },
   { GOTO_QOP, "GOTO_QOP" },
   { IF_FALSE_QOP, "IF_FALSE_QOP" },
   { IF_TRUE_QOP, "IF_TRUE_QOP" },
@@ -51,7 +52,8 @@ static val_name_pair qop_table [] = {
   { POST_PARAMS_QOP, "POST_PARAMS_QOP" },
   { POST_RET_QOP, "POST_RET_QOP" },
   { RETURN_QOP, "RETURN_QOP" },
-  { ARG_QOP, "ARG_QOP"} };
+  { ARG_QOP, "ARG_QOP"},
+  { ARG_ARRAY_QOP, "ARG_ARRAY_QOP"} };
   
 #define QOP_IDX(X)    ( (X) - NULL_QOP )
 #define QOP_NAME(X)   ( qop_table[ QOP_IDX((X)) ].name )

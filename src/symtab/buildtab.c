@@ -25,6 +25,7 @@ symboltable_t *build_symboltable(symboltable_t *table, ast_node root, ast_node c
   ast_node it;
   ast_node child, grandchild;
   symnode_t *param_entry;
+  symnode_t *array_entry;
   int param_count = 0;
   /*
    * Use this switch to parse each type of node correctly
@@ -34,24 +35,30 @@ symboltable_t *build_symboltable(symboltable_t *table, ast_node root, ast_node c
 
       // Loop to the right until you get to null
       for (child = curr->left_child; child != NULL; child = child->right_sibling) {
+
         // The node is a declaration => add to symtab
         if (child->node_type == OP_ASSIGN_N) {
           insert_into_symboltable(table, INT_LT, child->left_child->value_string, child->left_child->lineno);
+  
         // Node is a valueless declaration => add to symtab
         } else if (child->node_type == DEC_ID_N) {
-          if (child->value_int == 0) // Not an array
+          if (child->value_int == 0) { // Not an array
             insert_into_symboltable(table, INT_LT, child->value_string, child->lineno); 
-          else
-            insert_into_symboltable(table, INT_ARRAY_LT, child->value_string, child->lineno);
-        // Node is a function => add to symtab & recurse
+          } else {
+            array_entry = insert_into_symboltable(table, INT_ARRAY_LT, child->value_string, child->lineno);
+            array_entry->array_elem_count = child->value_int;
+          }
+          // Node is a function => add to symtab & recurse
         } else if (child->node_type == FUNC_N) {
           var_lookup_type type = (child->value_int == 0 ? FUNC_VOID_LT : FUNC_INT_LT);
           insert_into_symboltable(table, type, child->value_string, child->lineno);
           build_symboltable(table, root, child);
+
         // Node is other => recurse
         } else if (child->node_type == ERROR_N && 
             (strcmp(child->value_string, "Invalid Variable Declaration")) == 0) { 
           insert_into_symboltable(table, ERROR_LT, child->value_string, child->lineno);
+
         } else {
           build_symboltable(table, root, child);
         }
@@ -82,10 +89,13 @@ symboltable_t *build_symboltable(symboltable_t *table, ast_node root, ast_node c
             insert_into_symboltable(table, INT_LT, child->left_child->value_string, child->left_child->lineno);
           }
         } else if (child->node_type == DEC_ID_N) { 
-          if (child->value_int == 0) // Not an array
-            insert_into_symboltable(table, INT_LT, child->value_string, child->lineno);
-          else
-            insert_into_symboltable(table, INT_ARRAY_LT, child->value_string, child->lineno);
+
+          if (child->value_int == 0) { // Not an array
+            insert_into_symboltable(table, INT_LT, child->value_string, child->lineno); 
+          } else {
+            array_entry = insert_into_symboltable(table, INT_ARRAY_LT, child->value_string, child->lineno);
+            array_entry->array_elem_count = child->value_int;
+          }
         } else {  // Node is an error
           insert_into_symboltable(table, ERROR_LT, child->value_string, child->lineno);
         }

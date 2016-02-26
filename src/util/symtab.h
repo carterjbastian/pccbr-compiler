@@ -93,6 +93,7 @@ typedef struct symnode {
   int val;
   char *func_label;                 /* If this symnode is a function, what is the title of its label */
   int func_arg_count;               /* The number of arguments this function has */
+  int array_elem_count;             /* Number of elements in an array */
 } symnode_t;
 
 /* Hash table for a given scope in a symbol table. */

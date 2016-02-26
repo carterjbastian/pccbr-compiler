@@ -74,6 +74,7 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
     // return leftVar
     case OP_ASSIGN_N :
       t0 = NewTemp(table); 
+      t1 = NewTemp(table);
        
       // we have to treat declaration ID's slightly different
       if (child->node_type == DEC_ID_N && child->right_sibling->node_type == INT_LITERAL_N) {
@@ -93,6 +94,16 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
         x = lookup_in_symboltable(table, child->value_string, LOCAL_VT);
         add_quad(ASSN_QOP, x, t0, NULL);
 
+        // Special Case of Assigning to an index in an array
+      } else if (child->node_type == ID_N && child->value_int != 0) {
+        x = lookup_in_symboltable(table, child->value_string, LOCAL_VT); // Will this work with globals?
+        t0 = code_gen(child->left_child, table);
+
+        y = code_gen(child->right_sibling, table); // What we're loading into the memory
+
+        add_quad(INDEX_ASSN_QOP, x, t0, y); // Load the memory address of x[t0] into the mem_location of temp1
+        
+        // Will the retval of x cause problems?? 
       } else {
         y = code_gen(child->right_sibling, table);
         add_quad(ASSN_QOP, t0, y, NULL);
@@ -634,10 +645,15 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
     add_quad(PRE_CALL_QOP, y, NULL, NULL);
     count = 0;
     for (iterator = child; iterator != NULL; iterator = iterator->right_sibling) {
+      // Are we passing an entire array as a parameter?
       t0 = NewTemp(table);
       x = code_gen(iterator, table);
-      add_quad(ASSN_QOP, t0, x, NULL);
-      add_quad(ARG_QOP, t0, NULL, NULL);
+
+      if (x->array_elem_count != 0 && iterator->left_child == NULL) {
+        add_quad(ARG_ARRAY_QOP, x, NULL, NULL);
+      } else {
+        add_quad(ARG_QOP, x, NULL, NULL);
+      }
       count++;
       /* ADD IN FUNCTIONALITY FOR NULL CHILD? */
     }
@@ -686,17 +702,24 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
       // (assn, t0, lookUpInSymtab(), -)
     // return t0
     t0 = NewTemp(table);
+    t1 = NewTemp(table);
     if (node->value_int != 0) {
       buff = calloc(1, sizeof(char) * 11); // Assumes int <= 10 digits
       buff[10] = '\0';
       sprintf(buff, "%d", node->value_int);
 
+      /*
       x = create_symnode(buff, TEMP_LT, NULL, -1);
       x->hasVal = 1;
       x->val = node->value_int;
       x->mem_location = 0;
+      */
+      t1 = code_gen(child, table);
       y = lookup_in_symboltable(table, node->value_string, LOCAL_VT);
-      add_quad(INDEX_QOP, t0, y, x);
+      add_quad(INDEX_QOP, t0, y, t1);
+      t0->mem_location = y->mem_location;
+      t0->array_elem_count = y->array_elem_count;
+      t0->vType = y->vType;
       retval = t0;
     } else {
       x = lookup_in_symboltable(table, node->value_string, LOCAL_VT);
