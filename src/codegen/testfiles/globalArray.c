@@ -7,9 +7,9 @@ int main() {
   /*for (i = 0; i < 10; i++) {
     x[i] = i;
   } */
-  x[i + 1] = 10;
+  x[i + 1] = 10; // x[1] = 10
   //y[1] = x[1];
-  x[2] = x[i + 1];
+  x[2] = x[i + 1]; // x[2] = 10
   i = x[2];
 
   return i;
@@ -17,7 +17,7 @@ int main() {
 
 /*
  * Intended results:
- *  x[0] = 0xa
- *  y[0] = 0xa
+ *  x[1] = 0xa
+ *  x[2] = 0xa
  *  %eax = 0xa
  */

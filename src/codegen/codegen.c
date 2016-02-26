@@ -76,7 +76,7 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
         // Check if it's a global variable
         if (node->vType == LOCAL_VT && 
             (node->type != FUNC_INT_LT) && (node->type != FUNC_VOID_LT) ) {
-          node->mem_location = curr_pos;
+          //node->mem_location = curr_pos;
           
           // Consider allocating an array
           if (node->array_elem_count != 0) {
@@ -84,6 +84,10 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
           } else { // Or just allocate space for one int
             curr_pos += 4;
           }
+          
+          // Global arrays start at the largest element in the array for convenience
+          // so that we can access things more easily
+          node->mem_location = curr_pos - 4;
 
           // Mark this value as a global
           node->vType = GLOBAL_VT;
@@ -353,15 +357,39 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
 
       /* CASE 5: ARG_QOP */
       case ARG_QOP :
-        // Argument will be in a temporary
         reg1 = get_available_register(fp, registers);
  
         // Load it to a register 
+          // NOTE: if the parameter is an array, we must push the location into the array
         if (quad->operand1->absolute_address) {
           fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand1->mem_location, reg1->name);
         } else {
-          fprintf(fp, "\tmrmovl %d(%%ebp), %s\n", quad->operand1->mem_location, reg1->name);
+          fprintf(fp, "\tmrmovl %d(%%ebp), %s\n", quad->operand1->mem_location, reg1->name); 
         }
+        
+        
+        // push it onto the stack
+        fprintf(fp, "\tpushl %s\n", reg1->name);
+        
+        // Free register 1
+        reg1->available = 1;
+        break;
+
+      case ARG_ARRAY_QOP :
+        reg1 = get_available_register(fp, registers);
+ 
+        // Load it to a register 
+        // the parameter is an array, we must push its absolute location onto the stack
+        if (quad->operand1->absolute_address) {
+          fprintf(fp, "\tirmovl 0x%08x, %s\n", quad->operand1->mem_location, reg1->name);
+        } else {
+          // This is a array parameter with a relative address
+          // First, get its absolute address into a register
+          fprintf(fp, "\tirmovl 0x%08x, %s\n", quad->operand1->mem_location, reg1->name);
+          fprintf(fp, "\taddl %%ebp, %s\n", reg1->name);
+        }
+        
+        
         // push it onto the stack
         fprintf(fp, "\tpushl %s\n", reg1->name);
         
@@ -955,7 +983,13 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
         // Load address of variable into register 2
           // NOTE: this may be a relative address
         fprintf(fp, "\t\t#Putting the address of the array element in register %s\n", reg4->name);
-        fprintf(fp, "\tirmovl 0x%08x, %s\n", quad->operand1->mem_location, reg2->name);
+        
+        if (quad->operand1->absolute_address == 0 && quad->operand1->mem_location > 0) {
+          // The array is a parameter - load it's absolute address into the register
+          fprintf(fp, "\tmrmovl %d(%%ebp), %s\n", quad->operand1->mem_location, reg2->name);
+        } else {
+          fprintf(fp, "\tirmovl 0x%08x, %s\n", quad->operand1->mem_location, reg2->name);
+        }
 
         // Load index into register 3
         if (quad->operand2->absolute_address) {
@@ -969,11 +1003,11 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
         }
         
         // multiply the index by 4 (or -4) (stored in reg 4)
-        if (quad->operand1->absolute_address) { // Addresses go up with index for global arrays
-          fprintf(fp, "\tirmovl 0x4, %s\n", reg4->name);
-        } else { // Addresses go down with indexes for local and parameter arrays
+//       if (quad->operand1->absolute_address) { // Addresses go up with index for global arrays
+//          fprintf(fp, "\tirmovl 0x4, %s\n", reg4->name);
+//       } else { // Addresses go down with indexes for local and parameter arrays
           fprintf(fp, "\tirmovl 0xfffffffc, %s\n", reg4->name);
-        }
+//        }
         fprintf(fp, "\tmull %s, %s\n", reg3->name, reg4->name);
 
         // Add variable address and the offset
@@ -981,8 +1015,9 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
         
         // rmmovl the results (int register 1) into the address stored in register 4
         fprintf(fp, "\t\t#Moving results into the array location\n");
-        if (quad->operand1->absolute_address) {
-        // IF the array is global, the memory address is absolute
+        if (quad->operand1->absolute_address ||
+            (quad->operand1->absolute_address == 0 && quad->operand1->mem_location > 0)) {
+        // IF the array is global or param, the memory address is absolute
           fprintf(fp, "\trmmovl %s, (%s)\n", reg1->name, reg4->name);
         } else { // Array is local -> memory address in reg4 is an offset of ebp
           fprintf(fp, "\taddl %%ebp, %s\n", reg4->name);
@@ -1016,7 +1051,11 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
         // Load address of variable into register 2
           // NOTE: this may be a relative address
         fprintf(fp, "\t\t#Putting the address of the array element in register %s\n", reg4->name);
-        fprintf(fp, "\tirmovl 0x%08x, %s\n", quad->operand2->mem_location, reg2->name);
+        if (quad->operand2->absolute_address == 0 && quad->operand2->mem_location > 0) {
+          fprintf(fp, "\tmrmovl %d(%%ebp), %s\n", quad->operand2->mem_location, reg2->name);
+        } else {
+          fprintf(fp, "\tirmovl 0x%08x, %s\n", quad->operand2->mem_location, reg2->name);
+        }
 
         // Load index into register 3
         if (quad->operand3->absolute_address) {
@@ -1029,11 +1068,11 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
           fprintf(fp, "\tmrmovl %d(%%ebp), %s\n", quad->operand3->mem_location, reg3->name);
         }
         
-        if (quad->operand2->absolute_address) { // Addresses go up with index for global arrays
-          fprintf(fp, "\tirmovl 0x4, %s\n", reg4->name);
-        } else { // Addresses go down with indexes for local and parameter arrays
+//        if (quad->operand2->absolute_address) { // Addresses go up with index for global arrays
+//          fprintf(fp, "\tirmovl 0x4, %s\n", reg4->name);
+//        } else { // Addresses go down with indexes for local and parameter arrays
           fprintf(fp, "\tirmovl 0xfffffffc, %s\n", reg4->name);
-        }
+//        }
 
         fprintf(fp, "\tmull %s, %s\n", reg3->name, reg4->name);
 
@@ -1043,7 +1082,8 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
         // Loading memory in address stored in register 4 to the result's memory
         fprintf(fp, "\t\t#Loading results from the array location\n");
 
-        if (quad->operand2->absolute_address) {
+        if (quad->operand2->absolute_address ||
+            (quad->operand2->absolute_address == 0 && quad->operand2->mem_location > 0)) {
         // IF the array is global, the memory address is absolute
           fprintf(fp, "\tmrmovl (%s), %s\n", reg4->name, reg1->name);
         } else { // Array is local -> memory address in reg4 is an offset of ebp

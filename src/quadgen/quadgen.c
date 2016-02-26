@@ -645,10 +645,15 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
     add_quad(PRE_CALL_QOP, y, NULL, NULL);
     count = 0;
     for (iterator = child; iterator != NULL; iterator = iterator->right_sibling) {
+      // Are we passing an entire array as a parameter?
       t0 = NewTemp(table);
       x = code_gen(iterator, table);
-      add_quad(ASSN_QOP, t0, x, NULL);
-      add_quad(ARG_QOP, t0, NULL, NULL);
+
+      if (x->array_elem_count != 0 && iterator->left_child == NULL) {
+        add_quad(ARG_ARRAY_QOP, x, NULL, NULL);
+      } else {
+        add_quad(ARG_QOP, x, NULL, NULL);
+      }
       count++;
       /* ADD IN FUNCTIONALITY FOR NULL CHILD? */
     }
@@ -712,6 +717,9 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
       t1 = code_gen(child, table);
       y = lookup_in_symboltable(table, node->value_string, LOCAL_VT);
       add_quad(INDEX_QOP, t0, y, t1);
+      t0->mem_location = y->mem_location;
+      t0->array_elem_count = y->array_elem_count;
+      t0->vType = y->vType;
       retval = t0;
     } else {
       x = lookup_in_symboltable(table, node->value_string, LOCAL_VT);
