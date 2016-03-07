@@ -467,7 +467,7 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
             // rmmovl %[reg], 0x00FFFE10
             fprintf(fp, "\trmmovl %s, 0x00FFFE10\n", reg1->name);
             break;
-          case INT_LT:
+          default:
             if (quad->operand1->absolute_address == 1) {
               fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand1->mem_location, reg1->name);
             } else {
@@ -475,9 +475,6 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
             }
 
             fprintf(fp, "\trmmovl %s, 0x00FFFE14\n", reg1->name);
-            break;
-
-          default:
             break;
         }
         break;
