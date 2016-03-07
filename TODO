@@ -1,0 +1,21 @@
+EX opportunities:
+Quinn:
+  - fixing up symcheck (get err.c to fail)
+  - printing ints
+  - break & continue / switch (15)
+  - const (5)
+
+Carter:
+  - fix passing arrays within arrays (arr.c)
+  - fix fib.c
+  - fix inc.c
+  - static (5)
+  - ++ / -- Postfix (5)
+  - op-equals (5)
+
+Pool:
+  - sizeof (5)
+  - char / short base types
+  - pointers and & operator
+  - function prototypes
+  - function pointers

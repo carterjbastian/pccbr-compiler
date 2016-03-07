@@ -4,8 +4,8 @@ FLEXFLAGS = -ll
 
 all: codegen
 
-codegen: ../util/ast.o ../util/symtab.o ../util/unescape.o ../symtab/buildtab.o ../parser/parser.tab.o ../lexer/cscan.yy.o ../quadgen/quadgen.o codegen.o codegen_main.o
-	$(CC) -o $@ $(CFLAGS) ../lexer/cscan.yy.o ../symtab/buildtab.o ../parser/parser.tab.o ../util/ast.o ../util/symtab.o ../util/unescape.o ../quadgen/quadgen.o codegen.o codegen_main.o $(FLEXFLAGS)
+codegen: ../util/ast.o ../util/symtab.o ../util/unescape.o ../symtab/buildtab.o ../parser/parser.tab.o ../lexer/cscan.yy.o ../quadgen/quadgen.o codegen.o codegen_main.o ../symcheck/tree_check.o
+	$(CC) -o $@ $(CFLAGS) ../lexer/cscan.yy.o ../symtab/buildtab.o ../parser/parser.tab.o ../util/ast.o ../util/symtab.o ../util/unescape.o ../quadgen/quadgen.o codegen.o codegen_main.o ../symcheck/tree_check.o $(FLEXFLAGS)
 
 %.o : %.c
 	$(CC) $(CFLAGS) -c $<
@@ -21,6 +21,9 @@ codegen: ../util/ast.o ../util/symtab.o ../util/unescape.o ../symtab/buildtab.o 
 
 ../symtab/buildtab.o :
 	cd ../symtab; make
+
+../symcheck/tree_check.o : ../symcheck/tree_check.c
+	cd ../symcheck; make
 
 ../parser/parser.tab.o:
 	cd ../parser; make parser.tab.o

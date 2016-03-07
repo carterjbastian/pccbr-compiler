@@ -2,6 +2,7 @@
 #include "../util/symtab.h"
 #include "../symtab/buildtab.h"
 #include "../quadgen/quadgen.h"
+#include "../symcheck/tree_check.h"
 #include "codegen.h"
 
 #include <stdio.h>
@@ -36,6 +37,7 @@ int main() {
   /* Set up the symbol tree */
   symtab = create_symboltable();
   symtab = build_symboltable(symtab, root, root);
+  typecheck_ast(symtab, root);
   print_ast(stdout, root, 0);
   print_symtab(symtab);
   code_gen(root, symtab);
