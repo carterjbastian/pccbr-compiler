@@ -458,12 +458,28 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
       /* CASE 8: PRINT_QOP */
       case PRINT_QOP :
         fprintf(fp, "\t\t# We are printing this string: \"%s\"\n", quad->operand1->name);
-
+        
         reg1 = get_available_register(fp, registers);
-        // irmovl %08x(quad->curr_pos) to %[reg]
-        fprintf(fp, "\tirmovl 0x%08x, %s\n", quad->operand1->mem_location, reg1->name);
-        // rmmovl %[reg], 0x00FFFE10
-        fprintf(fp, "\trmmovl %s, 0x00FFFE10\n", reg1->name);
+        switch(quad->operand1->type) {
+          case STR_LT:
+            // irmovl %08x(quad->curr_pos) to %[reg]
+            fprintf(fp, "\tirmovl 0x%08x, %s\n", quad->operand1->mem_location, reg1->name);
+            // rmmovl %[reg], 0x00FFFE10
+            fprintf(fp, "\trmmovl %s, 0x00FFFE10\n", reg1->name);
+            break;
+          case INT_LT:
+            if (quad->operand1->absolute_address == 1) {
+              fprintf(fp, "\tmrmovl 0x%08x, %s\n", quad->operand1->mem_location, reg1->name);
+            } else {
+              fprintf(fp, "\tmrmovl 0x%08x(%%ebp), %s\n", quad->operand1->mem_location, reg1->name);
+            }
+
+            fprintf(fp, "\trmmovl %s, 0x00FFFE14\n", reg1->name);
+            break;
+
+          default:
+            break;
+        }
         break;
 
 
