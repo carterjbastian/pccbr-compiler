@@ -1,17 +1,20 @@
 int x[8];
 
 int fib(int a) {
-  int x;
-  if(a <= 1)
+  int q;
+  if(a <= 1) 
     return 1;
-  x = (fib(a-1) + fib(a-2));
-  return x;
+
+/*  y = fib(a);
+  z = fib(a); */
+  q = fib(a-1) + fib(a-2);
+  return q;
 }
   
 int main() {
   int i;
 
-  for (i = 1; i <=7; i=i+1) {
+  for (i = 1; i <=3; i=i+1) {
     // printf("%d\n", fib(i));
     x[i] = fib(i);
 

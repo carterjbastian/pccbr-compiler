@@ -263,12 +263,12 @@ statement : expressionStatement { $$ = $1; }
 ;
 
 expressionStatement : expression ';' { $$ = $1; }
-| error ';' %prec ERR_EXPR {
+/*| error ';' %prec ERR_EXPR {
         ast_node t = create_ast_node(ERROR_N);
         t->value_string = "Invalid Expression";
         fprintf(error_out, "PARSING ERROR:\tStatement on line %d Discarded due to an invalid expression\n", yylineno);
         parseError++;
-        $$ = t; }
+        $$ = t; }*/
 | ';' { $$ = create_ast_node(NULL_N); $$->value_string = "empty expressionStatement"; }
 ;
 
