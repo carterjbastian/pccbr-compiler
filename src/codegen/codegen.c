@@ -334,7 +334,15 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
         fprintf(fp, "\t\t#Popping off local variables\n");
         fprintf(fp, "\trrmovl %%ebp, %%esp\n");
         local_offset = -4; // WARNING: WILL THIS CAUSE PROBLEMS?
-        
+       
+        // Move the return value (if present) to eax
+        if (quad->operand1) {
+          if (quad->operand1->absolute_address) {
+            fprintf(fp, "\tmrmovl 0x%08x, %%eax\n", quad->operand1->mem_location);
+          } else {
+            fprintf(fp, "\tmrmovl %d(%%ebp), %%eax\n", quad->operand1->mem_location);
+          }
+        }
         // Return to the proper place in the code
         fprintf(fp, "\tret\n");
         break;
