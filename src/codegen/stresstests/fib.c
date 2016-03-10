@@ -10,6 +10,10 @@ int fib(int a) {
 //  y = fib(a-1);
 //  z = fib(a-2);
   x = fib(a-1) + fib(a-2);
+  print "In Fib";
+  print a;
+  print "RES:";
+  print x;
   return x;
 }
   

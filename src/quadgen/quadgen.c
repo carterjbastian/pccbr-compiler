@@ -43,7 +43,7 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
   int count = 0;
   symnode_t *retval = NULL;
   // Basic temps and intermideary values
-  symnode_t *t0, *t1, *t2, *tx, *ty, *x, *y, *l1, *l2;
+  symnode_t *t0, *t1, *t2, *tx, *ty, *tc, *x, *y, *l1, *l2;
   ast_node iterator;
   char *buff;
 
@@ -131,6 +131,12 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
       y = code_gen(child->right_sibling, table);
       add_quad(ASSN_QOP, ty, y, NULL);
 
+      // Initialize the temp
+      t1 = create_symnode("0", TEMP_LT, NULL, -1);
+      t1->hasVal = 1;
+      t1->val = 0;
+      add_quad(ASSN_QOP, t0, t1, NULL);
+
       add_quad(ADD_QOP, t0, tx, ty);
 
       retval = t0;
@@ -147,6 +153,12 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
       y = code_gen(child->right_sibling, table);
       add_quad(ASSN_QOP, ty, y, NULL);
 
+      // Initialize the temp
+      t1 = create_symnode("0", TEMP_LT, NULL, -1);
+      t1->hasVal = 1;
+      t1->val = 0;
+      add_quad(ASSN_QOP, t0, t1, NULL);
+
       add_quad(SUB_QOP, t0, tx, ty);
 
       retval = t0;
@@ -162,6 +174,12 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
 
       y = code_gen(child->right_sibling, table);
       add_quad(ASSN_QOP, ty, y, NULL);
+
+      // Initialize the temp
+      t1 = create_symnode("0", TEMP_LT, NULL, -1);
+      t1->hasVal = 1;
+      t1->val = 0;
+      add_quad(ASSN_QOP, t0, t1, NULL);
 
       add_quad(MULL_QOP, t0, tx, ty);
 
@@ -180,6 +198,12 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
       y = code_gen(child->right_sibling, table);
       add_quad(ASSN_QOP, ty, y, NULL);
 
+      // Initialize the temp
+      t1 = create_symnode("0", TEMP_LT, NULL, -1);
+      t1->hasVal = 1;
+      t1->val = 0;
+      add_quad(ASSN_QOP, t0, t1, NULL);
+
       add_quad(DIV_QOP, t0, tx, ty);
 
       retval = t0;
@@ -196,6 +220,12 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
 
       y = code_gen(child->right_sibling, table);
       add_quad(ASSN_QOP, ty, y, NULL);
+
+      // Initialize the temp
+      t1 = create_symnode("0", TEMP_LT, NULL, -1);
+      t1->hasVal = 1;
+      t1->val = 0;
+      add_quad(ASSN_QOP, t0, t1, NULL);
 
       add_quad(MOD_QOP, t0, tx, ty);
 
@@ -219,7 +249,13 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
       // Assignment (for registers)
       x = code_gen(child, table);
       add_quad(ASSN_QOP, tx, x, NULL);
-      
+
+      // Initialize the temp
+      tc = create_symnode("0", TEMP_LT, NULL, -1);
+      tc->hasVal = 1;
+      tc->val = 0;
+      add_quad(ASSN_QOP, t0, tc, NULL);
+
       // Negation
       add_quad(SUB_QOP, t0, t1, tx);
       add_quad(ASSN_QOP, x, t0, NULL);
@@ -237,7 +273,13 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
       // Assignment (for registers)
       x = code_gen(child, table);
       add_quad(ASSN_QOP, tx, x, NULL);
-      
+     
+      // Initialize the temp
+      tc = create_symnode("0", TEMP_LT, NULL, -1);
+      tc->hasVal = 1;
+      tc->val = 0;
+      add_quad(ASSN_QOP, t0, tc, NULL);
+
       // Negation
       add_quad(SUB_QOP, t0, t1, tx);
       add_quad(ASSN_QOP, x, t0, NULL);
@@ -266,7 +308,13 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
 
       y = code_gen(child->right_sibling, table);
       add_quad(ASSN_QOP, ty, y, NULL);
-      
+
+      // Initialize the temp
+      tc = create_symnode("0", TEMP_LT, NULL, -1);
+      tc->hasVal = 1;
+      tc->val = 0;
+      add_quad(ASSN_QOP, t0, tc, NULL);
+
       add_quad(LT_QOP, t0, tx, ty);
 
       retval = t0;
@@ -282,7 +330,13 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
 
       y = code_gen(child->right_sibling, table);
       add_quad(ASSN_QOP, ty, y, NULL);
-      
+
+      // Initialize the temp
+      tc = create_symnode("0", TEMP_LT, NULL, -1);
+      tc->hasVal = 1;
+      tc->val = 0;
+      add_quad(ASSN_QOP, t0, tc, NULL);
+
       add_quad(LTE_QOP, t0, tx, ty);
 
       retval = t0;
@@ -298,7 +352,13 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
 
       y = code_gen(child->right_sibling, table);
       add_quad(ASSN_QOP, ty, y, NULL);
-      
+
+      // Initialize the temp
+      tc = create_symnode("0", TEMP_LT, NULL, -1);
+      tc->hasVal = 1;
+      tc->val = 0;
+      add_quad(ASSN_QOP, t0, tc, NULL);
+
       add_quad(EQ_QOP, t0, tx, ty);
 
       retval = t0;
@@ -315,7 +375,13 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
 
       y = code_gen(child->right_sibling, table);
       add_quad(ASSN_QOP, ty, y, NULL);
-      
+
+      // Initialize the temp
+      tc = create_symnode("0", TEMP_LT, NULL, -1);
+      tc->hasVal = 1;
+      tc->val = 0;
+      add_quad(ASSN_QOP, t0, tc, NULL);
+
       add_quad(GT_QOP, t0, tx, ty);
 
       retval = t0;
@@ -332,7 +398,13 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
 
       y = code_gen(child->right_sibling, table);
       add_quad(ASSN_QOP, ty, y, NULL);
-      
+
+      // Initialize the temp
+      tc = create_symnode("0", TEMP_LT, NULL, -1);
+      tc->hasVal = 1;
+      tc->val = 0;
+      add_quad(ASSN_QOP, t0, tc, NULL);
+
       add_quad(GTE_QOP, t0, tx, ty);
 
       retval = t0;
@@ -477,6 +549,13 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
       x = code_gen(child, table);
       
       add_quad(ASSN_QOP, t1, t2, NULL);
+
+      // Initialize the temp
+      tc = create_symnode("0", TEMP_LT, NULL, -1);
+      tc->hasVal = 1;
+      tc->val = 0;
+      add_quad(ASSN_QOP, t0, tc, NULL);
+
       add_quad(ADD_QOP, t0, x, t1);
       add_quad(ASSN_QOP, x, t0, NULL);
 
@@ -493,6 +572,13 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
       x = code_gen(child, table);
       
       add_quad(ASSN_QOP, t1, t2, NULL);
+
+      // Initialize the temp
+      tc = create_symnode("0", TEMP_LT, NULL, -1);
+      tc->hasVal = 1;
+      tc->val = 0;
+      add_quad(ASSN_QOP, t0, tc, NULL);
+
       add_quad(SUB_QOP, t0, x, t1);
       add_quad(ASSN_QOP, x, t0, NULL);
 
@@ -664,6 +750,14 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
     add_quad(POST_PARAMS_QOP, y, NULL, NULL);
     y->func_arg_count = count;
     t1 = ((y->type == FUNC_INT_LT) ? NewTemp(table) : NULL);
+
+    if (t1 != NULL) {
+      // Initialize the temp
+      tc = create_symnode("0", TEMP_LT, NULL, -1);
+      tc->hasVal = 1;
+      tc->val = 0;
+      add_quad(ASSN_QOP, t1, tc, NULL);
+    }
     add_quad(POST_RET_QOP, t1, y, NULL);
     retval = t1;
     break;
