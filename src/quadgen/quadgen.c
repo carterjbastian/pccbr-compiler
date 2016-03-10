@@ -730,7 +730,7 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
       t0->vType = y->vType;
       t0->type = y->type;
       //t0->name = y->name;
-      retval = y;
+      retval = t0;
     } else {
       x = lookup_in_symboltable(table, node->value_string, LOCAL_VT);
       retval = x;
