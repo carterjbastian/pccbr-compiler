@@ -5,7 +5,7 @@ FLEXFLAGS = -ll
 all: codegen
 
 codegen: ../util/ast.o ../util/symtab.o ../util/unescape.o ../symtab/buildtab.o ../parser/parser.tab.o ../lexer/cscan.yy.o ../quadgen/quadgen.o codegen.o codegen_main.o ../symcheck/tree_check.o
-	$(CC) -o $@ $(CFLAGS) ../lexer/cscan.yy.o ../symtab/buildtab.o ../parser/parser.tab.o ../util/ast.o ../util/symtab.o ../util/unescape.o ../quadgen/quadgen.o codegen.o codegen_main.o  $(FLEXFLAGS)
+	$(CC) -o $@ $(CFLAGS) ../lexer/cscan.yy.o ../symtab/buildtab.o ../parser/parser.tab.o ../util/ast.o ../util/symtab.o ../util/unescape.o ../quadgen/quadgen.o ../symcheck/tree_check.o codegen.o codegen_main.o  $(FLEXFLAGS)
 
 %.o : %.c
 	$(CC) $(CFLAGS) -c $<

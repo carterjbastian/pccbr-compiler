@@ -37,7 +37,13 @@ int main() {
   /* Set up the symbol tree */
   symtab = create_symboltable();
   symtab = build_symboltable(symtab, root, root);
-//  typecheck_ast(symtab, root);
+  typecheck_ast(symtab, root);
+  int retval = typecheck_ast(symtab, root);
+  print_checked_ast(stdout, root, 0);
+  if (retval != 0) {
+    fprintf(stderr, "There were %d errors encountered in the parse tree. Aborting.\n", retval);
+    return 1;
+  }
   print_ast(stdout, root, 0);
   print_symtab(symtab);
   code_gen(root, symtab);
