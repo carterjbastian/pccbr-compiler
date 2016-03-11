@@ -566,10 +566,10 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
     // x = codeGen(leftChild)
     // (assn, t0, x, -)
     // (return, t0, -, -)
-    t0 = NewTemp(table);
+    //t0 = NewTemp(table);
     x = code_gen(child, table);
-    add_quad(ASSN_QOP, t0, x, NULL);
-    add_quad(RETURN_QOP, t0, NULL, NULL); 
+    //add_quad(ASSN_QOP, t0, x, NULL);
+    add_quad(RETURN_QOP, x, NULL, NULL); 
     break;
 
 
@@ -720,9 +720,16 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
       t1 = code_gen(child, table);
       y = lookup_in_symboltable(table, node->value_string, LOCAL_VT);
       add_quad(INDEX_QOP, t0, y, t1);
-      t0->mem_location = y->mem_location;
+      if (t1->hasVal) {
+        t0->mem_location = y->mem_location + (4 * t1->val);
+      } else {
+        t0->mem_location = y->mem_location;
+      }
+      t0->absolute_address = y->absolute_address;
       t0->array_elem_count = y->array_elem_count;
       t0->vType = y->vType;
+      t0->type = y->type;
+      //t0->name = y->name;
       retval = t0;
     } else {
       x = lookup_in_symboltable(table, node->value_string, LOCAL_VT);

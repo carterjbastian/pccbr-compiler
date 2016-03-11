@@ -40,7 +40,7 @@ letter [A-Za-z]
 digit [0-9]
 id ({letter}|_)({letter}|{digit}|_)*
 integer {digit}+
-signedint [-]?{integer}
+signedint {integer}
 
 %x string
 %x block_comment

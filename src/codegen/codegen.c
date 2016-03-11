@@ -19,6 +19,9 @@ const int START_POS = 12;
 int curr_pos;
 int last_stomped = 0;
 
+int start_temps;
+int end_temps;
+
 // Initialize register table
 reg_t registers[] = {
   {"%eax", NULL, 1}, {"%ecx", NULL, 1}, {"%edx", NULL, 1}, {"%ebx", NULL, 1}, 
@@ -103,6 +106,7 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
   /* Temps */
   curr_pos = ((curr_pos / 4) * 4) + 4;
   fprintf(fp, "\n");
+  start_temps = curr_pos;
   fprintf(fp, ".pos 0x%x\n", curr_pos);
   fprintf(fp, "L_TEMPS:\n");
 
@@ -125,7 +129,7 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
     }
   }
 
-
+  end_temps = curr_pos;
 
   // Jump to global assignment section
   curr_pos = ((curr_pos / 4) * 4) + 4;
@@ -334,7 +338,15 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
         fprintf(fp, "\t\t#Popping off local variables\n");
         fprintf(fp, "\trrmovl %%ebp, %%esp\n");
         local_offset = -4; // WARNING: WILL THIS CAUSE PROBLEMS?
-        
+       
+        // Move the return value (if present) to eax
+        if (quad->operand1) {
+          if (quad->operand1->absolute_address) {
+            fprintf(fp, "\tmrmovl 0x%08x, %%eax\n", quad->operand1->mem_location);
+          } else {
+            fprintf(fp, "\tmrmovl %d(%%ebp), %%eax\n", quad->operand1->mem_location);
+          }
+        }
         // Return to the proper place in the code
         fprintf(fp, "\tret\n");
         break;
@@ -342,16 +354,28 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
 
       /* CASE 4: PRE_CALL_QOP */
       case PRE_CALL_QOP:
+        reg3 = get_available_register(fp, registers);
         // Push all of the general purpose registers
           // NOTE: This can be optimized!
         fprintf(fp, "\t\t#Caller-save storing registers\n");
         for (int i = 0; i < REGISTER_COUNT; i++) 
           fprintf(fp, "\tpushl %s\n", registers[i].name);
 
+        fprintf(fp, "\t\t#Pushing all of the temps for recursion\n");
+        // Push all of the temps...
+        for (int addr = start_temps; addr <= end_temps; addr += 4) { 
+          fprintf(fp, "\tmrmovl 0x%08x, %s\n", addr, reg3->name);
+          fprintf(fp, "\tpushl %s\n", reg3->name);
+        }
+
+
         fprintf(fp, "\t\t#Storing the caller's ebp\n");
         // Push the current frame's base pointer
         fprintf(fp, "\tpushl %%ebp\n");
         fprintf(fp, "\t\t#Pushing %d arguments for the function\n", quad->operand1->func_arg_count); 
+
+        reg3->available = 1;
+
         break;
 
 
@@ -404,6 +428,7 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
         reg1 = get_available_register(fp, registers);
         reg2 = get_available_register(fp, registers);
 
+
         fprintf(fp, "\t\t#Setting the callee's base pointer\n");
         // Subtract four from the ESP and store the resulting address in a reg
         fprintf(fp, "\tirmovl 0x4, %s\n", reg1->name);
@@ -412,8 +437,6 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
 
         // Set the base pointer to that value
         fprintf(fp, "\trrmovl %s, %%ebp\n", reg2->name);
-
-        // Modify the scope in such a way that  
 
         // Call the function
         fprintf(fp, "\tcall %s\n", quad->operand1->func_label);
@@ -426,6 +449,8 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
 
       /* CASE 7: POST_CALL_QOP */
       case POST_RET_QOP :
+
+
         // Pop off the parameters to get to the old base pointer
         fprintf(fp, "\t\t#Popping off %d parameters\n", quad->operand2->func_arg_count);
         for (int i = 0; i < quad->operand2->func_arg_count; i++)
@@ -435,6 +460,14 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
         fprintf(fp, "\t\t#Restoring Caller's EBP\n");
         fprintf(fp, "\tpopl %%ebp\n");
 
+
+
+        // Pop off the temps into the right place
+        fprintf(fp, "\t\t#Restoring all of the temps from recursion\n");
+        for (int addr = end_temps; addr >= start_temps; addr -= 4) {
+          fprintf(fp, "\tpopl %%esi\n");
+          fprintf(fp, "\trmmovl %%esi, 0x%08x\n", addr);
+        }
 
         // Do we need to save the return value? It will be in %eax
         if (quad->operand1 != NULL) {
@@ -446,7 +479,6 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
             fprintf(fp, "\trmmovl %%eax, %d(%%ebp)\n", quad->operand1->mem_location);
           }
         }
-
 
         // Pop the registers in order (caller save)
         fprintf(fp, "\t\t#Restoring Caller's Registers\n");  
@@ -1155,7 +1187,7 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
   // String definitions
 
   // .pos for stack
-  fprintf(fp, "\n.pos 0x%x\n", 0x800);
+  fprintf(fp, "\n.pos 0x%x\n", 0x00004000);
 
   // stack location
   fprintf(fp, "stack:\n");
