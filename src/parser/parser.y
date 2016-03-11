@@ -348,9 +348,11 @@ forHeaderExpr : expression { $$ = $1; }
 
 returnStatement : RETURN_T ';' { 
         ast_node t = create_ast_node(RETURN_N);
+        t->lineno = yylineno;
         $$ = t; }
 | RETURN_T expression ';' {
         ast_node t = create_ast_node(RETURN_N);
+        t->lineno = yylineno;
         t->left_child = $2;
         $$ = t; }
 | RETURN_T error ';' %prec ERR_RETURN {

@@ -62,6 +62,9 @@ int main() {
 
   int retval = typecheck_ast(symtab, root);
   print_checked_ast(stdout, root, 0);
+  if (retval != 0) {
+    fprintf(stderr, "There were %d errors encountered in the parse tree. Aborting.\n", retval);
+  }
 
   return 0;
 

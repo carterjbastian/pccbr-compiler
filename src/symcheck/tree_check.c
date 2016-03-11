@@ -27,20 +27,18 @@ int typecheck_ast(symboltable_t *table, ast_node node) {
   var_lookup_type group_type;
   int changed_scope = 0; // 0 => same scope, 1 => entered deeper scope
   int arg_count = 0;
+  int ret_val = 0;
 
-
-  printf("Current scope: %s in node of type: %s\n", table->leaf->name, NODE_NAME(node->node_type));
   /* Change scope if necessary */
   if (node->node_type == FUNC_N || node->node_type == COMPOUND_STMT_N) {
     // Change to next child scope
     change_scope(table);
-    // table->leaf = table->leaf->child;
     changed_scope = 1; 
   }
 
   /* Recurse on Children */
   if (child)
-    typecheck_ast(table, child);
+    ret_val += typecheck_ast(table, child);
   
   if (changed_scope) {
     if (table->leaf->parent)
@@ -48,14 +46,14 @@ int typecheck_ast(symboltable_t *table, ast_node node) {
   }
 
   if (rsib)
-    typecheck_ast(table, rsib);
+    ret_val += typecheck_ast(table, rsib);
 
   switch(node->node_type) {
     case ID_N :
       symbol = lookup_in_symboltable(table, node->value_string, LOCAL_VT);
       if (!symbol) {
-        fprintf(stderr, "Invalid use of symbol %s on line %d\n", node->value_string, node->lineno);
-        node->dtype = ERROR_LT;
+        fprintf(stderr, "Using symbol %s on line %d before declaration\n", node->value_string, node->lineno);
+        ret_val += 1;
         break;
       }
       node->lineno = symbol->lineno;
@@ -63,13 +61,26 @@ int typecheck_ast(symboltable_t *table, ast_node node) {
       break;
 
     // #swag
-    case OP_ASSIGN_N ... OP_DECREMENT_N :
+    case OP_ASSIGN_N:
+      if (child->node_type != ID_N && child->node_type != DEC_ID_N) {
+        fprintf(stderr, "Attempting to assign to invalid expression %s on line %d\n", child->value_string, node->lineno);
+        node->dtype = ERROR_LT;
+        ret_val += 1;
+        break;
+      }
+
+    case OP_PLUS_N ... OP_DECREMENT_N :
       group_type = child->dtype;
 
       for (curr = child; curr != NULL; curr = curr->right_sibling) {
+        if (curr->node_type == OP_ASSIGN_N) {
+          fprintf(stderr, "Error: expressionis not assignable on line %d\n", node->lineno);
+          ret_val += 1;
+        }
         if (curr->dtype != group_type) {
           // Make error reporting better?
-          fprintf(stderr, "Type Mismatch on line %d\n", node->lineno);
+          fprintf(stderr, "Type Mismatch in operation on line %d\n", node->lineno);
+          ret_val += 1;
         }
       }
 
@@ -82,8 +93,8 @@ int typecheck_ast(symboltable_t *table, ast_node node) {
       symbol = lookup_in_symboltable(table, node->value_string, LOCAL_VT);
 
       if (!symbol || (symbol->type != FUNC_INT_LT && symbol->type != FUNC_VOID_LT))  {
-          // Make error reporting better?
           fprintf(stderr, "Symbol %s is not a function on line %d\n", node->value_string, node->lineno);
+          return ret_val + 1;
       }
       
       // The hash table containing the parent nodes
@@ -102,18 +113,26 @@ int typecheck_ast(symboltable_t *table, ast_node node) {
             if (curr->node_type == NULL_N) break;
 
           fprintf(stderr, "Too many args in call to %s on line %d\n", node->value_string, node->lineno);
+          ret_val += 1;
+          break;
         }
         
         if (curr->node_type == NULL_N) {
           fprintf(stderr, "Too few args in call to %s on line %d\n", node->value_string, node->lineno);
+          ret_val += 1;
+          break;
         }
 
         if (curr->dtype == INT_LT && parent_curr->node_type != PARAM_N) {
           fprintf(stderr, "Type Mismatch on line %d\n", node->lineno);
+          ret_val += 1;
+          break;
         }
 
         if (curr->dtype == INT_ARRAY_LT && parent_curr->node_type != ARRAY_PARAM_N) {
           fprintf(stderr, "Type Mismatch on line %d\n", node->lineno);
+          ret_val += 1;
+          break;
         }
 
         parent_curr = parent_curr->right_sibling;
@@ -121,6 +140,7 @@ int typecheck_ast(symboltable_t *table, ast_node node) {
 
       if (parent_curr != NULL) {
           fprintf(stderr, "Too few args in call to %s on line %d\n", symbol->name, node->lineno);
+          ret_val += 1;
       }
       
       if (symbol->type == FUNC_INT_LT) {
@@ -137,25 +157,30 @@ int typecheck_ast(symboltable_t *table, ast_node node) {
         func_scope = func_scope->parent);
       
       if (func_scope == NULL) {
-        // Make error reporting better?
         fprintf(stderr, "Too many arguments in call to %s on line %d\n", symbol->name, node->lineno);
+        ret_val += 1;
       }
 
       if (func_scope->declaring_func->value_int == 1) {
-        if(node->left_child == NULL) {
-          // Make error reporting better?
-          fprintf(stderr, "Void return in function that should return int on line %d\n", node->lineno);
+        if(child == NULL) {
+          fprintf(stderr, "Void return in function %s that should return int on line %d\n", func_scope->declaring_func->value_string, node->lineno);
+          ret_val += 1;
         }
 
-        else if(node->left_child->dtype != INT_LT) {
-          fprintf(stderr, "Bad return in function that should return int on line %d\n", node->lineno);
+        else if(child->dtype != INT_LT) {
+          if (!(child ->dtype == INT_ARRAY_LT && child->left_child != NULL)) {
+            fprintf(stderr, "Bad return in function that should return int on line %d\n", node->lineno);
+            ret_val += 1;
+          }
         }
+
         node->dtype = INT_LT;
       }
 
       if (func_scope->declaring_func->value_int == 0) {
-        if(node->left_child != NULL) {
+        if(child != NULL) {
           fprintf(stderr, "Returning value in function that should return void on line %d\n", node->lineno);
+          ret_val += 1;
         }
         
         node->dtype = VOID_LT;
@@ -168,6 +193,7 @@ int typecheck_ast(symboltable_t *table, ast_node node) {
       break;
   }
 
-  printf("Leaving node %s\n", NODE_NAME(node->node_type));
-  return 0;
+  return ret_val;
 } 
+
+
