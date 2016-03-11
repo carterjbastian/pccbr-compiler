@@ -57,7 +57,10 @@ int typecheck_ast(symboltable_t *table, ast_node node) {
         break;
       }
       node->lineno = symbol->lineno;
-      node->dtype = symbol->type;
+      if (symbol->type == INT_ARRAY_LT && child != NULL)
+        node->dtype = INT_LT;
+      else node->dtype = symbol->type;
+
       break;
 
     // #swag
@@ -74,7 +77,7 @@ int typecheck_ast(symboltable_t *table, ast_node node) {
 
       for (curr = child; curr != NULL; curr = curr->right_sibling) {
         if (curr->node_type == OP_ASSIGN_N) {
-          fprintf(stderr, "Error: expressionis not assignable on line %d\n", node->lineno);
+          fprintf(stderr, "Error: expression is not assignable on line %d\n", node->lineno);
           ret_val += 1;
         }
         if (curr->dtype != group_type) {

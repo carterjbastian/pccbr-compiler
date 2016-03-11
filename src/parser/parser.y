@@ -395,6 +395,7 @@ printStatement : PRINT_T expression ';' {
 
 expression : var '=' expression %prec EXPR_P { 
         ast_node t = create_ast_node(OP_ASSIGN_N);
+        t->lineno = yylineno;
         t->left_child = $1; 
         t->left_child->right_sibling = $3;
         $$ = t; }
