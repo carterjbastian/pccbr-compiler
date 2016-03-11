@@ -43,7 +43,7 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
   int count = 0;
   symnode_t *retval = NULL;
   // Basic temps and intermideary values
-  symnode_t *t0, *t1, *t2, *tx, *ty, *x, *y, *l1, *l2;
+  symnode_t *t0, *t1, *t2, *tx, *ty, *x, *y, *l1, *l2, *x2;
   ast_node iterator;
   char *buff;
 
@@ -468,6 +468,9 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
     // (assn, t1, 1, 0)
     // (add, t0, x, 1)
     // return t0
+
+
+    if (!(child->node_type == ID_N && child->left_child != NULL)) {      
       t0 = NewTemp(table);
       t1 = NewTemp(table);
       t2 = create_symnode("1", TEMP_LT, NULL, -1);
@@ -475,15 +478,53 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
       t2->val = 1;
 
       x = code_gen(child, table);
-      
+
       add_quad(ASSN_QOP, t1, t2, NULL);
       add_quad(ADD_QOP, t0, x, t1);
       add_quad(ASSN_QOP, x, t0, NULL);
+      retval = x;  
 
-      retval = x;
-      break;
+    } else {
+      t0 = NewTemp(table);
+      x = lookup_in_symboltable(table, child->value_string, LOCAL_VT); // Will this work with globals?
+      t0 = code_gen(child->left_child, table);
+
+      y = code_gen(child->right_sibling, table); // What we're loading into the memory
+
+        
+      // Will the retval of x cause problems?? 
+
+      /*
+      y = code_gen(child->right_sibling, table);
+      add_quad(ASSN_QOP, ty, y, NULL);
+      */
+      t1 = NewTemp(table);
+      tx = NewTemp(table);
+      ty = NewTemp(table);
+      x2 = NewTemp(table);
+      add_quad(NULL_QOP, NULL, NULL, NULL);
+//      x2 = code_gen(child, table);      
+      add_quad(INDEX_QOP, x2, x, t0);
+      add_quad(ASSN_QOP, tx, x2, NULL);
+      add_quad(NULL_QOP, NULL, NULL, NULL);
+
+      t2 = create_symnode("1", TEMP_LT, NULL, -1);
+      t2->hasVal = 1;
+      t2->val = 1;
+      add_quad(ASSN_QOP, ty, t2, NULL);
+
+      add_quad(ADD_QOP, t1, tx, ty);
+
+      
+      /* FINISH */
+
+      add_quad(INDEX_ASSN_QOP, x, t0, t1); // Load the memory address of x[t0] into the mem_location of temp1
+    }
+      
+    break;
 
   case OP_DECREMENT_N:
+    if (!(child->node_type == ID_N && child->left_child != NULL)) {      
       t0 = NewTemp(table);
       t1 = NewTemp(table);
       t2 = create_symnode("1", TEMP_LT, NULL, -1);
@@ -497,7 +538,45 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
       add_quad(ASSN_QOP, x, t0, NULL);
 
       retval = x;
-      break;
+    } else {
+      t0 = NewTemp(table);
+      x = lookup_in_symboltable(table, child->value_string, LOCAL_VT); // Will this work with globals?
+      t0 = code_gen(child->left_child, table);
+
+      y = code_gen(child->right_sibling, table); // What we're loading into the memory
+
+        
+      // Will the retval of x cause problems?? 
+
+      /*
+      y = code_gen(child->right_sibling, table);
+      add_quad(ASSN_QOP, ty, y, NULL);
+      */
+      t1 = NewTemp(table);
+      tx = NewTemp(table);
+      ty = NewTemp(table);
+      x2 = NewTemp(table);
+      add_quad(NULL_QOP, NULL, NULL, NULL);
+//      x2 = code_gen(child, table);      
+      add_quad(INDEX_QOP, x2, x, t0);
+      add_quad(ASSN_QOP, tx, x2, NULL);
+      add_quad(NULL_QOP, NULL, NULL, NULL);
+
+      t2 = create_symnode("1", TEMP_LT, NULL, -1);
+      t2->hasVal = 1;
+      t2->val = 1;
+      add_quad(ASSN_QOP, ty, t2, NULL);
+
+      add_quad(SUB_QOP, t1, tx, ty);
+
+      
+      /* FINISH */
+
+      add_quad(INDEX_ASSN_QOP, x, t0, t1); // Load the memory address of x[t0] into the mem_location of temp1
+
+    }  
+      
+    break;
 
 
   case IF_N:
