@@ -10,10 +10,16 @@ int foo(int a[]) {
 
 int main(void) {
   int i;
-  int x[5];
+  int x[3];
   x[0] = 1;
   x[1] = 2;
+  x[2] = 3;
   i = foo(x);
+
+  print x[0];
+  print x[1];
+  print x[2];
+
   return x[1];
 }
 

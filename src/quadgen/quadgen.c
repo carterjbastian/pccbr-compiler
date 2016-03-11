@@ -653,6 +653,7 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
       x = code_gen(iterator, table);
 
       if (x->array_elem_count != 0 && iterator->left_child == NULL) {
+
         add_quad(ARG_ARRAY_QOP, x, NULL, NULL);
       } else {
         add_quad(ARG_QOP, x, NULL, NULL);
@@ -771,6 +772,19 @@ symnode_t *code_gen(ast_node node, symboltable_t *table) {
 
   case DEC_ID_N :
       retval = lookup_in_symboltable(table, node->value_string, LOCAL_VT);
+      if (retval) {
+        if (retval->type == INT_ARRAY_LT) {
+          t1 = create_symnode("0", TEMP_LT, NULL, -1);
+          t1->hasVal = 1;
+          t1->val = 0;
+
+          t2 = create_symnode("1", TEMP_LT, NULL, -1);
+          t2->hasVal = 1;
+          t2->val = 1;
+ 
+          add_quad(INDEX_ASSN_QOP, retval, t2, t1); // Load the memory address of x[t0] into the mem_location of temp
+        }
+      }
       break;
 
   default :

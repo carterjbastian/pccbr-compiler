@@ -1187,7 +1187,7 @@ int generate_assembly(FILE *fp, quad_t ir, symboltable_t *table) {
   // String definitions
 
   // .pos for stack
-  fprintf(fp, "\n.pos 0x%x\n", 0x00004000);
+  fprintf(fp, "\n.pos 0x%x\n", 0x0000F000);
 
   // stack location
   fprintf(fp, "stack:\n");

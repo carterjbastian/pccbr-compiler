@@ -43,7 +43,7 @@ int main() {
   if (retval != 0) {
     fprintf(stderr, "There were %d errors encountered in the parse tree. Aborting.\n", retval);
     return 1;
-  }
+  } 
   print_ast(stdout, root, 0);
   print_symtab(symtab);
   code_gen(root, symtab);
