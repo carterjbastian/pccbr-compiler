@@ -1,4 +1,4 @@
-Poject:  pccbr-compiler Project Symbol Table
+# pccbr-compiler Project Symbol Table
 Authors:  Carter J. Bastian, Quinn Stearns
 
 The pccbr compiler generates assembly code for the y86 ISA. Our code generator accepts
@@ -8,17 +8,28 @@ of the pccbr compiler using the testfiles located in codegen/testfiles. Going fo
 we plan to focus on refactoring, improving the command line interface, and implementing
 extra credit to expand the features of the compiler.
 
+## Honor Code Violation Disclaimer:                                                
+This is work done as an assignment for Dartmouth College's CS57.                   
+If you are currently enrolled at Dartmouth college and will ever take this course, **downloading, using, modifying, running, or even looking at this code is an honor code violation.** Please don't; it is not for you.
+                                                                                   
+If you are a professor teaching this course and wish for me to take down the REPO, shoot me an email at carter.bastian1@gmail.com, and I'll be happy to do so.
+
+## Building and Testing
 In order to build the compiler:
 
-cd src/codegen
-make
+```bash
+$ cd src/codegen
+$ make
+```
 
 In order to execute our tests, from the src/codegen directory run:
 
-./codegen < testfiles/helloWorld.c
-./codegen < testfiles/scopeTest.c
-./codegen < testfiles/funcTest.c
-./codegen < testfiles/math.c
+```bash
+$ ./codegen < testfiles/helloWorld.c
+$ ./codegen < testfiles/scopeTest.c
+$ ./codegen < testfiles/funcTest.c
+$ ./codegen < testfiles/math.c
+```
 
 You can see the output of the compiler in the file sample.ys after each invocation
 and assemble it using the yas assembler. We confirmed the results of our test cases
@@ -30,8 +41,8 @@ the project can be made and tested individually.
 Relevant source code appears primarily in codegen/codegen.c. Our quad data structures
 are defined in codegen.h.
 
-FILES:
-
+# Files
+```bash
 |__src
    |__lexer
    |  |__cscan.c
@@ -61,7 +72,7 @@ FILES:
    |__codegen
       |__codegen.c
       |__codegen_main.c
-
+```
   - symtab.c
     Implementations of symbol table functions declared in ast.c
 
@@ -79,24 +90,24 @@ FILES:
   - parser.y
     The parser defines the grammar, constructs ASTs, and handles/reports errors
 
-  - symbol_main.c
+  - symbol\_main.c
     A simple driver to build and traverse the parse tree to make a symbol table
     Also does a bottom up traversal of the parse tree to verify its consistency
 
-  - ast_main.c
+  - ast\_main.c
     A simple driver to only build a parse tree using the grammar in parser.y
 
   - quadgen.c
     This file contains our implementation of a IR-generator, which genrates three
     address quads
 
-DEPENDENCIES:
+# Dependencies:
 - Our build requires Bison 3.0.0 or later. Notice that Mac's generally have an
   older version of this software, while the Sudikof Lab machines have version
   3.0.2
 
 
-NOTES ON SYMBOL TABLE DESIGN:
+## Notes on Symbol Table Design:
 - Our naming protocol is as follows:
   i. The first level is 0 (and this level "0-" is ommitted from all other names)
   ii. Any subsequent depth is denoted with a '-'
@@ -105,12 +116,12 @@ NOTES ON SYMBOL TABLE DESIGN:
   EXAMPLE: 1-0-1-2-3 and 1-0-1-2-5 are siblings, while 1-0-1-1-4 is not.
 
 - Because of the minimalist structure of our parse tree, some fancy looping is
-  necessary in the build_symboltable function of symbols_main.c
+  necessary in the `build_symboltable` function of `symbols_main.c`
   
   Specifically, we really only need to concern ourselves with declarations in 
-  the cases of ROOT_N (where functions and globals can be declared),
-  COMPOUND_STMT_N (where new local variables can be declared and a new scope
-  is entered), and FUNC_N (where we can get parameters).
+  the cases of `ROOT_N` (where functions and globals can be declared),
+  `COMPOUND_STMT_N` (where new local variables can be declared and a new scope
+  is entered), and `FUNC_N` (where we can get parameters).
 
   In other cases, we simply recurse on the children nodes of the AST and return
   without modifying scope or adding to the symbol table.
@@ -127,18 +138,18 @@ NOTES ON SYMBOL TABLE DESIGN:
     - ETC.
 
 
-IMPORTANT NOTE ON AST REPRESENTATION OF ARRAY VARIABLES:
+## IMPORTANT NOTE ON AST REPRESENTATION OF ARRAY VARIABLES:
   On the last checkpoint, we were docked points becuase our array and non-array
-  identifiers are all collected under the ID_N ast_node type. However, this is
+  identifiers are all collected under the `ID_N` ast\_node type. However, this is
   an intentional design decision on our part.
   
-  For any non-array identifier, the value_int field of it's ast_node is set to
+  For any non-array identifier, the value\_int field of it's ast\_node is set to
   zero.
 
   For a declared array, the number of items it's declared as having is stored in
-  the value_int field of its ast_node.
+  the value\_int field of its ast\_node.
 
-  For an ID representing access into an array, it's ast_node's value_int
+  For an ID representing access into an array, it's ast\_node's value\_int
   field is set to -1 and it's leftmost (and only) child is the expression
   used as the index.
 
@@ -151,18 +162,18 @@ IMPORTANT NOTE ON AST REPRESENTATION OF ARRAY VARIABLES:
   directory.
 
 
-UPDATES TO LEXER AND PARSER:
+## Updates to Lexer and Parser
 - Fixed a bug in which the parser failed to copy the correct name of the 
-  function into the ast_node->value_string field.
+  function into the `ast_node->value_string` field.
 - Fixed a bug in which multiple-declarations (eg int a,b, c = 5;) were parsed
   as only a single declaration.
 - Added semantic differentiation between ID of normal parameters and IDs of 
   array parameters.
 - Added semantic differentiation between variables used in an expression
-  (ID_N) and variables used in a declaration (DEC_ID_N).
+  (`ID_N`) and variables used in a declaration (`DEC_ID_N`).
 - Changed the way we handle arrays (the note on symbol table design above)
 
-ERROR REPORTING AND RECOVERY:
+## Error Reporting and Recovery
   Note that we concern ourselves in the symbol table only with those error 
   nodes which are due to Invalid Variable Declarations. All others are ignored
   while traversing the AST.
@@ -175,7 +186,7 @@ ERROR REPORTING AND RECOVERY:
   Edge cases related to error reporting and recovery are tested in the file
   testfiles/declaredErrors.c
 
-NOTES ON SYMBOL CHECKER:
+## Notes on Symbol Checker
 To test our submission for the bottom-up symbol and type checker, please execute
 bottomUpTests.sh to see all of our test cases. The output from the checker will
 appear above the symbol table and ast print outs.
@@ -185,18 +196,23 @@ recorded a reference to the ast node that defines new function scopes to make it
 to find that in our symbol table checker. We also added a reference to the scope in the
 ast to make it easier to traverse the symbol scopes.
 
-USAGE:
+## Usage
 To build and print the symbol table for any given file:
-  make clean; make; ./symtab < FILE_NAME
+```bash
+make clean; make; ./symtab < FILE_NAME
+```
 
 To build and print ONLY the AST for any given file:
-  make clean; make parse; ./parse < FILE_NAME
+```bash
+make clean; make parse; ./parse < FILE_NAME
+```
 
 To run our test suite (see below):
-  ./autoTest.sh
+```bash
+./autoTest.sh
+```
 
-
-AUTOMATED TESTING:
+### Automated Testing
   By running the autoTest.sh script as described above, you will run a series of
   all the test inputs we have written (all of which are in the testfiles/ 
   directory). All of the output will be placed in the outfiles/ directory.
@@ -212,7 +228,7 @@ AUTOMATED TESTING:
   representations of their respective c-files.
 
 
-SUMMARY OF TESTS (FILES):
+### summary of tests (files)
 Those Special to the 
   - arrayTest
     Testing and demonstration of how the Symbol Table generator handles arrays
